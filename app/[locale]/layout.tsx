@@ -19,6 +19,9 @@ export const metadata: Metadata = {
   title: "servicesms",
   description:
     "Servicesms.sn est un service en ligne de premier plan au Sénégal",
+  icons: {
+    icon: "/logo2.png",
+  },
 };
 
 export default async function RootLayout({

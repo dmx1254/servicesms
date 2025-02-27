@@ -35,30 +35,34 @@ export default function LanguageSwitcher() {
   return (
     <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
-        <Button
-          variant="ghost"
-          size="icon"
-          className="cursor-pointer hover:bg-transparent bg-transparent outline-none focus:border-none focus:outline-none"
+        <button
+          className="group flex items-center gap-2 border-none shadow-none cursor-pointer hover:bg-transparent bg-transparent outline-none focus:border-none focus:outline-none hover:border-none hover:outline-none"
           onMouseEnter={() => setIsOpen(true)}
         >
-          <img
+          <Image
             src={currentLocale === "fr" ? "/flags/frr.png" : "/flags/enn.png"}
             alt={currentLocale}
+            width={20}
+            height={20}
             className="w-5 h-5 rounded-full"
           />
-          <span className="text-base uppercase text-[#646464] outline-none focus:border-none focus:outline-none">
+          <span className="flex items-center gap-0.5 text-base border-none uppercase text-[#646464] outline-none focus:border-none focus:outline-none group-hover:text-[#67B142]">
             {currentLocale}
+            <ChevronDown size={16} />
           </span>
-          <span>
-            <ChevronDown />
-          </span>
+
           {/* <GlobeIcon className="h-4 w-4" /> */}
           <span className="sr-only">Switch language</span>
-        </Button>
+        </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="center" onMouseLeave={() => setIsOpen(false)}>
+      <DropdownMenuContent
+        align="center"
+        onMouseLeave={() => setIsOpen(false)}
+        className="min-w-[5rem] hover:bg-none"
+      >
         <DropdownMenuItem
           onClick={() => switchLanguage(currentLocale === "fr" ? "en" : "fr")}
+          className="cursor-pointer"
         >
           {/* {locale === "fr" ? "🇫🇷 Français" : "🇬🇧 English"} */}
           <img
@@ -67,7 +71,7 @@ export default function LanguageSwitcher() {
             className="w-5 h-5 rounded-full"
           />
           <span className="text-base uppercase text-[#646464] outline-none focus:border-none focus:outline-none">
-            {currentLocale}
+            {currentLocale === "fr" ? "en" : "fr"}
           </span>
         </DropdownMenuItem>
       </DropdownMenuContent>
