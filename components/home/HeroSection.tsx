@@ -923,7 +923,7 @@ export default function HeroSection(): JSX.Element {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen pt-32 pb-20 overflow-hidden perspective-1000"
+      className="relative min-h-screen py-20 overflow-hidden perspective-1000"
       style={{ perspective: 1000 }}
     >
       {/* Canvas Three.js pour les animations 3D */}
@@ -1344,7 +1344,7 @@ export default function HeroSection(): JSX.Element {
                     </div>
 
                     {/* Barre de saisie */}
-                    <div className="mt-4 bg-zinc-800 rounded-full p-3 flex items-center">
+                    <div className="mt-4 mb-4 bg-zinc-800 rounded-full p-3 flex items-center">
                       <div className="bg-zinc-700 h-5 w-full rounded-full"></div>
                       <motion.div
                         className={cn(
