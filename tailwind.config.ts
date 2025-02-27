@@ -58,6 +58,7 @@ export default {
       },
       fontFamily: {
         rubik: "var(--font-rubik)",
+        poppins: "var(--font-poppins)",
       },
     },
   },
