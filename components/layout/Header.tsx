@@ -84,16 +84,16 @@ export default function Header() {
               className="mx-2 text-[#646464] w-[1px] h-5"
             />
 
-            <button className="text-[#67B142] bg-transparent text-base shadow-none font-semibold">
+            <Link href="/signin" className="text-[#67B142] bg-transparent text-base shadow-none font-semibold">
               Connexion
-            </button>
+            </Link>
             <Separator
               orientation="vertical"
               className="mx-2 text-[#646464] w-[1px] h-5"
             />
-            <button className="bg-[#67B142] text-white p-2 text-base rounded-2xl font-semibold transition-colors hover:bg-black/80">
-              S'inscrire
-            </button>
+            <Link href="/signup" className="bg-[#67B142] text-white p-2 text-base rounded-2xl font-semibold transition-colors hover:bg-black/80">
+              S&apos;inscrire
+            </Link>
 
             {/* Mobile menu button */}
             <Button

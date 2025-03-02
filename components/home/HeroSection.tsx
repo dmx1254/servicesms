@@ -6,7 +6,6 @@ import {
   useAnimation,
   useInView,
   AnimatePresence,
-  MotionValue,
   useTransform,
   useMotionValue,
   useSpring,
@@ -17,7 +16,6 @@ import {
   MessageSquare,
   Send,
   CheckCircle2,
-  Smartphone,
   Users,
   BarChart3,
   Globe,
@@ -26,6 +24,10 @@ import {
 import { cn } from "@/lib/utils";
 import { useScopedI18n } from "@/locales/client";
 import * as THREE from "three";
+import React from "react";
+
+// Add JSX namespace
+/// <reference types="react" />
 
 // Types
 type PhoneObject = {
@@ -72,12 +74,12 @@ type Card3DProps = {
   isActive?: boolean;
 };
 
-const Card3D: React.FC<Card3DProps> = ({
+const Card3D = React.memo(function Card3D({
   children,
   className,
   depth = 40,
   isActive = false,
-}) => {
+}: Card3DProps) {
   const x = useMotionValue(0);
   const y = useMotionValue(0);
 
@@ -144,7 +146,7 @@ const Card3D: React.FC<Card3DProps> = ({
       </motion.div>
     </motion.div>
   );
-};
+});
 
 // Particule 3D qui flotte dans l'espace
 const Particle3D: React.FC<{
@@ -182,7 +184,7 @@ const Particle3D: React.FC<{
   );
 };
 
-export default function HeroSection(): JSX.Element {
+export default function HeroSection() {
   const tScope = useScopedI18n("hero");
   const [mounted, setMounted] = useState<boolean>(false);
   const [activeMessageType, setActiveMessageType] =
@@ -194,25 +196,21 @@ export default function HeroSection(): JSX.Element {
 
   // Effet de parallaxe
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
-  useEffect(() => {
-    const handleMouseMove = (e: MouseEvent) => {
-      const { clientX, clientY } = e;
-      const windowWidth = window.innerWidth;
-      const windowHeight = window.innerHeight;
+  const handleMouseMove = React.useCallback((e: MouseEvent) => {
+    const { clientX, clientY } = e;
+    const windowWidth = window.innerWidth;
+    const windowHeight = window.innerHeight;
 
-      // Normaliser les coordonnées entre -1 et 1
-      const normalizedX = (clientX / windowWidth) * 2 - 1;
-      const normalizedY = (clientY / windowHeight) * 2 - 1;
+    const normalizedX = (clientX / windowWidth) * 2 - 1;
+    const normalizedY = (clientY / windowHeight) * 2 - 1;
 
-      setMousePosition({ x: normalizedX, y: normalizedY });
-    };
-
-    window.addEventListener("mousemove", handleMouseMove);
-
-    return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-    };
+    setMousePosition({ x: normalizedX, y: normalizedY });
   }, []);
+
+  useEffect(() => {
+    window.addEventListener("mousemove", handleMouseMove);
+    return () => window.removeEventListener("mousemove", handleMouseMove);
+  }, [handleMouseMove]);
 
   // Animation pour les téléphones flottants
   useEffect(() => {
@@ -221,30 +219,39 @@ export default function HeroSection(): JSX.Element {
     }
   }, [isInView, controls]);
 
-  // Initialisation de Three.js avec des paramètres améliorés
+  // Memoize particles first
+  const particles = React.useMemo(() => Array.from({ length: 20 }).map((_, i) => (
+    <Particle3D
+      key={i}
+      delay={i * 0.3}
+      duration={2 + Math.random() * 4}
+      size={3 + Math.random() * 5}
+      x={(Math.random() - 0.5) * 600}
+      y={(Math.random() - 0.5) * 600}
+      color={i % 3 === 0 ? "#67B142" : i % 3 === 1 ? "#4285F4" : "#ffffff"}
+    />
+  )), []);
+
+  const renderedParticles = React.useMemo(() => mounted ? particles : null, [mounted, particles]);
+
+  // Three.js setup and animation
   useEffect(() => {
     setMounted(true);
-
     if (!canvasRef.current) return;
 
-    // Configuration de la scène Three.js
+    const canvas = canvasRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(
-      85, // FOV plus large pour un meilleur effet 3D
-      window.innerWidth / window.innerHeight,
-      0.1,
-      1000
-    );
+    const camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.1, 1000);
     const renderer = new THREE.WebGLRenderer({
-      canvas: canvasRef.current,
+      canvas,
       alpha: true,
       antialias: true,
-      powerPreference: "high-performance", // Améliore les performances
+      powerPreference: "high-performance",
     });
 
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setClearColor(0x000000, 0);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Limite pour les performances
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
     // Lumières améliorées
     const ambientLight = new THREE.AmbientLight(0xffffff, 0.3);
@@ -497,8 +504,9 @@ export default function HeroSection(): JSX.Element {
     camera.position.x = 0.5;
     camera.lookAt(0, 0, -10); // Regarder vers le centre de la scène
 
-    // Animation avec une meilleure fluidité
+    // Animation loop
     const clock = new THREE.Clock();
+    let animationFrameId: number;
 
     const animate = () => {
       const elapsedTime = clock.getElapsedTime();
@@ -578,10 +586,10 @@ export default function HeroSection(): JSX.Element {
       camera.lookAt(mousePosition.x * 5, mousePosition.y * 3, -15);
 
       renderer.render(scene, camera);
-      requestAnimationFrame(animate);
+      animationFrameId = requestAnimationFrame(animate);
     };
 
-    // Gestion du redimensionnement
+    // Handle resize
     const handleResize = () => {
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
@@ -592,23 +600,27 @@ export default function HeroSection(): JSX.Element {
     window.addEventListener("resize", handleResize);
     animate();
 
-    // Nettoyage
+    // Cleanup
     return () => {
       window.removeEventListener("resize", handleResize);
+      if (animationFrameId) {
+        cancelAnimationFrame(animationFrameId);
+      }
+      
+      // Dispose resources
       renderer.dispose();
-
-      // Nettoyer les géométries et matériaux
-      phoneGeometry.dispose();
-      screenGeometry.dispose();
-      particlesGeometry.dispose();
-      trailGeometry.dispose();
-
-      phoneMaterials.forEach((material) => material.dispose());
-      screenMaterials.forEach((material) => material.dispose());
-      particleMaterials.forEach((material) => material.dispose());
-      trailMaterial.dispose();
+      scene.traverse((object) => {
+        if (object instanceof THREE.Mesh) {
+          object.geometry.dispose();
+          if (Array.isArray(object.material)) {
+            object.material.forEach(material => material.dispose());
+          } else {
+            object.material.dispose();
+          }
+        }
+      });
     };
-  }, [mounted, canvasRef, activeMessageType, mousePosition]);
+  }, [activeMessageType]);
 
   // Changement automatique de type de message mis en avant
   useEffect(() => {
@@ -718,13 +730,12 @@ export default function HeroSection(): JSX.Element {
     },
   };
 
-  // Features - définition des types de messages avec des couleurs améliorées
-  const features: FeatureProps[] = [
+  // Memoize features array to prevent unnecessary re-renders
+  const features = React.useMemo<FeatureProps[]>(() => [
     {
       icon: <MessageSquare className="h-6 w-6" />,
       title: "SMS PRO",
-      description:
-        "Messages texte simples et efficaces avec un taux de lecture de 98%.",
+      description: "Messages texte simples et efficaces avec un taux de lecture de 98%.",
       color: "bg-[#67B142]/10 text-[#67B142]",
       iconBg: "bg-[#67B142]/10",
       type: "sms",
@@ -733,8 +744,7 @@ export default function HeroSection(): JSX.Element {
     {
       icon: <Globe className="h-6 w-6" />,
       title: "RCS Enrichi",
-      description:
-        "Messages enrichis avec images, carousels et boutons interactifs.",
+      description: "Messages enrichis avec images, carousels et boutons interactifs.",
       color: "bg-blue-500/10 text-blue-500",
       iconBg: "bg-blue-500/10",
       type: "rcs",
@@ -743,8 +753,7 @@ export default function HeroSection(): JSX.Element {
     {
       icon: <Users className="h-6 w-6" />,
       title: "Campagnes",
-      description:
-        "Diffusez vos promotions à grande échelle avec des modèles personnalisés.",
+      description: "Diffusez vos promotions à grande échelle avec des modèles personnalisés.",
       color: "bg-purple-500/10 text-purple-500",
       iconBg: "bg-purple-500/10",
       type: "campaign",
@@ -753,8 +762,7 @@ export default function HeroSection(): JSX.Element {
     {
       icon: <CheckCircle2 className="h-6 w-6" />,
       title: "Transactionnels",
-      description:
-        "Confirmations, avis de livraison et autres messages automatisés.",
+      description: "Confirmations, avis de livraison et autres messages automatisés.",
       color: "bg-amber-500/10 text-amber-500",
       iconBg: "bg-amber-500/10",
       type: "transactional",
@@ -763,16 +771,15 @@ export default function HeroSection(): JSX.Element {
     {
       icon: <BarChart3 className="h-6 w-6" />,
       title: "Rappels",
-      description:
-        "Rappels de rendez-vous et échéances pour diminuer les absences.",
+      description: "Rappels de rendez-vous et échéances pour diminuer les absences.",
       color: "bg-red-500/10 text-red-500",
       iconBg: "bg-red-500/10",
       type: "reminder",
       bgColor: "from-red-500 to-rose-600",
     },
-  ];
+  ], []);
 
-  // Simulation de messages selon le type sélectionné
+  // Memoize active messages to prevent unnecessary re-renders
   const messagesByType: Record<MessageType, Message[]> = {
     sms: [
       {
@@ -900,25 +907,14 @@ export default function HeroSection(): JSX.Element {
     ],
   };
 
-  // Récupérer les messages du type actif
-  const activeMessages = messagesByType[activeMessageType];
-  const activeFeaturesInfo =
-    features.find((f) => f.type === activeMessageType) || features[0];
+  // Memoize active messages to prevent unnecessary re-renders
+  const activeMessages = React.useMemo(() => messagesByType[activeMessageType], [activeMessageType]);
+  const activeFeaturesInfo = React.useMemo(() => features.find((f) => f.type === activeMessageType) || features[0], [features, activeMessageType]);
 
-  // Générer particules aléatoires
-  const renderParticles = () => {
-    return Array.from({ length: 20 }).map((_, i) => (
-      <Particle3D
-        key={i}
-        delay={i * 0.3}
-        duration={2 + Math.random() * 4}
-        size={3 + Math.random() * 5}
-        x={(Math.random() - 0.5) * 600}
-        y={(Math.random() - 0.5) * 600}
-        color={i % 3 === 0 ? "#67B142" : i % 3 === 1 ? "#4285F4" : "#ffffff"}
-      />
-    ));
-  };
+  // Memoize message type change handler
+  const handleMessageTypeChange = React.useCallback((type: MessageType) => {
+    setActiveMessageType(type);
+  }, []);
 
   return (
     <section
@@ -934,7 +930,7 @@ export default function HeroSection(): JSX.Element {
 
       {/* Particules et lumières ambiantes */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {mounted && renderParticles()}
+        {renderedParticles}
       </div>
 
       {/* Overlay gradient pour améliorer la lisibilité */}
@@ -946,7 +942,7 @@ export default function HeroSection(): JSX.Element {
           {/* Texte principal */}
           <div>
             <motion.h1
-              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#67B142] to-[#34A853]"
+              className="text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-r from-[#67B142] to-[#3c3d3c]"
               initial="hidden"
               animate={isInView ? "visible" : "hidden"}
               variants={titleVariants}
@@ -1134,7 +1130,7 @@ export default function HeroSection(): JSX.Element {
                         : "border border-[#67B142]/30 hover:bg-[#67B142]/10",
                       "gap-2 rounded-xl shadow-sm"
                     )}
-                    onClick={() => setActiveMessageType(feature.type)}
+                    onClick={() => handleMessageTypeChange(feature.type)}
                   >
                     {feature.icon}
                     {feature.title}

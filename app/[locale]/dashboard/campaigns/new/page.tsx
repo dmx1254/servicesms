@@ -1,0 +1,1790 @@
+"use client";
+
+import { useState, useRef } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  MessageSquare,
+  Users,
+  Upload,
+  Calendar,
+  Tag,
+  Check,
+  Info,
+  Sparkles,
+  Send,
+  ChevronRight,
+  GraduationCap,
+  Book,
+  Trophy,
+  Star,
+  LucideIcon,
+  PartyPopper,
+  AlertCircle,
+  FileText,
+  Clock,
+  CalendarDays,
+  Download,
+  Plus,
+  CalendarIcon,
+} from "lucide-react";
+import { motion } from "framer-motion";
+import { format, addDays } from "date-fns";
+import { fr } from "date-fns/locale";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { useSession } from "next-auth/react";
+
+type TemplateId =
+  // Academic templates
+  | "trimester_grades"
+  | "exam_results"
+  | "absence_alert"
+  | "homework_reminder"
+  | "parent_meeting"
+  | "behavior_report"
+  | "school_event"
+  | "late_arrival"
+  | "success_congrats"
+  // Marketing templates
+  | "promotional"
+  | "new_product"
+  | "special_offer"
+  | "event_invitation"
+  // Transactional templates
+  | "order_confirmation"
+  | "delivery_status"
+  | "payment_receipt"
+  | "appointment_reminder";
+
+interface Template {
+  id: TemplateId;
+  title: string;
+  icon: LucideIcon;
+  desc: string;
+  category: "academic" | "marketing" | "transactional";
+}
+
+const TEMPLATES: Template[] = [
+  // Marketing Templates
+  {
+    id: "promotional",
+    title: "Promotion",
+    icon: Tag,
+    desc: "Profitez de notre promotion exceptionnelle ! {discount}% de réduction sur {product_name}. Offre valable jusqu'au {expiry_date}. {company}",
+    category: "marketing",
+  },
+  {
+    id: "new_product",
+    title: "Nouveau Produit",
+    icon: Sparkles,
+    desc: "Découvrez notre nouveauté ! {product_name} est maintenant disponible chez {company}. Venez vite l'essayer !",
+    category: "marketing",
+  },
+  {
+    id: "special_offer",
+    title: "Offre Spéciale",
+    icon: Star,
+    desc: "Offre exclusive pour {first_name} ! Utilisez le code {offer_code} et bénéficiez de {discount}% sur votre prochain achat chez {company}.",
+    category: "marketing",
+  },
+  {
+    id: "event_invitation",
+    title: "Invitation",
+    icon: Calendar,
+    desc: "Cher(e) {first_name}, nous vous invitons à notre événement le {event_date}. {company} vous réserve des surprises !",
+    category: "marketing",
+  },
+  // Transactional Templates
+  {
+    id: "order_confirmation",
+    title: "Confirmation",
+    icon: Check,
+    desc: "Bonjour {first_name}, votre commande #{order_number} est confirmée. Montant: {payment_amount} FCFA. Merci de votre confiance !",
+    category: "transactional",
+  },
+  {
+    id: "delivery_status",
+    title: "Livraison",
+    icon: Send,
+    desc: "Votre colis #{tracking_code} sera livré le {delivery_date}. Suivez votre livraison sur notre site. {company}",
+    category: "transactional",
+  },
+  {
+    id: "payment_receipt",
+    title: "Paiement",
+    icon: FileText,
+    desc: "Reçu de paiement - {payment_amount} FCFA pour {service_name}. Référence: {reference}. Merci de votre confiance, {company}",
+    category: "transactional",
+  },
+  {
+    id: "appointment_reminder",
+    title: "Rendez-vous",
+    icon: Clock,
+    desc: "Rappel: Votre RDV est prévu le {appointment_time} pour {service_name}. En cas d'empêchement, merci de nous contacter.",
+    category: "transactional",
+  },
+  // Academic Templates
+  {
+    id: "trimester_grades",
+    title: "Moyenne Trimestrielle",
+    icon: Star,
+    desc: "Bonjour, la moyenne trimestrielle de {student_name} en classe de {class_name} est de {average_grade}/20. Cordialement, {school_name}",
+    category: "academic",
+  },
+  {
+    id: "exam_results",
+    title: "Résultats d'Examens",
+    icon: Trophy,
+    desc: "Les résultats de {student_name} ({class_name}): {exam_results}. Moyenne générale: {overall_average}/20. {school_name}",
+    category: "academic",
+  },
+  {
+    id: "success_congrats",
+    title: "Félicitations",
+    icon: PartyPopper,
+    desc: "Félicitations à {student_name} pour son excellente moyenne de {average_grade}/20 en {class_name} ! Continuez ainsi ! {school_name}",
+    category: "academic",
+  },
+  {
+    id: "absence_alert",
+    title: "Absence",
+    icon: Calendar,
+    desc: "Nous vous informons de l'absence de {student_name} le {absence_date} en classe de {class_name}. Merci de justifier cette absence.",
+    category: "academic",
+  },
+  {
+    id: "late_arrival",
+    title: "Retard",
+    icon: Clock,
+    desc: "Notification de retard",
+    category: "academic",
+  },
+  {
+    id: "parent_meeting",
+    title: "Réunion Parents",
+    icon: Users,
+    desc: "Invitation réunion parents-profs",
+    category: "academic",
+  },
+  {
+    id: "school_event",
+    title: "Événement",
+    icon: CalendarDays,
+    desc: "Événements scolaires",
+    category: "academic",
+  },
+  {
+    id: "behavior_report",
+    title: "Comportement",
+    icon: AlertCircle,
+    desc: "Rapport de comportement",
+    category: "academic",
+  },
+  {
+    id: "homework_reminder",
+    title: "Devoirs",
+    icon: FileText,
+    desc: "Rappel des devoirs",
+    category: "academic",
+  },
+];
+
+interface Contact {
+  lastname: string;
+  firstname: string;
+  phone: string;
+  average?: number;
+  class?: string;
+}
+
+// Add interface for SMS response
+interface SMSResponse {
+  statusCode: string;
+  statusText: string;
+  messageId: string;
+  messageDetailId: string;
+  recipient: string;
+}
+
+// Add interface for message tracking
+interface MessageStatus {
+  messageId: string;
+  messageDetailId: string;
+  recipient: string;
+  contact: Contact;
+  status: "sent" | "delivered" | "failed";
+  timestamp: Date;
+}
+
+export default function NewCampaign() {
+  const { data: session, status } = useSession();
+  const [message, setMessage] = useState<string>("");
+  const [optimize, setOptimize] = useState(false);
+  const [campaignType, setCampaignType] =
+    useState<Template["category"]>("marketing");
+  const [scheduledDate, setScheduledDate] = useState<Date>();
+  const [scheduledTime, setScheduledTime] = useState("now");
+  const [selectedHour, setSelectedHour] = useState<string>("");
+  const [responseType, setResponseType] = useState("no-response");
+  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | "">("");
+  const [selectedClass, setSelectedClass] = useState<string>("");
+  const [studentGrade, setStudentGrade] = useState<number>(0);
+  const [studentName, setStudentName] = useState<string>("");
+  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [fileError, setFileError] = useState<string>("");
+  const [success, setSuccess] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [loading, setLoading] = useState(false);
+  const [isScheduled, setIsScheduled] = useState<boolean>(false);
+  const [signature, setSignature] = useState<string>("");
+  const [messageStatuses, setMessageStatuses] = useState<MessageStatus[]>([]);
+  const [showStatusModal, setShowStatusModal] = useState(false);
+
+  // New state for single contact form
+  const [singleContact, setSingleContact] = useState<Contact>({
+    lastname: "",
+    firstname: "",
+    phone: "",
+    average: undefined,
+  });
+
+  // Add new state for file input reference
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Get variables based on campaign type
+  const getVariables = () => {
+    switch (campaignType) {
+      case "academic":
+        return [
+          "{student_name}",
+          "{average_grade}",
+          "{subject}",
+          "{school_name}",
+          "{exam_results}",
+          "{overall_average}",
+          "{absence_date}",
+          "{class_name}",
+        ];
+      case "marketing":
+        return [
+          "{first_name}",
+          "{last_name}",
+          "{company}",
+          "{offer_code}",
+          "{expiry_date}",
+          "{discount}",
+          "{product_name}",
+          "{event_date}",
+        ];
+      case "transactional":
+        return [
+          "{order_number}",
+          "{tracking_code}",
+          "{delivery_date}",
+          "{payment_amount}",
+          "{appointment_time}",
+          "{service_name}",
+          "{customer_name}",
+          "{reference}",
+        ];
+      default:
+        return [];
+    }
+  };
+
+  // Mock data for dropdowns
+  const classes = [
+    "6ème A",
+    "6ème B",
+    "5ème A",
+    "5ème B",
+    "4ème A",
+    "4ème B",
+    "3ème A",
+    "3ème B",
+  ];
+
+  // Calculate SMS details
+  const charCount = message.length;
+  const smsCount = Math.ceil(charCount / 160);
+
+  // Handle template selection
+  const handleTemplateChange = (templateId: TemplateId) => {
+    setSelectedTemplate(templateId);
+    const template = TEMPLATES.find((t) => t.id === templateId);
+    if (template) {
+      let messageText = template.desc;
+
+      // Replace variables based on campaign type and contact data
+      if (contacts.length > 0 && contacts[0]) {
+        const contact = contacts[0]; // Preview with first contact
+
+        // Common replacements
+        messageText = messageText
+          .replace(/{first_name}/g, contact.firstname)
+          .replace(/{last_name}/g, contact.lastname);
+
+        // Academic specific replacements
+        if (template.category === "academic") {
+          messageText = messageText
+            .replace(
+              /{student_name}/g,
+              `${contact.firstname} ${contact.lastname}`
+            )
+            .replace(/{average_grade}/g, contact.average?.toString() || "--")
+            .replace(/{class_name}/g, contact.class || selectedClass)
+            .replace(/{school_name}/g, "École Example");
+        }
+
+        // Marketing specific replacements
+        if (template.category === "marketing") {
+          messageText = messageText
+            .replace(/{company}/g, signature)
+            .replace(/{discount}/g, "20")
+            .replace(/{product_name}/g, "Nouveau Produit")
+            .replace(/{offer_code}/g, "PROMO20")
+            .replace(
+              /{expiry_date}/g,
+              format(addDays(new Date(), 7), "dd/MM/yyyy")
+            )
+            .replace(
+              /{event_date}/g,
+              format(addDays(new Date(), 14), "dd/MM/yyyy")
+            );
+        }
+
+        // Transactional specific replacements
+        if (template.category === "transactional") {
+          messageText = messageText
+            .replace(/{order_number}/g, "12345")
+            .replace(/{tracking_code}/g, "TRK123456")
+            .replace(
+              /{delivery_date}/g,
+              format(addDays(new Date(), 3), "dd/MM/yyyy")
+            )
+            .replace(/{payment_amount}/g, "15000")
+            .replace(/{service_name}/g, "Service Premium")
+            .replace(/{reference}/g, "REF123456")
+            .replace(
+              /{appointment_time}/g,
+              format(addDays(new Date(), 1), "dd/MM/yyyy à HH:mm")
+            );
+        }
+      }
+
+      setMessage(messageText);
+    }
+  };
+
+  // Campaign options based on type
+  const campaignOptions = {
+    marketing: [
+      {
+        value: "promotional",
+        label: "Promotionnel",
+        description: "Promotions & Annonces",
+      },
+      {
+        value: "product",
+        label: "Produit",
+        description: "Lancement & Nouveautés",
+      },
+    ],
+    transactional: [
+      {
+        value: "notification",
+        label: "Notification",
+        description: "Messages de service",
+      },
+      {
+        value: "confirmation",
+        label: "Confirmation",
+        description: "Confirmations & Reçus",
+      },
+    ],
+    academic: [
+      { value: "grades", label: "Notes", description: "Moyennes & Résultats" },
+      {
+        value: "info",
+        label: "Information",
+        description: "Messages aux parents",
+      },
+    ],
+  };
+
+  // Fix campaign type handling
+  const handleCampaignTypeChange = (type: Template["category"]) => {
+    setCampaignType(type);
+    setSelectedTemplate("");
+    setContacts([]);
+    setSingleContact({
+      lastname: "",
+      firstname: "",
+      phone: "",
+      average: undefined,
+    });
+    if (type === "academic") {
+      setStudentGrade(0);
+      setStudentName("");
+    }
+  };
+
+  // Handle option selection
+  const handleOptionSelect = (value: string) => {
+    setResponseType(value);
+  };
+
+  // Sample templates for file download
+  const getTemplateHeaders = () => {
+    switch (campaignType) {
+      case "academic":
+        return "Nom,Prénom,Téléphone,Classe,Moyenne\nDupont,Jean,+33612345678,6ème A,15.5";
+      default:
+        return "Nom,Prénom,Téléphone\nDupont,Jean,+33612345678";
+    }
+  };
+
+  // Handle file download
+  const handleDownloadTemplate = () => {
+    const headers = getTemplateHeaders();
+    const blob = new Blob([headers], { type: "text/csv" });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `template_${campaignType}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+  };
+
+  // Handle single contact form changes
+  const handleSingleContactChange = (
+    field: keyof Contact,
+    value: string | number
+  ) => {
+    setSingleContact((prev) => ({
+      ...prev,
+      [field]: value,
+      ...(field === "class" ? { class: value as string } : {}),
+    }));
+  };
+
+  // Handle add single contact
+  const handleAddContact = () => {
+    // Validate required fields
+    if (
+      !singleContact.lastname ||
+      !singleContact.firstname ||
+      !singleContact.phone
+    ) {
+      setFileError("Veuillez remplir tous les champs obligatoires");
+      return;
+    }
+
+    // Validate phone number format
+    const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+    if (!phoneRegex.test(singleContact.phone)) {
+      setFileError("Format de numéro de téléphone invalide (ex: +33612345678)");
+      return;
+    }
+
+    // Validate average for academic campaigns
+    if (
+      campaignType === "academic" &&
+      (singleContact.average === undefined ||
+        singleContact.average < 0 ||
+        singleContact.average > 20)
+    ) {
+      setFileError("La moyenne doit être comprise entre 0 et 20");
+      return;
+    }
+
+    // Add the contact
+    setContacts([singleContact]);
+    setFileError("");
+
+    // Reset form
+    setSingleContact({
+      lastname: "",
+      firstname: "",
+      phone: "",
+      average: undefined,
+    });
+  };
+
+  // Update handleFileImport to properly handle class information
+  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.toLowerCase().endsWith(".csv")) {
+      setFileError("Seuls les fichiers CSV sont acceptés");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const text = e.target?.result as string;
+        const lines = text.split("\n").filter((line) => line.trim());
+
+        if (lines.length < 2) {
+          setFileError("Le fichier est vide ou ne contient que les en-têtes");
+          return;
+        }
+
+        // Normalize headers (remove accents, spaces, and convert to lowercase)
+        const headers = lines[0]
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .split(",")
+          .map((h) => h.trim());
+
+        // Map normalized headers to expected headers
+        const headerMap = {
+          nom: ["nom", "name", "lastname"],
+          prenom: ["prenom", "firstname", "prénom"],
+          telephone: ["telephone", "phone", "tel", "téléphone"],
+          classe: ["classe", "class"],
+          moyenne: ["moyenne", "average", "note"],
+        };
+
+        // Find column indices using normalized headers
+        const findColumnIndex = (headerTypes: string[]) => {
+          return headers.findIndex((h) => headerTypes.includes(h));
+        };
+
+        const nameIndex = findColumnIndex(headerMap.nom);
+        const firstNameIndex = findColumnIndex(headerMap.prenom);
+        const phoneIndex = findColumnIndex(headerMap.telephone);
+        const classIndex = findColumnIndex(headerMap.classe);
+        const averageIndex = findColumnIndex(headerMap.moyenne);
+
+        // Validate required headers
+        const missingRequired = [];
+        if (nameIndex === -1) missingRequired.push("Nom");
+        if (firstNameIndex === -1) missingRequired.push("Prénom");
+        if (phoneIndex === -1) missingRequired.push("Téléphone");
+
+        if (missingRequired.length > 0) {
+          setFileError(`Colonnes manquantes: ${missingRequired.join(", ")}`);
+          return;
+        }
+
+        // Additional validation for academic campaigns
+        if (campaignType === "academic") {
+          const missingAcademic = [];
+          if (classIndex === -1) missingAcademic.push("Classe");
+          if (averageIndex === -1) missingAcademic.push("Moyenne");
+
+          if (missingAcademic.length > 0) {
+            setFileError(
+              `Colonnes académiques manquantes: ${missingAcademic.join(", ")}`
+            );
+            return;
+          }
+        }
+
+        // Normalize class name to match predefined format
+        const normalizeClassName = (className: string) => {
+          // Remove extra spaces and convert to proper format
+          const normalized = className
+            .trim()
+            .toLowerCase()
+            .replace(/(\d+)(?:ere|ème|eme)?\s*([a-z])/i, (_, num, letter) => {
+              return `${num}ème ${letter.toUpperCase()}`;
+            });
+          return normalized;
+        };
+
+        // Parse contacts with validation
+        const importedContacts: Contact[] = [];
+        const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+        let lineNumber = 1;
+
+        for (const line of lines.slice(1)) {
+          lineNumber++;
+          const values = line.split(",").map((v) => v.trim());
+
+          // Skip empty lines
+          if (values.length < 3) continue;
+
+          let className =
+            classIndex !== -1
+              ? normalizeClassName(values[classIndex])
+              : undefined;
+
+          // Validate class against predefined list for academic campaigns
+          if (campaignType === "academic" && className) {
+            if (!classes.includes(className)) {
+              console.warn(
+                `Ligne ${lineNumber}: Classe invalide "${className}". Classes valides: ${classes.join(
+                  ", "
+                )}`
+              );
+              continue;
+            }
+          }
+
+          const contact: Contact = {
+            lastname: values[nameIndex],
+            firstname: values[firstNameIndex],
+            phone: values[phoneIndex],
+            ...(className ? { class: className } : {}),
+            ...(averageIndex !== -1
+              ? {
+                  average: parseFloat(values[averageIndex].replace(",", ".")),
+                }
+              : {}),
+          };
+
+          // Validate required fields
+          if (!contact.lastname || !contact.firstname || !contact.phone) {
+            console.warn(`Ligne ${lineNumber}: Champs requis manquants`);
+            continue;
+          }
+
+          // Validate phone number
+          if (!phoneRegex.test(contact.phone)) {
+            console.warn(
+              `Ligne ${lineNumber}: Format de téléphone invalide "${contact.phone}"`
+            );
+            continue;
+          }
+
+          // Validate class for academic campaigns
+          if (campaignType === "academic" && !contact.class) {
+            console.warn(
+              `Ligne ${lineNumber}: Classe manquante pour contact académique`
+            );
+            continue;
+          }
+
+          // Validate average for academic campaigns
+          if (campaignType === "academic") {
+            const avg = contact.average;
+            if (avg === undefined || isNaN(avg) || avg < 0 || avg > 20) {
+              console.warn(
+                `Ligne ${lineNumber}: Moyenne invalide "${values[averageIndex]}"`
+              );
+              continue;
+            }
+          }
+
+          importedContacts.push(contact);
+        }
+
+        if (importedContacts.length === 0) {
+          setFileError("Aucun contact valide trouvé dans le fichier");
+          return;
+        }
+
+        console.log("Contacts importés:", importedContacts);
+        setContacts(importedContacts);
+        setFileError("");
+        event.target.value = "";
+      } catch (err) {
+        console.error("Error importing file:", err);
+        setFileError("Erreur lors de l'importation du fichier");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // Add function to trigger file input
+  const handleBulkImportClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  // Handle schedule change
+  const handleScheduleChange = (date: Date | undefined) => {
+    setScheduledDate(date);
+  };
+
+  // Parse HTML response from SMS API
+  const parseHTMLResponse = (html: string): SMSResponse | null => {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, "text/html");
+      const smallTags = doc.getElementsByTagName("small");
+
+      const response: Partial<SMSResponse> = {};
+
+      for (const tag of smallTags) {
+        const text = tag.textContent?.trim() || "";
+        if (text.startsWith("STATUS_CODE:"))
+          response.statusCode = text.split(":")[1].trim();
+        if (text.startsWith("STATUS_TEXT:"))
+          response.statusText = text.split(":")[1].trim();
+        if (text.startsWith("MESSAGE_ID:"))
+          response.messageId = text.split(":")[1].trim();
+        if (text.startsWith("MESSAGEDETAIL_ID:"))
+          response.messageDetailId = text.split(":")[1].trim();
+        if (text.startsWith("RECIPIENT:"))
+          response.recipient = text.split(":")[1].trim();
+      }
+
+      return response as SMSResponse;
+    } catch (error) {
+      console.error("Error parsing SMS response:", error);
+      return null;
+    }
+  };
+
+  const handleSendCampaign = async () => {
+    try {
+      setLoading(true);
+      setError("");
+      setSuccess("");
+      setMessageStatuses([]);
+
+      // Validate required fields
+      if (!message || !signature || contacts.length === 0) {
+        setError(
+          "Veuillez remplir tous les champs obligatoires et ajouter des contacts"
+        );
+        return;
+      }
+
+      // Process each contact
+      const results = await Promise.all(
+        contacts.map(async (contact) => {
+          try {
+            // Format phone number
+            let formattedPhone = contact.phone.replace("+", "");
+            if (!formattedPhone.startsWith("221")) {
+              formattedPhone = "221" + formattedPhone;
+            }
+
+            // Replace variables in message if academic campaign
+            let personalizedMessage = message;
+            if (campaignType === "academic") {
+              personalizedMessage = message
+                .replace(
+                  /{student_name}/g,
+                  `${contact.firstname} ${contact.lastname}`
+                )
+                .replace(/{average_grade}/g, contact.average?.toString() || "")
+                .replace(/{class_name}/g, contact.class || "");
+            }
+
+            // Send SMS
+            const response = await fetch("/api/sms/send", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                recipient: formattedPhone,
+                content: personalizedMessage,
+                signature: signature,
+              }),
+            });
+
+            const responseText = await response.text();
+            const parsedResponse = parseHTMLResponse(responseText);
+
+            if (!response.ok || !parsedResponse) {
+              throw new Error(`Failed to send SMS to ${contact.phone}`);
+            }
+
+            // Add to message statuses
+            const messageStatus: MessageStatus = {
+              messageId: parsedResponse.messageId,
+              messageDetailId: parsedResponse.messageDetailId,
+              recipient: parsedResponse.recipient,
+              contact,
+              status: "sent",
+              timestamp: new Date(),
+            };
+
+            setMessageStatuses((prev) => [...prev, messageStatus]);
+
+            return {
+              success: true,
+              phone: contact.phone,
+              messageId: parsedResponse.messageId,
+              messageDetailId: parsedResponse.messageDetailId,
+            };
+          } catch (error) {
+            return { success: false, phone: contact.phone, error };
+          }
+        })
+      );
+
+      // Count successes and failures
+      const successful = results.filter((r) => r.success).length;
+      const failed = results.filter((r) => !r.success).length;
+
+      if (failed === 0) {
+        setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+        setShowStatusModal(true);
+      } else {
+        setError(`${successful} message(s) envoyé(s), ${failed} échec(s)`);
+      }
+    } catch (error) {
+      setError("Une erreur est survenue lors de l'envoi de la campagne");
+      console.error("Campaign error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Add status modal component
+  const StatusModal = () => {
+    if (!showStatusModal || messageStatuses.length === 0) return null;
+
+    return (
+      <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto space-y-4">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold">Statut des messages</h3>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setShowStatusModal(false)}
+              className="hover:bg-gray-100 rounded-full p-2"
+            >
+              ✕
+            </Button>
+          </div>
+
+          <div className="space-y-2">
+            {messageStatuses.map((status) => (
+              <div
+                key={status.messageId}
+                className="p-4 bg-gray-50 rounded-xl flex items-center justify-between"
+              >
+                <div>
+                  <div className="font-medium">
+                    {status.contact.firstname} {status.contact.lastname}
+                  </div>
+                  <div className="text-sm text-gray-500">
+                    {status.recipient}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    ID: {status.messageId}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`px-2 py-1 rounded-full text-sm ${
+                      status.status === "sent"
+                        ? "bg-green-100 text-green-700"
+                        : status.status === "delivered"
+                        ? "bg-blue-100 text-blue-700"
+                        : "bg-red-100 text-red-700"
+                    }`}
+                  >
+                    {status.status === "sent"
+                      ? "Envoyé"
+                      : status.status === "delivered"
+                      ? "Délivré"
+                      : "Échec"}
+                  </div>
+                  <div className="text-xs text-gray-400">
+                    {format(status.timestamp, "HH:mm:ss")}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
+      <div className="max-w-7xl mx-auto p-6 space-y-8">
+        {/* Hidden file input for bulk import */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".csv"
+          className="hidden"
+          onChange={handleFileImport}
+        />
+
+        {/* Header with dynamic gradient and floating elements */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#67B142] via-[#4CAF50] to-[#67B142] p-12"
+        >
+          <div className="relative z-10">
+            <motion.h1
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2 }}
+              className="text-4xl font-bold text-white mb-3"
+            >
+              Nouvelle Campagne SMS
+            </motion.h1>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.3 }}
+              className="text-lg text-white/90"
+            >
+              Créez et envoyez des campagnes SMS personnalisées
+            </motion.p>
+          </div>
+          <div className="absolute right-0 top-0 w-96 h-full opacity-10 transform rotate-6">
+            <MessageSquare className="w-full h-full" />
+          </div>
+          {/* Floating elements */}
+          <div className="absolute top-8 right-8 flex items-center gap-4">
+            <motion.div
+              animate={{ y: [0, -10, 0] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center"
+            >
+              <Book className="w-6 h-6 text-white" />
+            </motion.div>
+            <motion.div
+              animate={{ y: [-10, 0, -10] }}
+              transition={{ duration: 2, repeat: Infinity }}
+              className="w-12 h-12 rounded-2xl bg-white/10 backdrop-blur-sm flex items-center justify-center"
+            >
+              <Trophy className="w-6 h-6 text-white" />
+            </motion.div>
+          </div>
+        </motion.div>
+
+        {/* Campaign Type Selector */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="flex gap-4 overflow-x-auto pb-2"
+        >
+          {[
+            { id: "marketing" as const, label: "Marketing", icon: Tag },
+            {
+              id: "transactional" as const,
+              label: "Transactionnel",
+              icon: FileText,
+            },
+            {
+              id: "academic" as const,
+              label: "Notes & Résultats",
+              icon: GraduationCap,
+            },
+          ].map((type) => (
+            <motion.button
+              key={type.id}
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              onClick={() => handleCampaignTypeChange(type.id)}
+              className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
+                campaignType === type.id
+                  ? "bg-[#67B142] text-white shadow-lg"
+                  : "bg-white text-gray-600 hover:bg-[#67B142]/10"
+              }`}
+            >
+              <type.icon className="w-4 h-4" />
+              {type.label}
+            </motion.button>
+          ))}
+        </motion.div>
+
+        {/* Academic Filters - Only show for academic campaigns */}
+        {campaignType === "academic" && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="grid grid-cols-1 md:grid-cols-2 gap-4"
+          >
+            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <GraduationCap className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">Classe</span>
+              </div>
+              <Select value={selectedClass} onValueChange={setSelectedClass}>
+                <SelectTrigger className="w-full border-2 rounded-xl h-12">
+                  <SelectValue placeholder="Sélectionner une classe" />
+                </SelectTrigger>
+                <SelectContent>
+                  {classes.map((className) => (
+                    <SelectItem key={className} value={className}>
+                      {className}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <Trophy className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">
+                  Moyenne de l&apos;élève
+                </span>
+              </div>
+              <div className="space-y-4">
+                <Input
+                  type="text"
+                  placeholder="Nom de l'élève"
+                  className="w-full border-2 rounded-xl"
+                  value={studentName}
+                  onChange={(e) => setStudentName(e.target.value)}
+                />
+                <div className="flex gap-4 items-center">
+                  <Input
+                    type="number"
+                    min="0"
+                    max="20"
+                    step="0.01"
+                    placeholder="Moyenne /20"
+                    className="flex-1 border-2 rounded-xl text-lg font-medium"
+                    value={studentGrade || ""}
+                    onChange={(e) =>
+                      setStudentGrade(parseFloat(e.target.value) || 0)
+                    }
+                  />
+                  <div className="text-2xl font-bold text-[#67B142]">
+                    {studentGrade.toFixed(2)}/20
+                  </div>
+                </div>
+              </div>
+            </div>
+          </motion.div>
+        )}
+
+        {/* Quick Templates Section - Filtered by campaign type */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="grid grid-cols-1 md:grid-cols-3 gap-4"
+        >
+          {TEMPLATES.filter(
+            (template) => template.category === campaignType
+          ).map((template) => (
+            <motion.div
+              key={template.id}
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              onClick={() => handleTemplateChange(template.id)}
+              className={`cursor-pointer p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 ${
+                selectedTemplate === template.id
+                  ? "border-2 border-[#67B142]"
+                  : ""
+              }`}
+            >
+              <div className="flex items-center gap-3 mb-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <template.icon className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">
+                  {template.title}
+                </span>
+              </div>
+              <p className="text-sm text-gray-600">{template.desc}</p>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Left Column - Message */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-6"
+          >
+            <div className="flex items-center gap-3">
+              <div className="p-3 bg-[#67B142]/10 rounded-2xl">
+                <MessageSquare className="w-6 h-6 text-[#67B142]" />
+              </div>
+              <span className="text-lg font-semibold text-gray-800">
+                Composez votre message
+              </span>
+            </div>
+
+            <div className="relative group">
+              <Textarea
+                value={message}
+                onChange={(e) => setMessage(e.target.value)}
+                className="h-48 font-mono text-base border-2 focus:border-[#67B142] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md"
+                placeholder="Tapez votre message..."
+              />
+              <motion.div
+                whileHover={{ scale: 1.05 }}
+                className="absolute top-3 right-3"
+              >
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="bg-white shadow-lg hover:shadow-xl transition-all duration-300 text-gray-600 hover:text-[#67B142] hover:bg-[#67B142]/10 rounded-xl"
+                  onClick={() => setOptimize(!optimize)}
+                >
+                  <Sparkles className="w-4 h-4 mr-2" />
+                  Optimiser
+                </Button>
+              </motion.div>
+            </div>
+
+            <div className="flex items-center justify-between px-6 py-3 bg-white rounded-2xl shadow-sm">
+              <div className="flex items-center gap-4">
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-gray-400" />
+                  <span
+                    className={`text-sm ${
+                      charCount > 160 ? "text-amber-500" : "text-gray-600"
+                    }`}
+                  >
+                    {charCount}/160 car.
+                  </span>
+                </div>
+                <div className="w-px h-4 bg-gray-200" />
+                <div className="flex items-center gap-2">
+                  <span
+                    className={`font-medium ${
+                      smsCount > 1 ? "text-amber-500" : "text-[#67B142]"
+                    }`}
+                  >
+                    {smsCount} {smsCount > 1 ? "SMS" : "SMS"}
+                  </span>
+                  {smsCount > 1 && (
+                    <div className="text-xs px-2 py-1 bg-amber-50 text-amber-500 rounded-lg">
+                      {Math.ceil((160 - (charCount % 160)) % 160)} car. avant
+                      prochain SMS
+                    </div>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <Info className="w-4 h-4 text-gray-400" />
+                <span className="text-xs text-gray-500">
+                  {smsCount > 1
+                    ? `${Math.floor(charCount / 160)} SMS complet${
+                        smsCount > 2 ? "s" : ""
+                      } + ${charCount % 160} car.`
+                    : "Standard GSM"}
+                </span>
+              </div>
+            </div>
+
+            {/* Variables Section - Dynamic based on campaign type */}
+            <div className="space-y-4">
+              <div className="flex items-center gap-2">
+                <Tag className="w-4 h-4 text-[#67B142]" />
+                <span className="text-sm font-medium text-gray-700">
+                  Variables disponibles
+                </span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {getVariables().map((variable) => (
+                  <motion.div
+                    key={variable}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      className="bg-[#67B142]/10 hover:bg-[#67B142]/20 text-[#67B142] border-none rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                      onClick={() => setMessage(message + variable)}
+                    >
+                      {variable}
+                    </Button>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+
+            {/* Save Template */}
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              className="p-6 bg-white rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <Tag className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">
+                  Sauvegarde du template
+                </span>
+              </div>
+              <div className="flex gap-4">
+                <Button
+                  variant="outline"
+                  className="flex-1 border-2 hover:border-[#67B142] hover:text-[#67B142] rounded-xl transition-all duration-300"
+                >
+                  Sauver mon texte
+                </Button>
+                <Select defaultValue="default">
+                  <SelectTrigger className="flex-1 border-2 rounded-xl">
+                    <SelectValue placeholder="Choisir un template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="default">Template par défaut</SelectItem>
+                    <SelectItem value="promo">Template promotionnel</SelectItem>
+                    <SelectItem value="alert">
+                      Template d&apos;alerte
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </motion.div>
+
+            {/* Sender Name */}
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              className="p-6 bg-white rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                    <Users className="w-5 h-5 text-[#67B142]" />
+                  </div>
+                  <span className="font-medium text-gray-800">Émetteur</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Info className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-500">
+                    Maximum 11 caractères
+                  </span>
+                </div>
+              </div>
+              <div className="relative">
+                <Input
+                  placeholder="Nom de l'émetteur"
+                  maxLength={11}
+                  className="max-w-[200px] border-2 focus:border-[#67B142] rounded-xl"
+                />
+                <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-[#67B142]">
+                  8/11
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Schedule */}
+            <motion.div
+              whileHover={{ scale: 1.01 }}
+              className="p-6 bg-white rounded-2xl shadow-sm space-y-4 hover:shadow-md transition-all duration-300"
+            >
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <Calendar className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">Planification</span>
+              </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <Button
+                    variant={scheduledTime === "now" ? "default" : "outline"}
+                    className={`h-12 rounded-xl transition-all duration-300 ${
+                      scheduledTime === "now"
+                        ? "bg-[#67B142] hover:bg-[#67B142]/90 shadow-lg"
+                        : "border-2 hover:border-[#67B142] hover:text-[#67B142]"
+                    }`}
+                    onClick={() => {
+                      setScheduledTime("now");
+                      setScheduledDate(undefined);
+                    }}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Maintenant
+                    {scheduledTime === "now" && (
+                      <Check className="ml-2 h-4 w-4" />
+                    )}
+                  </Button>
+                  <Button
+                    variant={
+                      scheduledTime === "scheduled" ? "default" : "outline"
+                    }
+                    className={`h-12 rounded-xl transition-all duration-300 ${
+                      scheduledTime === "scheduled"
+                        ? "bg-[#67B142] hover:bg-[#67B142]/90 shadow-lg"
+                        : "border-2 hover:border-[#67B142] hover:text-[#67B142]"
+                    }`}
+                    onClick={() => setScheduledTime("scheduled")}
+                  >
+                    <Calendar className="mr-2 h-4 w-4" />
+                    Programmer
+                    <ChevronRight className="ml-2 h-4 w-4" />
+                  </Button>
+                </div>
+
+                {scheduledTime === "scheduled" && (
+                  <div className="space-y-4 animate-in fade-in-50">
+                    <div className="grid grid-cols-2 gap-4">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={`w-full justify-start text-left font-normal border-2 rounded-xl ${
+                              !scheduledDate && "text-muted-foreground"
+                            }`}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4" />
+                            {scheduledDate ? (
+                              format(scheduledDate, "PPP", { locale: fr })
+                            ) : (
+                              <span>Choisir une date</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <CalendarComponent
+                            mode="single"
+                            selected={scheduledDate}
+                            onSelect={handleScheduleChange}
+                            initialFocus
+                            disabled={(date) => date < new Date()}
+                          />
+                        </PopoverContent>
+                      </Popover>
+
+                      <Select onValueChange={setSelectedHour}>
+                        <SelectTrigger className="border-2 rounded-xl">
+                          <SelectValue placeholder="Heure d'envoi" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {Array.from({ length: 24 }, (_, i) => (
+                            <SelectItem key={i} value={`${i}:00`}>
+                              {`${i.toString().padStart(2, "0")}:00`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {scheduledDate && (
+                      <div className="flex items-center gap-2 text-sm text-[#67B142]">
+                        <Info className="w-4 h-4" />
+                        <span>
+                          Votre campagne sera envoyée le{" "}
+                          {format(scheduledDate, "PPPP", { locale: fr })}
+                          {selectedHour && <span> à {selectedHour}</span>}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+
+          {/* Right Column */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.4 }}
+            className="space-y-6"
+          >
+            {/* Recipients Section */}
+            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-6">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                    <Users className="w-5 h-5 text-[#67B142]" />
+                  </div>
+                  <span className="font-medium text-gray-800">
+                    Destinataires
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`rounded-xl transition-all duration-300 ${
+                      contacts.length === 0 ? "bg-[#67B142] text-white" : ""
+                    }`}
+                    onClick={() => {
+                      setContacts([]);
+                      setFileError("");
+                    }}
+                  >
+                    Contact unique
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className={`rounded-xl transition-all duration-300 ${
+                      contacts.length > 0 ? "bg-[#67B142] text-white" : ""
+                    }`}
+                    onClick={handleBulkImportClick}
+                  >
+                    Import en masse
+                  </Button>
+                </div>
+              </div>
+
+              {/* File Format Information */}
+              <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
+                <div className="font-medium text-gray-700">
+                  Format de fichier requis :
+                </div>
+                <div className="space-y-1 text-gray-600">
+                  <p>• Fichier CSV (séparateur: virgule)</p>
+                  <p>• Encodage UTF-8</p>
+                  <p>• Colonnes requises :</p>
+                  <div className="pl-4">
+                    {campaignType === "academic" ? (
+                      <code className="text-[#67B142]">
+                        Nom,Prénom,Téléphone,Classe,Moyenne
+                      </code>
+                    ) : (
+                      <code className="text-[#67B142]">
+                        Nom,Prénom,Téléphone
+                      </code>
+                    )}
+                  </div>
+                  {campaignType === "academic" && (
+                    <p>• Format moyenne : nombre décimal (ex: 15.5)</p>
+                  )}
+                </div>
+              </div>
+
+              {contacts.length === 0 ? (
+                // Single Contact Form
+                <div className="space-y-4">
+                  <div className="grid grid-cols-2 gap-4">
+                    <Input
+                      placeholder="Nom"
+                      className="border-2 rounded-xl"
+                      value={singleContact.lastname}
+                      onChange={(e) =>
+                        handleSingleContactChange("lastname", e.target.value)
+                      }
+                    />
+                    <Input
+                      placeholder="Prénom"
+                      className="border-2 rounded-xl"
+                      value={singleContact.firstname}
+                      onChange={(e) =>
+                        handleSingleContactChange("firstname", e.target.value)
+                      }
+                    />
+                  </div>
+                  <Input
+                    placeholder="Numéro de téléphone"
+                    className="border-2 rounded-xl"
+                    value={singleContact.phone}
+                    onChange={(e) =>
+                      handleSingleContactChange("phone", e.target.value)
+                    }
+                  />
+                  {campaignType === "academic" && (
+                    <div className="flex gap-4">
+                      <Input
+                        type="number"
+                        min="0"
+                        max="20"
+                        step="0.01"
+                        placeholder="Moyenne /20"
+                        className="border-2 rounded-xl"
+                        value={singleContact.average || ""}
+                        onChange={(e) =>
+                          handleSingleContactChange(
+                            "average",
+                            parseFloat(e.target.value)
+                          )
+                        }
+                      />
+                      <Select
+                        value={selectedClass}
+                        onValueChange={setSelectedClass}
+                      >
+                        <SelectTrigger className="border-2 rounded-xl">
+                          <SelectValue placeholder="Classe" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {classes.map((className) => (
+                            <SelectItem key={className} value={className}>
+                              {className}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                  {fileError && (
+                    <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+                      {fileError}
+                    </div>
+                  )}
+                  <Button
+                    className="w-full bg-[#67B142] hover:bg-[#67B142]/90 text-white rounded-xl h-12"
+                    onClick={handleAddContact}
+                  >
+                    <Plus className="w-4 h-4 mr-2" />
+                    Ajouter le contact
+                  </Button>
+                </div>
+              ) : (
+                // Bulk Import Section
+                <div className="space-y-6">
+                  <div className="grid grid-cols-2 gap-4">
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full h-24 rounded-xl border-2 hover:border-[#67B142] hover:text-[#67B142] transition-all duration-300"
+                        onClick={handleDownloadTemplate}
+                      >
+                        <div className="flex flex-col items-center gap-3">
+                          <Download className="w-6 h-6" />
+                          <span>Télécharger le modèle</span>
+                        </div>
+                      </Button>
+                    </motion.div>
+
+                    <motion.div
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                    >
+                      <Button
+                        variant="outline"
+                        className="w-full h-24 rounded-xl border-2 hover:border-[#67B142] hover:text-[#67B142] transition-all duration-300"
+                        onClick={handleBulkImportClick}
+                      >
+                        <div className="flex flex-col items-center gap-3">
+                          <Upload className="w-6 h-6" />
+                          <span>Importer un fichier</span>
+                        </div>
+                      </Button>
+                    </motion.div>
+                  </div>
+
+                  {fileError && (
+                    <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm">
+                      {fileError}
+                    </div>
+                  )}
+
+                  {contacts.length > 0 && (
+                    <div className="space-y-4">
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm font-medium text-gray-700">
+                          Aperçu des contacts importés
+                        </span>
+                        <span className="text-sm text-[#67B142] font-medium">
+                          {contacts.length} contacts
+                        </span>
+                      </div>
+                      <div className="max-h-60 overflow-y-auto space-y-2">
+                        {contacts.slice(0, 5).map((contact, index) => (
+                          <div
+                            key={index}
+                            className="p-3 bg-gray-50 rounded-xl flex items-center justify-between"
+                          >
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4 text-gray-400" />
+                              <span className="font-medium">
+                                {contact.firstname} {contact.lastname}
+                              </span>
+                            </div>
+                            <div className="flex items-center gap-4">
+                              <span className="text-sm text-gray-500">
+                                {contact.phone}
+                              </span>
+                              {contact.average !== undefined && (
+                                <span className="font-medium text-[#67B142]">
+                                  {contact.average.toFixed(2)}/20
+                                </span>
+                              )}
+                            </div>
+                          </div>
+                        ))}
+                        {contacts.length > 5 && (
+                          <div className="text-center text-sm text-gray-500">
+                            + {contacts.length - 5} autres contacts
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Campaign Options */}
+            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-[#67B142]/10 rounded-xl">
+                  <Tag className="w-5 h-5 text-[#67B142]" />
+                </div>
+                <span className="font-medium text-gray-800">
+                  Options de campagne
+                </span>
+              </div>
+
+              <div className="space-y-6">
+                {/* Campaign Type Options */}
+                <div className="space-y-3">
+                  <span className="text-sm font-medium text-gray-700">
+                    Type de message
+                  </span>
+                  <div className="grid grid-cols-2 gap-4">
+                    {campaignOptions[campaignType].map((option) => (
+                      <motion.div
+                        key={option.value}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          variant={
+                            responseType === option.value
+                              ? "default"
+                              : "outline"
+                          }
+                          className={`w-full h-auto py-4 rounded-xl transition-all duration-300 ${
+                            responseType === option.value
+                              ? "bg-[#67B142] hover:bg-[#67B142]/90 shadow-lg"
+                              : "border-2 hover:border-[#67B142] hover:text-[#67B142]"
+                          }`}
+                          onClick={() => handleOptionSelect(option.value)}
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{option.label}</span>
+                            <span className="text-xs opacity-70">
+                              {option.description}
+                            </span>
+                          </div>
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Response Management */}
+                <div className="space-y-3">
+                  <span className="text-sm font-medium text-gray-700">
+                    Gestion des réponses
+                  </span>
+                  <div className="grid grid-cols-2 gap-4">
+                    {[
+                      {
+                        value: "no-response",
+                        label: "Sans réponses",
+                        description: "Communication à sens unique",
+                      },
+                      {
+                        value: "with-response",
+                        label: "Avec réponses",
+                        description: "Dialogue bidirectionnel",
+                      },
+                    ].map((option) => (
+                      <motion.div
+                        key={option.value}
+                        whileHover={{ scale: 1.02 }}
+                        whileTap={{ scale: 0.98 }}
+                      >
+                        <Button
+                          variant={
+                            responseType === option.value
+                              ? "default"
+                              : "outline"
+                          }
+                          className={`w-full h-auto py-4 rounded-xl transition-all duration-300 ${
+                            responseType === option.value
+                              ? "bg-[#67B142] hover:bg-[#67B142]/90 shadow-lg"
+                              : "border-2 hover:border-[#67B142] hover:text-[#67B142]"
+                          }`}
+                          onClick={() => handleOptionSelect(option.value)}
+                        >
+                          <div className="flex flex-col items-center gap-1">
+                            <span>{option.label}</span>
+                            <span className="text-xs opacity-70">
+                              {option.description}
+                            </span>
+                          </div>
+                        </Button>
+                      </motion.div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Add signature selection */}
+            <div className="space-y-4">
+              <div>
+                <label className="text-sm font-medium mb-1 block">
+                  Signature
+                </label>
+                <Select value={signature} onValueChange={setSignature}>
+                  <SelectTrigger className="max-w-sm">
+                    <SelectValue placeholder="Sélectionnez une signature" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value={session?.user.companyName || ""}>
+                      {session?.user.companyName || ""}
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Launch Button */}
+            <div className="flex justify-end gap-4 mt-8">
+              <Button variant="outline">Annuler</Button>
+              <Button
+                onClick={handleSendCampaign}
+                disabled={
+                  loading || !message || !signature || contacts.length === 0
+                }
+                className="bg-[#67B142] hover:bg-[#67B142]/90"
+              >
+                {loading ? (
+                  <>
+                    <span className="animate-spin mr-2">⏳</span>
+                    Envoi en cours...
+                  </>
+                ) : (
+                  <>
+                    <Send className="w-4 h-4 mr-2" />
+                    Envoyer la campagne
+                  </>
+                )}
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Success/Error messages */}
+        {success && (
+          <div className="bg-green-50 text-green-800 p-4 rounded-md mt-4">
+            {success}
+          </div>
+        )}
+        {error && (
+          <div className="bg-red-50 text-red-800 p-4 rounded-md mt-4">
+            {error}
+          </div>
+        )}
+      </div>
+
+      {/* Add StatusModal before closing div */}
+      <StatusModal />
+    </div>
+  );
+}

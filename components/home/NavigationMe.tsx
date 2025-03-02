@@ -13,108 +13,87 @@ import {
   NavigationMenuTrigger,
   navigationMenuTriggerStyle,
 } from "@/components/ui/navigation-menu";
+import {
+  MessageSquare,
+  Mic,
+  ImagePlus,
+  Database,
+  Mail,
+  BarChart3,
+  Vote,
+  Ticket,
+} from "lucide-react";
 
-const components: { title: string; href: string; description: string }[] = [
+const components: {
+  title: string;
+  href: string;
+  description: string;
+  icon: React.ReactNode;
+}[] = [
   {
-    title: "Alert Dialog",
-    href: "/docs/primitives/alert-dialog",
+    title: "SMS PRO",
+    href: "/sms-pro",
     description:
-      "A modal dialog that interrupts the user with important content and expects a response.",
+      "Solution professionnelle pour l'envoi de SMS en masse avec suivi en temps réel et analyses détaillées.",
+    icon: <MessageSquare className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
-    title: "Hover Card",
-    href: "/docs/primitives/hover-card",
+    title: "SMS VOCAL",
+    href: "/sms-vocal",
     description:
-      "For sighted users to preview content available behind a link.",
+      "Convertissez vos messages texte en messages vocaux pour une communication plus personnelle et accessible.",
+    icon: <Mic className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
-    title: "Progress",
-    href: "/docs/primitives/progress",
+    title: "SMS ENRICHI",
+    href: "/sms-enrichi",
     description:
-      "Displays an indicator showing the completion progress of a task, typically displayed as a progress bar.",
+      "Enrichissez vos SMS avec des contenus multimédias et des liens interactifs pour plus d'engagement.",
+    icon: <ImagePlus className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
-    title: "Scroll-area",
-    href: "/docs/primitives/scroll-area",
-    description: "Visually or semantically separates content.",
+    title: "LOCATION BDD",
+    href: "/location-bdd",
+    description:
+      "Accédez à notre base de données qualifiée pour cibler efficacement vos campagnes SMS.",
+    icon: <Database className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
-    title: "Tabs",
-    href: "/docs/primitives/tabs",
+    title: "MAIL TO SMS",
+    href: "/mail-to-sms",
     description:
-      "A set of layered sections of content—known as tab panels—that are displayed one at a time.",
+      "Convertissez automatiquement vos emails en SMS pour une communication multicanale efficace.",
+    icon: <Mail className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
-    title: "Tooltip",
-    href: "/docs/primitives/tooltip",
+    title: "SONDAGES SMS",
+    href: "/sondages-sms",
     description:
-      "A popup that displays information related to an element when the element receives keyboard focus or the mouse hovers over it.",
+      "Créez et gérez des sondages par SMS pour collecter facilement les retours de vos clients.",
+    icon: <BarChart3 className="h-6 w-6 text-[#67B142] shrink-0" />,
+  },
+  {
+    title: "VOTE SMS",
+    href: "/vote-sms",
+    description:
+      "Système de vote par SMS sécurisé pour vos événements et consultations.",
+    icon: <Vote className="h-6 w-6 text-[#67B142] shrink-0" />,
+  },
+  {
+    title: "MOBILE TICKETING",
+    href: "/mobile-ticketing",
+    description:
+      "Solution de billetterie mobile par SMS pour gérer vos événements et contrôler les accès.",
+    icon: <Ticket className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
 ];
 
-{
-  /* <Link
-              href="#"
-              className="text-sm font-medium text-muted-foreground uppercase transition-colors hover:text-[#67B142]"
-            >
-              Solutions
-            </Link>
-            <Link
-              href="/fonctionnalites"
-              className={cn(
-                "text-sm font-medium uppercase transition-colors hover:text-[#67B142]",
-                pathname === "fonctionnalites"
-                  ? "text-[#67B142] font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Fonctionnalités
-            </Link>
-            <Link
-              href="/tarifs"
-              className={cn(
-                "text-sm font-medium uppercase transition-colors hover:text-[#67B142]",
-                pathname === "tarifs"
-                  ? "text-[#67B142] font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Tarifs
-            </Link>
-            <Link
-              href="/metiers"
-              className={cn(
-                "text-sm font-medium uppercase transition-colors hover:text-[#67B142]",
-                pathname === "metiers"
-                  ? "text-[#67B142] font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Metiers
-            </Link>
-            <Link
-              href="/api"
-              className={cn(
-                "text-sm font-medium uppercase transition-colors hover:text-[#67B142]",
-                pathname === "api"
-                  ? "text-[#67B142] font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Api
-            </Link>
-            <Link
-              href="/blog"
-              className={cn(
-                "text-sm font-medium uppercase transition-colors hover:text-[#67B142]",
-                pathname === "blog"
-                  ? "text-[#67B142] font-semibold"
-                  : "text-muted-foreground"
-              )}
-            >
-              Blog
-            </Link> */
-}
+const scrollToSection = (sectionId: string) => {
+  const element = document.getElementById(sectionId);
+  if (element) {
+    element.scrollIntoView({ behavior: "smooth" });
+  }
+};
 
 export function NavigationMe() {
   return (
@@ -123,14 +102,27 @@ export function NavigationMe() {
         <NavigationMenuItem>
           <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
           <NavigationMenuContent>
-            <ul className="grid w-[400px] gap-3 p-4 md:w-[500px] md:grid-cols-2 lg:w-[600px] ">
+            <ul className="grid w-[400px] gap-4 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
               {components.map((component) => (
                 <ListItem
                   key={component.title}
                   title={component.title}
                   href={component.href}
+                  className="group"
                 >
-                  {component.description}
+                  <div className="flex items-start gap-3">
+                    <div className="mt-1 bg-gray-50 rounded-lg p-2 group-hover:bg-[#67B142]/10 transition-colors">
+                      {component.icon}
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold mb-1 text-gray-900 group-hover:text-[#67B142] transition-colors">
+                        {component.title}
+                      </div>
+                      <p className="text-sm leading-snug text-muted-foreground group-hover:text-gray-600 transition-colors">
+                        {component.description}
+                      </p>
+                    </div>
+                  </div>
                 </ListItem>
               ))}
             </ul>
@@ -144,11 +136,12 @@ export function NavigationMe() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/tarifs" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Tarifs
-            </NavigationMenuLink>
-          </Link>
+          <button
+            onClick={() => scrollToSection("pricing")}
+            className={navigationMenuTriggerStyle()}
+          >
+            Tarifs
+          </button>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/metiers" legacyBehavior passHref>
@@ -179,22 +172,19 @@ export function NavigationMe() {
 const ListItem = React.forwardRef<
   React.ElementRef<"a">,
   React.ComponentPropsWithoutRef<"a">
->(({ className, title, children, ...props }, ref) => {
+>(({ className, children, ...props }, ref) => {
   return (
     <li>
       <NavigationMenuLink asChild>
         <a
           ref={ref}
           className={cn(
-            "block select-none space-y-1 rounded-md p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
+            "block select-none rounded-lg p-3 leading-none no-underline outline-none transition-colors hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
             className
           )}
           {...props}
         >
-          <div className="text-sm font-medium leading-none">{title}</div>
-          <p className="line-clamp-2 text-sm leading-snug text-muted-foreground">
-            {children}
-          </p>
+          {children}
         </a>
       </NavigationMenuLink>
     </li>

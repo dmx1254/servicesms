@@ -117,3 +117,59 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Custom PhoneInput Styles */
+.PhoneInput {
+  height: 40px;
+  display: flex;
+  align-items: center;
+  border: 1px solid #e5e7eb;
+  border-radius: 0.75rem;
+  padding-right: 0.75rem;
+  transition: all 0.2s;
+}
+
+.PhoneInput:focus-within {
+  border-color: #67B142;
+  box-shadow: 0 0 0 1px #67B142;
+}
+
+.PhoneInput--error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 1px #ef4444;
+}
+
+.PhoneInputCountry {
+  margin-right: 0.5rem;
+  padding-left: 0.75rem;
+  position: relative;
+  z-index: 10;
+}
+
+.PhoneInputInput {
+  flex: 1;
+  border: none !important;
+  padding: 0.5rem 0;
+  outline: none;
+  background: transparent;
+  font-size: 0.875rem;
+}
+
+.PhoneInputInput:focus {
+  box-shadow: none !important;
+  border: none !important;
+}
+
+/* Adjust the select dropdown appearance */
+.PhoneInputCountrySelect option {
+  color: black;
+  background: white;
+  padding: 0.5rem;
+}
+
+/* Style for the country flag emoji */
+.PhoneInputCountryIcon {
+  width: 1.5rem;
+  height: 1rem;
+  margin-right: 0.5rem;
+}

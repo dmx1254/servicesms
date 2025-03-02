@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Rubik, Poppins } from "next/font/google";
 import "../globals.css";
 import { Providers } from "@/components/i18n/providers";
-import Footer from "@/components/layout/Footer";
+import { Toaster } from "sonner";
+// import Footer from "@/components/layout/Footer";
 
 const rubik = Rubik({
   variable: "--font-rubik",
@@ -20,7 +21,7 @@ export const metadata: Metadata = {
   description:
     "Servicesms.sn est un service en ligne de premier plan au Sénégal",
   icons: {
-    icon: "/logo2.png",
+    icon: "/logo.png",
   },
 };
 
@@ -31,7 +32,6 @@ export default async function RootLayout({
   children: React.ReactNode;
   params: { params: Promise<{ locale: string }> };
 }>) {
-  // @ts-ignore
   const { locale } = await params;
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -39,8 +39,9 @@ export default async function RootLayout({
         className={`${rubik.variable} ${poppins.variable} antialiased font-sans`}
       >
         <Providers locale={locale}>
+          <Toaster />
           <main className="min-h-screen">{children}</main>
-          <Footer />
+          {/* <Footer /> */}
         </Providers>
       </body>
     </html>
