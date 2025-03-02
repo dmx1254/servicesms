@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -46,6 +46,13 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { useSession } from "next-auth/react";
+import { toast } from "sonner";
+import { Label } from "@/components/ui/label";
+import {
+  SMSErrorCode,
+  formatSMSErrorMessage,
+  getSMSErrorDetails,
+} from "@/app/lib/utils/smsErrorCodes";
 
 type TemplateId =
   // Academic templates
@@ -212,7 +219,7 @@ interface Contact {
 
 // Add interface for SMS response
 interface SMSResponse {
-  statusCode: string;
+  statusCode: SMSErrorCode;
   statusText: string;
   messageId: string;
   messageDetailId: string;
@@ -227,19 +234,56 @@ interface MessageStatus {
   contact: Contact;
   status: "sent" | "delivered" | "failed";
   timestamp: Date;
+  errorMessage?: string;
+  errorDetails?: SMSError;
 }
 
+interface CampaignData {
+  id: string;
+  name: string;
+  template?: TemplateId;
+  contacts: Contact[];
+  message: string;
+  signature: string;
+  responseType: "no-response" | "with-response";
+  scheduledDate?: Date;
+}
+
+// Modèles de noms prédéfinis par type
+const CAMPAIGN_NAME_TEMPLATES = {
+  academic: [
+    "Bulletin Trimestre {term} {year}",
+    "Résultats Examens {month} {year}",
+    "Réunion Parents {date}",
+    "Événement Scolaire: {event_name}",
+  ],
+  marketing: [
+    "Promo {product} {discount}%",
+    "Lancement {product_name}",
+    "Soldes {season} {year}",
+    "Événement: {event_name}",
+  ],
+  transactional: [
+    "Confirmation Commande #{order_id}",
+    "Livraison Commande #{order_id}",
+    "Rappel RDV {date}",
+    "Reçu Paiement #{payment_id}",
+  ],
+};
+
 export default function NewCampaign() {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const [message, setMessage] = useState<string>("");
   const [optimize, setOptimize] = useState(false);
   const [campaignType, setCampaignType] =
-    useState<Template["category"]>("marketing");
+    useState<Template["category"]>("academic");
   const [scheduledDate, setScheduledDate] = useState<Date>();
   const [scheduledTime, setScheduledTime] = useState("now");
   const [selectedHour, setSelectedHour] = useState<string>("");
   const [responseType, setResponseType] = useState("no-response");
-  const [selectedTemplate, setSelectedTemplate] = useState<TemplateId | "">("");
+  const [selectedTemplate, setSelectedTemplate] = useState<
+    TemplateId | undefined
+  >();
   const [selectedClass, setSelectedClass] = useState<string>("");
   const [studentGrade, setStudentGrade] = useState<number>(0);
   const [studentName, setStudentName] = useState<string>("");
@@ -248,7 +292,6 @@ export default function NewCampaign() {
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [isScheduled, setIsScheduled] = useState<boolean>(false);
   const [signature, setSignature] = useState<string>("");
   const [messageStatuses, setMessageStatuses] = useState<MessageStatus[]>([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
@@ -263,6 +306,21 @@ export default function NewCampaign() {
 
   // Add new state for file input reference
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Add new state for campaign data
+  const [campaignData, setCampaignData] = useState<CampaignData>({
+    id: crypto.randomUUID(),
+    name: "",
+    contacts: [],
+    message: "",
+    signature: session?.user?.companyName || "",
+    responseType: "no-response",
+  });
+
+  // Ajout de l'état pour la sauvegarde automatique
+  const [saveTimeout, setSaveTimeout] = useState<NodeJS.Timeout>();
+  const [lastSaved, setLastSaved] = useState<Date>();
+  const [isSaving, setIsSaving] = useState(false);
 
   // Get variables based on campaign type
   const getVariables = () => {
@@ -428,7 +486,7 @@ export default function NewCampaign() {
   // Fix campaign type handling
   const handleCampaignTypeChange = (type: Template["category"]) => {
     setCampaignType(type);
-    setSelectedTemplate("");
+    setSelectedTemplate(undefined);
     setContacts([]);
     setSingleContact({
       lastname: "",
@@ -444,7 +502,7 @@ export default function NewCampaign() {
 
   // Handle option selection
   const handleOptionSelect = (value: string) => {
-    setResponseType(value);
+    setResponseType(value as "no-response" | "with-response");
   };
 
   // Sample templates for file download
@@ -527,20 +585,20 @@ export default function NewCampaign() {
   };
 
   // Update handleFileImport to properly handle class information
-  const handleFileImport = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
+  const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
 
     if (!file.name.toLowerCase().endsWith(".csv")) {
       setFileError("Seuls les fichiers CSV sont acceptés");
-      event.target.value = "";
+      e.target.value = "";
       return;
     }
 
     const reader = new FileReader();
-    reader.onload = (e) => {
+    reader.onload = async (event) => {
       try {
-        const text = e.target?.result as string;
+        const text = event.target?.result as string;
         const lines = text.split("\n").filter((line) => line.trim());
 
         if (lines.length < 2) {
@@ -698,7 +756,7 @@ export default function NewCampaign() {
         console.log("Contacts importés:", importedContacts);
         setContacts(importedContacts);
         setFileError("");
-        event.target.value = "";
+        e.target.value = "";
       } catch (err) {
         console.error("Error importing file:", err);
         setFileError("Erreur lors de l'importation du fichier");
@@ -729,7 +787,7 @@ export default function NewCampaign() {
       for (const tag of smallTags) {
         const text = tag.textContent?.trim() || "";
         if (text.startsWith("STATUS_CODE:"))
-          response.statusCode = text.split(":")[1].trim();
+          response.statusCode = text.split(":")[1].trim() as SMSErrorCode;
         if (text.startsWith("STATUS_TEXT:"))
           response.statusText = text.split(":")[1].trim();
         if (text.startsWith("MESSAGE_ID:"))
@@ -747,96 +805,96 @@ export default function NewCampaign() {
     }
   };
 
-  const handleSendCampaign = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      setSuccess("");
-      setMessageStatuses([]);
+  const handleCampaignNameChange = (name: string) => {
+    setCampaignData((prev) => ({ ...prev, name }));
+  };
 
-      // Validate required fields
-      if (!message || !signature || contacts.length === 0) {
-        setError(
-          "Veuillez remplir tous les champs obligatoires et ajouter des contacts"
-        );
-        return;
+  const handleSendCampaign = async () => {
+    if (!campaignData.name.trim()) {
+      toast.error("Veuillez donner un nom à votre campagne", {
+        style: { backgroundColor: "#EF4444", color: "white" },
+      });
+      return;
+    }
+
+    setLoading(true);
+    const failedMessages: MessageStatus[] = [];
+    const successMessages: MessageStatus[] = [];
+
+    try {
+      for (const contact of contacts) {
+        try {
+          const response = await fetch("/api/sms/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              recipient: contact.phone,
+              message: message,
+              campaignId: campaignData.id,
+              campaignName: campaignData.name,
+              signature: campaignData.signature,
+            }),
+          });
+
+          const responseText = await response.text();
+          const parsedResponse = parseHTMLResponse(responseText);
+
+          if (!parsedResponse) {
+            throw new Error(`Failed to parse response for ${contact.phone}`);
+          }
+
+          const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
+
+          if (parsedResponse.statusCode !== "200") {
+            throw new Error(formatSMSErrorMessage(errorDetails));
+          }
+
+          await autoSaveCampaign();
+
+          // Add to message statuses
+          const messageStatus: MessageStatus = {
+            messageId: parsedResponse.messageId,
+            messageDetailId: parsedResponse.messageDetailId,
+            recipient: parsedResponse.recipient,
+            contact,
+            status: "sent",
+            timestamp: new Date(),
+            errorDetails:
+              parsedResponse.statusCode === "200" ? undefined : errorDetails,
+          };
+
+          setMessageStatuses((prev) => [...prev, messageStatus]);
+          successMessages.push(messageStatus);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Erreur inconnue";
+          failedMessages.push({
+            messageId: "",
+            messageDetailId: "",
+            recipient: contact.phone,
+            contact,
+            status: "failed",
+            timestamp: new Date(),
+            errorMessage,
+          });
+        }
       }
 
-      // Process each contact
-      const results = await Promise.all(
-        contacts.map(async (contact) => {
-          try {
-            // Format phone number
-            let formattedPhone = contact.phone.replace("+", "");
-            if (!formattedPhone.startsWith("221")) {
-              formattedPhone = "221" + formattedPhone;
-            }
-
-            // Replace variables in message if academic campaign
-            let personalizedMessage = message;
-            if (campaignType === "academic") {
-              personalizedMessage = message
-                .replace(
-                  /{student_name}/g,
-                  `${contact.firstname} ${contact.lastname}`
-                )
-                .replace(/{average_grade}/g, contact.average?.toString() || "")
-                .replace(/{class_name}/g, contact.class || "");
-            }
-
-            // Send SMS
-            const response = await fetch("/api/sms/send", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                recipient: formattedPhone,
-                content: personalizedMessage,
-                signature: signature,
-              }),
-            });
-
-            const responseText = await response.text();
-            const parsedResponse = parseHTMLResponse(responseText);
-
-            if (!response.ok || !parsedResponse) {
-              throw new Error(`Failed to send SMS to ${contact.phone}`);
-            }
-
-            // Add to message statuses
-            const messageStatus: MessageStatus = {
-              messageId: parsedResponse.messageId,
-              messageDetailId: parsedResponse.messageDetailId,
-              recipient: parsedResponse.recipient,
-              contact,
-              status: "sent",
-              timestamp: new Date(),
-            };
-
-            setMessageStatuses((prev) => [...prev, messageStatus]);
-
-            return {
-              success: true,
-              phone: contact.phone,
-              messageId: parsedResponse.messageId,
-              messageDetailId: parsedResponse.messageDetailId,
-            };
-          } catch (error) {
-            return { success: false, phone: contact.phone, error };
-          }
-        })
-      );
-
       // Count successes and failures
-      const successful = results.filter((r) => r.success).length;
-      const failed = results.filter((r) => !r.success).length;
+      const successful = successMessages.length;
+      const failed = failedMessages.length;
 
       if (failed === 0) {
         setSuccess(`${successful} message(s) envoyé(s) avec succès`);
         setShowStatusModal(true);
       } else {
-        setError(`${successful} message(s) envoyé(s), ${failed} échec(s)`);
+        console.log(failedMessages);
+        const failureDetails = failedMessages
+          .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
+          .join("\n");
+        setError(
+          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
+        );
       }
     } catch (error) {
       setError("Une erreur est survenue lors de l'envoi de la campagne");
@@ -910,6 +968,61 @@ export default function NewCampaign() {
     );
   };
 
+  // Fonction de sauvegarde automatique
+  const autoSaveCampaign = async () => {
+    if (!campaignData.name || !session?.user?.id) return;
+
+    setIsSaving(true);
+    try {
+      await fetch("/api/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...campaignData,
+          type: campaignType,
+          message: message,
+          contacts,
+          status: "draft",
+        }),
+      });
+      setLastSaved(new Date());
+    } catch (error) {
+      console.error("Erreur de sauvegarde:", error);
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  // Déclencher la sauvegarde automatique lors des modifications
+  // useEffect(() => {
+  //   if (saveTimeout) clearTimeout(saveTimeout);
+  //   const timeout = setTimeout(autoSaveCampaign, 2000);
+  //   setSaveTimeout(timeout);
+
+  //   return () => {
+  //     if (saveTimeout) clearTimeout(saveTimeout);
+  //   };
+  // }, [campaignData, message, contacts, autoSaveCampaign]);
+
+  // Fonction pour suggérer des noms de campagne
+  const suggestCampaignName = () => {
+    const template =
+      CAMPAIGN_NAME_TEMPLATES[campaignType][
+        Math.floor(Math.random() * CAMPAIGN_NAME_TEMPLATES[campaignType].length)
+      ];
+
+    const now = new Date();
+    return template
+      .replace("{year}", now.getFullYear().toString())
+      .replace("{month}", now.toLocaleString("fr", { month: "long" }))
+      .replace("{date}", format(now, "dd/MM/yyyy"))
+      .replace("{term}", () => (Math.floor(now.getMonth() / 4) + 1).toString())
+      .replace(
+        "{season}",
+        ["Hiver", "Printemps", "Été", "Automne"][Math.floor(now.getMonth() / 3)]
+      );
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
@@ -968,6 +1081,93 @@ export default function NewCampaign() {
           </div>
         </motion.div>
 
+        {/* Type de Campagne */}
+        <div className="space-y-4">
+          <h2 className="text-2xl font-bold text-gray-900">Type de Campagne</h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              {
+                type: "academic" as const,
+                label: "Académique",
+                icon: GraduationCap,
+                description: "Communications scolaires",
+              },
+              {
+                type: "marketing" as const,
+                label: "Marketing",
+                icon: Tag,
+                description: "Promotions et offres",
+              },
+              {
+                type: "transactional" as const,
+                label: "Transactionnel",
+                icon: FileText,
+                description: "Confirmations et notifications",
+              },
+            ].map((option) => (
+              <motion.div
+                key={option.type}
+                whileHover={{ scale: 1.02 }}
+                whileTap={{ scale: 0.98 }}
+              >
+                <Button
+                  variant={campaignType === option.type ? "default" : "outline"}
+                  className={`w-full h-auto py-6 rounded-xl ${
+                    campaignType === option.type
+                      ? "bg-[#67B142] hover:bg-[#67B142]/90"
+                      : "hover:border-[#67B142] hover:text-[#67B142]"
+                  }`}
+                  onClick={() => handleCampaignTypeChange(option.type)}
+                >
+                  <div className="flex flex-col items-center gap-2">
+                    <option.icon className="w-6 h-6" />
+                    <span className="font-medium">{option.label}</span>
+                    <span className="text-xs opacity-70">
+                      {option.description}
+                    </span>
+                  </div>
+                </Button>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
+        {/* Nom de la Campagne */}
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <h2 className="text-2xl font-bold text-gray-900">
+              Nom de la Campagne
+            </h2>
+            <Button
+              variant="outline"
+              onClick={() => handleCampaignNameChange(suggestCampaignName())}
+              className="text-[#67B142] hover:text-white hover:bg-[#67B142]"
+            >
+              Suggérer un nom
+            </Button>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="campaignName">Nom de la campagne</Label>
+            <Input
+              id="campaignName"
+              placeholder="Ex: Promotion Juillet 2024"
+              value={campaignData.name}
+              onChange={(e) => handleCampaignNameChange(e.target.value)}
+              className="max-w-md"
+            />
+            {isSaving && (
+              <p className="text-sm text-muted-foreground">
+                Sauvegarde en cours...
+              </p>
+            )}
+            {lastSaved && (
+              <p className="text-sm text-muted-foreground">
+                Dernière sauvegarde: {format(lastSaved, "HH:mm:ss")}
+              </p>
+            )}
+          </div>
+        </div>
+
         {/* Campaign Type Selector */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -1013,7 +1213,7 @@ export default function NewCampaign() {
             transition={{ delay: 0.3 }}
             className="grid grid-cols-1 md:grid-cols-2 gap-4"
           >
-            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
+            {/* <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-[#67B142]/10 rounded-xl">
                   <GraduationCap className="w-5 h-5 text-[#67B142]" />
@@ -1032,9 +1232,9 @@ export default function NewCampaign() {
                   ))}
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
 
-            <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
+            {/* <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
               <div className="flex items-center gap-3">
                 <div className="p-2 bg-[#67B142]/10 rounded-xl">
                   <Trophy className="w-5 h-5 text-[#67B142]" />
@@ -1069,7 +1269,7 @@ export default function NewCampaign() {
                   </div>
                 </div>
               </div>
-            </div>
+            </div> */}
           </motion.div>
         )}
 

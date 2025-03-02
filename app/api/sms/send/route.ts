@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import axios, { AxiosError } from "axios";
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/option";
+import SMSModel from "@/app/lib/models/sms.model";
 
-// Load environment variables
-const SMS_PRO_PRIVATE_KEY = process.env.SMS_PRO_PRIVATE_KEY;
-const SMS_PRO_TOKEN = process.env.SMS_PRO_TOKEN;
+const SMS_PRO_PRIVATE_KEY = process.env.SMS_PRO_PRIVATE_KEY || "";
+const SMS_PRO_TOKEN = process.env.SMS_PRO_TOKEN || "";
 const API_URL = "https://api.orangesmspro.sn:8443/api";
 
-/**
- * Generate HMAC SHA1 key for Orange SMS Pro API
- */
+interface SMSResponse {
+  messageId: string;
+  cost: number;
+  status: string;
+}
+
 function generateKey(
   token: string,
   subject: string,
@@ -22,97 +25,102 @@ function generateKey(
 ): string {
   const msgToEncrypt = `${token}${subject}${signature}${recipient}${content}${timestamp}`;
   return crypto
-    .createHmac("sha1", SMS_PRO_PRIVATE_KEY!)
+    .createHmac("sha1", SMS_PRO_PRIVATE_KEY)
     .update(msgToEncrypt)
     .digest("hex");
 }
 
 export async function POST(request: Request) {
-  const session = await getServerSession(options);
-  if (!session?.user?.email) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   try {
-    // Get request body
-    const body = await request.json();
-    const { recipient, content, signature } = body;
+    const session = await getServerSession(options);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
 
-    // console.log(body);
+    const { recipient, message, campaignId, campaignName, signature } =
+      await request.json();
 
-    // Validate required fields
-    if (!recipient || !content) {
+    if (!recipient || !message || !campaignId || !campaignName) {
       return NextResponse.json(
-        { error: "Recipient and content are required" },
+        { error: "Informations manquantes" },
         { status: 400 }
       );
     }
 
-    // Check environment variables
-    if (!SMS_PRO_PRIVATE_KEY || !SMS_PRO_TOKEN) {
-      return NextResponse.json(
-        { error: "SMS service configuration missing" },
-        { status: 500 }
-      );
-    }
-
-    // Prepare request parameters
     const timestamp = Math.floor(Date.now() / 1000);
     const subject = "API_SMS";
-
-    // Generate the public key
     const key = generateKey(
       SMS_PRO_TOKEN,
       subject,
       signature,
       recipient,
-      content,
+      message,
       timestamp
     );
 
-    // Prepare request parameters
-    const params = {
-      token: SMS_PRO_TOKEN,
-      subject,
-      signature,
-      recipient,
-      content,
-      timestamp,
-      key,
-    };
+    const response = await axios.post<SMSResponse>(
+      API_URL,
+      {
+        token: SMS_PRO_TOKEN,
+        subject,
+        signature,
+        recipient,
+        content: message,
+        timestamp,
+        key,
+      },
+      {
+        auth: {
+          username: process.env.SMS_PRO_LOGIN || "",
+          password: SMS_PRO_TOKEN,
+        },
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+      }
+    );
 
-    // Make the API request
-    const response = await axios({
-      method: "post",
-      url: API_URL,
-      data: params,
-      auth: {
-        username: process.env.SMS_PRO_LOGIN || "",
-        password: SMS_PRO_TOKEN,
-      },
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
+    console.log(response);
+    console.log(response.data);
+    console.log(message);
+
+    const sms = await SMSModel.create({
+      userId: session.user.id,
+      campaignId,
+      campaignName,
+      recipient,
+      message,
+      messageId: response.data.messageId || crypto.randomUUID(),
+      status: "sent",
+      sentAt: new Date(),
+      cost: response.data.cost || 0,
+      response: JSON.stringify(response.data),
     });
 
-    // Return success response
-
-    console.log(response.data);
     return NextResponse.json({
       success: true,
-      data: response.data,
+      data: sms,
     });
-  } catch (error: any) {
-    console.error("Error sending SMS:", error);
+  } catch (error) {
+    console.log('=== ERREUR ENVOI SMS ===');
+    console.log('Error complet:', error);
+    if (error instanceof AxiosError) {
+      console.log('Response data:', error.response?.data);
+      console.log('Response status:', error.response?.status);
+      console.log('Response headers:', error.response?.headers);
+    }
+    console.log('========================');
 
-    // Handle specific API errors
-    if (error.response?.data) {
+    if (error instanceof AxiosError && error.response?.data) {
       return NextResponse.json(
         { error: error.response.data },
         { status: error.response.status || 500 }
       );
     }
 
-    // Handle general errors
-    return NextResponse.json({ error: "Failed to send SMS" }, { status: 500 });
+    return NextResponse.json(
+      { error: "Erreur lors de l'envoi du SMS" },
+      { status: 500 }
+    );
   }
 }

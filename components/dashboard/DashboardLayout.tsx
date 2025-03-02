@@ -16,7 +16,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils/utils";
 import { Button } from "@/components/ui/button";
 
 const sidebarItems = [

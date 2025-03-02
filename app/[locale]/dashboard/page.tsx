@@ -1,212 +1,413 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
+import { useEffect, useState } from "react";
+import { useUser } from "@/app/hooks/useUser";
 import {
   Card,
   CardContent,
-  CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import {
+  AreaChart,
+  LineChart,
+  Card as TremorCard,
+  Title,
+  Text,
+  TabGroup,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
+  Legend,
+} from "@tremor/react";
 import {
   MessageSquare,
-  TrendingUp,
   Users,
-  Clock,
-  Send,
-  BarChart,
-  ChevronRight,
-  ArrowUpRight,
-  ArrowDownRight,
+  TrendingUp,
+  CheckCircle2,
+  Plus,
 } from "lucide-react";
-import { TestSMSButton } from '@/components/TestSMSButton';
-import { Toaster } from 'sonner';
-import { useUser } from "@/app/hooks/useUser";
+import Link from "next/link";
+import { format, subDays } from "date-fns";
+import { fr } from "date-fns/locale";
 
-const stats = [
-  {
-    title: "SMS Envoyés",
-    value: "12,234",
-    change: "+14%",
-    trend: "up",
-    icon: <MessageSquare className="w-4 h-4" />,
-  },
-  {
-    title: "Taux de livraison",
-    value: "98.5%",
-    change: "+2.1%",
-    trend: "up",
-    icon: <TrendingUp className="w-4 h-4" />,
-  },
-  {
-    title: "Contacts actifs",
-    value: "3,456",
-    change: "-2.5%",
-    trend: "down",
-    icon: <Users className="w-4 h-4" />,
-  },
-  {
-    title: "Temps moyen de livraison",
-    value: "1.2s",
-    change: "-0.3s",
-    trend: "up",
-    icon: <Clock className="w-4 h-4" />,
-  },
-];
+interface Campaign {
+  id: string;
+  name: string;
+  type: "academic" | "marketing" | "transactional";
+  status: "draft" | "scheduled" | "sent" | "template";
+  contacts: Array<{
+    lastname: string;
+    firstname: string;
+    phone: string;
+  }>;
+  createdAt: string;
+  scheduledDate?: string;
+}
 
-const quickActions = [
-  {
-    title: "Nouvelle campagne",
-    description: "Créez et envoyez une nouvelle campagne SMS",
-    icon: <MessageSquare className="w-6 h-6" />,
-    href: "/dashboard/campaigns/new",
-  },
-  {
-    title: "Envoi rapide",
-    description: "Envoyez rapidement des SMS à vos contacts",
-    icon: <Send className="w-6 h-6" />,
-    href: "/dashboard/quick-send",
-  },
-  {
-    title: "Voir les statistiques",
-    description: "Analysez vos performances d'envoi",
-    icon: <BarChart className="w-6 h-6" />,
-    href: "/dashboard/statistics",
-  },
-];
+interface DashboardStats {
+  totalCampaigns: number;
+  totalContacts: number;
+  totalSent: number;
+  campaignsByType: {
+    academic: number;
+    marketing: number;
+    transactional: number;
+  };
+  campaignsByStatus: {
+    draft: number;
+    scheduled: number;
+    sent: number;
+    template: number;
+  };
+  recentCampaigns: Campaign[];
+}
 
-const recentCampaigns = [
-  {
-    title: "Promotion été 2024",
-    date: "Il y a 2 heures",
-    status: "Envoyé",
-    sent: 1234,
-    delivered: 1200,
-  },
-  {
-    title: "Newsletter Mars",
-    date: "Il y a 1 jour",
-    status: "Envoyé",
-    sent: 2500,
-    delivered: 2489,
-  },
-  {
-    title: "Rappel événement",
-    date: "Il y a 2 jours",
-    status: "Envoyé",
-    sent: 500,
-    delivered: 498,
-  },
-];
+interface ChartData {
+  name: string;
+  value: number;
+}
 
-export default function DashboardPage() {
-  const { user, isLoading } = useUser();
+interface TimelineData {
+  date: string;
+  academic: number;
+  marketing: number;
+  transactional: number;
+}
 
-  if (isLoading) {
-    return <div>Chargement...</div>;
-  }
+export default function Dashboard() {
+  const { user } = useUser();
+  const [stats, setStats] = useState<DashboardStats>({
+    totalCampaigns: 0,
+    totalContacts: 0,
+    totalSent: 0,
+    campaignsByType: {
+      academic: 0,
+      marketing: 0,
+      transactional: 0,
+    },
+    campaignsByStatus: {
+      draft: 0,
+      scheduled: 0,
+      sent: 0,
+      template: 0,
+    },
+    recentCampaigns: [],
+  });
+
+  useEffect(() => {
+    const fetchDashboardData = async () => {
+      try {
+        const response = await fetch("/api/campaigns");
+        const data = await response.json();
+        
+        if (data.success) {
+          const campaigns: Campaign[] = data.data;
+          
+          // Calculate statistics
+          const totalContacts = campaigns.reduce(
+            (sum, campaign) => sum + campaign.contacts.length,
+            0
+          );
+
+          const campaignsByType = {
+            academic: campaigns.filter((c) => c.type === "academic").length,
+            marketing: campaigns.filter((c) => c.type === "marketing").length,
+            transactional: campaigns.filter((c) => c.type === "transactional").length,
+          };
+
+          const campaignsByStatus = {
+            draft: campaigns.filter((c) => c.status === "draft").length,
+            scheduled: campaigns.filter((c) => c.status === "scheduled").length,
+            sent: campaigns.filter((c) => c.status === "sent").length,
+            template: campaigns.filter((c) => c.status === "template").length,
+          };
+
+          setStats({
+            totalCampaigns: campaigns.length,
+            totalContacts,
+            totalSent: campaignsByStatus.sent,
+            campaignsByType,
+            campaignsByStatus,
+            recentCampaigns: campaigns
+              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .slice(0, 5),
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching dashboard data:", error);
+      }
+    };
+
+    fetchDashboardData();
+  }, []);
+
+  // Generate sample timeline data
+  const timelineData: TimelineData[] = Array.from({ length: 7 }).map((_, i) => ({
+    date: format(subDays(new Date(), i), "dd MMM", { locale: fr }),
+    academic: Math.floor(Math.random() * 5),
+    marketing: Math.floor(Math.random() * 8),
+    transactional: Math.floor(Math.random() * 6),
+  })).reverse();
+
+  const statusData: ChartData[] = [
+    { name: "Brouillons", value: stats.campaignsByStatus.draft },
+    { name: "Programmées", value: stats.campaignsByStatus.scheduled },
+    { name: "Envoyées", value: stats.campaignsByStatus.sent },
+    { name: "Modèles", value: stats.campaignsByStatus.template },
+  ];
+
+  const valueFormatter = (value: number): string => `${value} campagnes`;
 
   return (
-    <div className="space-y-8">
+    <div className="p-6 space-y-6">
       {/* Welcome Section */}
-      <div>
-        <h1 className="text-2xl font-bold tracking-tight">Bienvenue, {user?.firstName} {user?.lastName} 👋</h1>
-        <p className="text-muted-foreground">
-          Voici un aperçu de votre activité SMS
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Bonjour, {user?.firstName} 👋
+          </h1>
+          <p className="text-gray-500 mt-1">
+            Voici un aperçu de vos campagnes SMS
+          </p>
+        </div>
+        <Link href="/dashboard/campaigns/new">
+          <Button className="bg-[#67B142] hover:bg-[#67B142]/90">
+            <Plus className="w-4 h-4 mr-2" />
+            Nouvelle Campagne
+          </Button>
+        </Link>
       </div>
 
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        {stats.map((stat, index) => (
-          <Card key={index}>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                {stat.title}
-              </CardTitle>
-              <div className="h-8 w-8 rounded-lg bg-[#67B142]/10 p-2 text-[#67B142]">
-                {stat.icon}
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{stat.value}</div>
-              <div className="flex items-center text-xs mt-1">
-                {stat.trend === "up" ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                ) : (
-                  <ArrowDownRight className="h-4 w-4 text-red-500" />
-                )}
-                <span
-                  className={
-                    stat.trend === "up" ? "text-green-500" : "text-red-500"
-                  }
-                >
-                  {stat.change}
-                </span>
-                <span className="text-gray-500 ml-1">vs mois dernier</span>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
+      {/* Stats Overview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">
+              Campagnes Totales
+            </CardTitle>
+            <div className="p-2 bg-emerald-50 rounded-full">
+              <MessageSquare className="w-4 h-4 text-emerald-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalCampaigns}</div>
+            <div className="mt-2 bg-emerald-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-emerald-500 transition-all duration-500"
+                style={{ width: `${(stats.totalCampaigns / 100) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {stats.campaignsByStatus.sent} campagnes envoyées
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">
+              Contacts
+            </CardTitle>
+            <div className="p-2 bg-blue-50 rounded-full">
+              <Users className="w-4 h-4 text-blue-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalContacts}</div>
+            <div className="mt-2 bg-blue-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-blue-500 transition-all duration-500"
+                style={{ width: `${(stats.totalContacts / 1000) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              {Math.round((stats.totalContacts / 1000) * 100)}% de l&apos;objectif
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">
+              Messages Envoyés
+            </CardTitle>
+            <div className="p-2 bg-purple-50 rounded-full">
+              <TrendingUp className="w-4 h-4 text-purple-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{stats.totalSent}</div>
+            <div className="mt-2 bg-purple-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-purple-500 transition-all duration-500"
+                style={{ width: `${(stats.totalSent / stats.totalCampaigns) * 100}%` }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Taux d&apos;envoi: {Math.round((stats.totalSent / stats.totalCampaigns) * 100)}%
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-lg transition-shadow">
+          <CardHeader className="flex flex-row items-center justify-between pb-2">
+            <CardTitle className="text-sm font-medium text-gray-500">
+              Taux de Réussite
+            </CardTitle>
+            <div className="p-2 bg-amber-50 rounded-full">
+              <CheckCircle2 className="w-4 h-4 text-amber-500" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats.totalSent > 0
+                ? Math.round((stats.totalSent / stats.totalCampaigns) * 100)
+                : 0}
+              %
+            </div>
+            <div className="mt-2 bg-amber-100 rounded-full h-2 overflow-hidden">
+              <div 
+                className="h-full bg-amber-500 transition-all duration-500"
+                style={{ 
+                  width: `${stats.totalSent > 0
+                    ? (stats.totalSent / stats.totalCampaigns) * 100
+                    : 0}%` 
+                }}
+              />
+            </div>
+            <p className="text-xs text-gray-500 mt-2">
+              Performance globale
+            </p>
+          </CardContent>
+        </Card>
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-        {quickActions.map((action, index) => (
-          <Card key={index} className="group hover:shadow-md transition-shadow">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div className="h-10 w-10 rounded-lg bg-[#67B142]/10 p-2 text-[#67B142]">
-                  {action.icon}
-                </div>
-                <ChevronRight className="h-5 w-5 text-gray-400 group-hover:text-[#67B142] transition-colors" />
-              </div>
-              <CardTitle className="mt-4">{action.title}</CardTitle>
-              <CardDescription>{action.description}</CardDescription>
-            </CardHeader>
-          </Card>
-        ))}
-      </div>
-
-      {/* Recent Campaigns */}
-      <Card>
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle>Campagnes récentes</CardTitle>
-            <Button variant="outline" size="sm">
-              Voir tout
-              <ChevronRight className="ml-2 h-4 w-4" />
-            </Button>
+      {/* Charts */}
+      <TremorCard className="p-6">
+        <div className="md:flex justify-between items-center">
+          <div>
+            <Title>Analyse des Campagnes</Title>
+            <Text>Vue détaillée de vos campagnes SMS</Text>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {recentCampaigns.map((campaign, index) => (
-              <div
-                key={index}
-                className="flex items-center justify-between py-2 border-b last:border-0"
-              >
-                <div>
-                  <p className="font-medium">{campaign.title}</p>
-                  <p className="text-sm text-gray-500">{campaign.date}</p>
-                </div>
-                <div className="text-right">
-                  <p className="text-sm font-medium text-green-600">
-                    {campaign.delivered}/{campaign.sent} délivrés
-                  </p>
-                  <p className="text-xs text-gray-500">{campaign.status}</p>
-                </div>
+        </div>
+
+        <TabGroup className="mt-4" defaultIndex={0}>
+          <TabList variant="solid">
+            <Tab>Par Type</Tab>
+            <Tab>Par Statut</Tab>
+            <Tab>Timeline</Tab>
+          </TabList>
+
+          <TabPanels>
+            <TabPanel>
+              <div className="mt-8">
+                <Legend
+                  className="mb-6"
+                  categories={["Académique", "Marketing", "Transactionnel"]}
+                  colors={["emerald", "blue", "amber"]}
+                />
+                <AreaChart
+                  className="h-80 mt-4"
+                  data={timelineData}
+                  index="date"
+                  categories={["academic", "marketing", "transactional"]}
+                  colors={["emerald", "blue", "amber"]}
+                  valueFormatter={valueFormatter}
+                  showLegend={false}
+                  showGridLines={false}
+                  curveType="monotone"
+                />
               </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+            </TabPanel>
 
-      <div className="grid gap-6">
-        <TestSMSButton />
-      </div>
+            <TabPanel>
+              <div className="mt-8">
+                <Legend
+                  className="mb-6"
+                  categories={["Brouillons", "Programmées", "Envoyées", "Modèles"]}
+                  colors={["gray", "purple", "emerald", "pink"]}
+                />
+                <LineChart
+                  className="h-80 mt-4"
+                  data={statusData}
+                  index="name"
+                  categories={["value"]}
+                  colors={["emerald"]}
+                  valueFormatter={valueFormatter}
+                  showLegend={false}
+                  showGridLines={false}
+                  curveType="monotone"
+                  showXAxis={true}
+                  showYAxis={true}
+                />
+              </div>
+            </TabPanel>
 
-      <Toaster />
+            <TabPanel>
+              <div className="mt-8 space-y-6">
+                {stats.recentCampaigns.map((campaign) => (
+                  <div
+                    key={campaign.id}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors"
+                  >
+                    <div className="flex items-center space-x-4">
+                      <div
+                        className={`p-2 rounded-full ${
+                          campaign.type === "academic"
+                            ? "bg-emerald-100 text-emerald-600"
+                            : campaign.type === "marketing"
+                            ? "bg-blue-100 text-blue-600"
+                            : "bg-amber-100 text-amber-600"
+                        }`}
+                      >
+                        {campaign.type === "academic" ? (
+                          <MessageSquare className="w-4 h-4" />
+                        ) : campaign.type === "marketing" ? (
+                          <TrendingUp className="w-4 h-4" />
+                        ) : (
+                          <Users className="w-4 h-4" />
+                        )}
+                      </div>
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {campaign.name}
+                        </p>
+                        <p className="text-sm text-gray-500">
+                          {format(new Date(campaign.createdAt), "dd MMM yyyy", {
+                            locale: fr,
+                          })}
+                        </p>
+                      </div>
+                    </div>
+                    <div
+                      className={`px-3 py-1 rounded-full text-xs ${
+                        campaign.status === "sent"
+                          ? "bg-emerald-100 text-emerald-600"
+                          : campaign.status === "scheduled"
+                          ? "bg-blue-100 text-blue-600"
+                          : campaign.status === "draft"
+                          ? "bg-gray-100 text-gray-600"
+                          : "bg-purple-100 text-purple-600"
+                      }`}
+                    >
+                      {campaign.status === "sent"
+                        ? "Envoyée"
+                        : campaign.status === "scheduled"
+                        ? "Programmée"
+                        : campaign.status === "draft"
+                        ? "Brouillon"
+                        : "Modèle"}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </TabPanel>
+          </TabPanels>
+        </TabGroup>
+      </TremorCard>
     </div>
   );
 } 

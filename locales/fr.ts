@@ -4,6 +4,14 @@ export default {
   "navigation.pricing": "Tarifs",
   "navigation.about": "À propos",
   "navigation.contact": "Contact",
+  "navigation.overview": "Vue d'ensemble",
+  "navigation.campaigns": "Campagnes SMS",
+  "navigation.quickSend": "Envoi rapide",
+  "navigation.contacts": "Contacts",
+  "navigation.statistics": "Statistiques",
+  "navigation.tutorials": "Tutoriels",
+  "navigation.invoices": "Factures",
+  "navigation.settings": "Paramètres",
 
   "hero.title": "Des solutions SMS professionnelles pour votre entreprise",
   "hero.subtitle":
@@ -40,4 +48,6 @@ export default {
   "common.getStarted": "Commencer",
   "common.contactUs": "Contactez-nous",
   "common.readMore": "Lire plus",
+  "common.myAccount": "Mon compte",
+  "common.logout": "Se déconnecter",
 } as const;

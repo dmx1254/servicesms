@@ -4,7 +4,7 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Check } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn } from "@/app/lib/utils/utils";
 import Link from "next/link";
 
 type PricingTier = {

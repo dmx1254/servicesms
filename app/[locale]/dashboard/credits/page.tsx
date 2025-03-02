@@ -22,6 +22,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { color } from "framer-motion";
 // import { toast } from "sonner";
 
 interface SMSPackage {
@@ -45,9 +46,9 @@ const defaultPackages: SMSPackage[] = [
       "100 crédits SMS",
       "Validité 12 mois",
       "Support basique",
-      "Statistiques simples"
+      "Statistiques simples",
     ],
-    isPopular: false
+    isPopular: false,
   },
   {
     id: "pro",
@@ -60,9 +61,9 @@ const defaultPackages: SMSPackage[] = [
       "Validité 12 mois",
       "Support prioritaire",
       "Statistiques avancées",
-      "API Access"
+      "API Access",
     ],
-    isPopular: true
+    isPopular: true,
   },
   {
     id: "enterprise",
@@ -76,20 +77,24 @@ const defaultPackages: SMSPackage[] = [
       "Support dédié 24/7",
       "Statistiques détaillées",
       "API Access",
-      "Personnalisation avancée"
+      "Personnalisation avancée",
     ],
-    isPopular: false
-  }
+    isPopular: false,
+  },
 ];
 
 export default function CreditsPage() {
   const [packages] = useState<SMSPackage[]>(defaultPackages);
-  const [selectedPackage, setSelectedPackage] = useState<SMSPackage | null>(null);
-  const [paymentMethod, setPaymentMethod] = useState<'orange' | 'wave'>('orange');
-  const [phoneNumber, setPhoneNumber] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState<SMSPackage | null>(
+    null
+  );
+  const [paymentMethod, setPaymentMethod] = useState<"orange" | "wave">(
+    "orange"
+  );
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  const { toast } = useToast();
+  import { toast } from "sonner";
 
   const handlePurchase = async (pkg: SMSPackage) => {
     setSelectedPackage(pkg);
@@ -102,10 +107,10 @@ export default function CreditsPage() {
 
       // Validate phone number
       if (!phoneNumber.match(/^(70|75|76|77|78)\d{7}$/)) {
-        toast({
-          title: "Numéro invalide",
-          description: "Veuillez entrer un numéro de téléphone valide",
-          variant: "destructive",
+        toast.error("Numéro invalide", {
+          style: {
+            color: "#ef4444",
+          },
         });
         return;
       }
@@ -131,7 +136,6 @@ export default function CreditsPage() {
 
       // Redirect to payment URL
       window.location.href = data.paymentUrl;
-
     } catch (error) {
       console.error("Payment error:", error);
       toast({
@@ -151,8 +155,8 @@ export default function CreditsPage() {
         <div className="text-center space-y-4">
           <h1 className="text-4xl font-bold">Achetez des Crédits SMS</h1>
           <p className="text-gray-600 max-w-2xl mx-auto">
-            Choisissez le forfait qui correspond à vos besoins. Plus vous achetez de crédits,
-            plus le prix unitaire est avantageux.
+            Choisissez le forfait qui correspond à vos besoins. Plus vous
+            achetez de crédits, plus le prix unitaire est avantageux.
           </p>
         </div>
 
@@ -168,9 +172,7 @@ export default function CreditsPage() {
               }`}
             >
               {pkg.isPopular && (
-                <Badge
-                  className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#67B142]"
-                >
+                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#67B142]">
                   Plus Populaire
                 </Badge>
               )}
@@ -216,14 +218,16 @@ export default function CreditsPage() {
             <DialogHeader>
               <DialogTitle>Choisissez votre méthode de paiement</DialogTitle>
               <DialogDescription>
-                Sélectionnez Orange Money ou Wave pour effectuer votre paiement de{" "}
-                {selectedPackage?.price.toLocaleString()} FCFA
+                Sélectionnez Orange Money ou Wave pour effectuer votre paiement
+                de {selectedPackage?.price.toLocaleString()} FCFA
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-6">
               <RadioGroup
                 value={paymentMethod}
-                onValueChange={(value: 'orange' | 'wave') => setPaymentMethod(value)}
+                onValueChange={(value: "orange" | "wave") =>
+                  setPaymentMethod(value)
+                }
                 className="grid grid-cols-2 gap-4"
               >
                 <div>
@@ -254,11 +258,7 @@ export default function CreditsPage() {
                     htmlFor="wave"
                     className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-[#67B142] peer-data-[state=checked]:bg-[#67B142]/10 cursor-pointer"
                   >
-                    <img
-                      src="/wave.png"
-                      alt="Wave"
-                      className="h-12 w-auto"
-                    />
+                    <img src="/wave.png" alt="Wave" className="h-12 w-auto" />
                     <span className="mt-2">Wave</span>
                   </Label>
                 </div>
@@ -277,7 +277,9 @@ export default function CreditsPage() {
                   />
                 </div>
                 <p className="text-sm text-gray-500">
-                  Entrez le numéro {paymentMethod === 'orange' ? 'Orange Money' : 'Wave'} qui effectuera le paiement
+                  Entrez le numéro{" "}
+                  {paymentMethod === "orange" ? "Orange Money" : "Wave"} qui
+                  effectuera le paiement
                 </p>
               </div>
 
@@ -314,14 +316,15 @@ export default function CreditsPage() {
             <div>
               <h3 className="font-semibold mb-2">Utilisation</h3>
               <p className="text-gray-600">
-                1 crédit = 1 SMS standard (160 caractères). Les messages plus longs
-                utilisent plus de crédits.
+                1 crédit = 1 SMS standard (160 caractères). Les messages plus
+                longs utilisent plus de crédits.
               </p>
             </div>
             <div>
               <h3 className="font-semibold mb-2">Paiement Sécurisé</h3>
               <p className="text-gray-600">
-                Nous acceptons les paiements via Orange Money et Wave pour votre sécurité.
+                Nous acceptons les paiements via Orange Money et Wave pour votre
+                sécurité.
               </p>
             </div>
           </div>
@@ -329,4 +332,4 @@ export default function CreditsPage() {
       </div>
     </div>
   );
-} 
+}

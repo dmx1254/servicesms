@@ -1,19 +1,16 @@
 import type { Metadata } from "next";
-import { Rubik, Poppins } from "next/font/google";
-import "../globals.css";
-import { Providers } from "@/components/i18n/providers";
+import { Rubik } from "next/font/google";
+import "./globals.css";
 import { Toaster } from "sonner";
+import { Providers } from "../../components/providers";
 // import Footer from "@/components/layout/Footer";
 
 const rubik = Rubik({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800", "900"],
+  display: "swap",
+  preload: true,
   variable: "--font-rubik",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
-});
-const poppins = Poppins({
-  variable: "--font-poppins",
-  subsets: ["latin"],
-  weight: ["400", "500", "600", "700", "800", "900"],
 });
 
 export const metadata: Metadata = {
@@ -28,19 +25,19 @@ export const metadata: Metadata = {
 export default async function RootLayout({
   children,
   params,
-}: Readonly<{
+}: {
   children: React.ReactNode;
   params: { params: Promise<{ locale: string }> };
-}>) {
+}) {
   const { locale } = await params;
   return (
     <html lang={locale} suppressHydrationWarning>
-      <body
-        className={`${rubik.variable} ${poppins.variable} antialiased font-sans`}
-      >
+      <body className={rubik.className}>
         <Providers locale={locale}>
-          <Toaster />
-          <main className="min-h-screen">{children}</main>
+          <div className="min-h-screen antialiased">
+            <Toaster />
+            {children}
+          </div>
           {/* <Footer /> */}
         </Providers>
       </body>

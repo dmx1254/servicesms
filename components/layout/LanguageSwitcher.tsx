@@ -9,7 +9,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { ChevronDown, GlobeIcon } from "lucide-react";
-import { locales, type ValidLocale } from "@/lib/utils";
+import { locales, type ValidLocale } from "@/app/lib/utils/utils";
 import Image from "next/image";
 import { useState } from "react";
 

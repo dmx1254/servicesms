@@ -21,10 +21,10 @@ import {
   Globe,
   Sparkle,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { useScopedI18n } from "@/locales/client";
+import { cn } from "@/app/lib/utils/utils";
 import * as THREE from "three";
 import React from "react";
+import { useScopedI18n } from "@/locales/client";
 
 // Add JSX namespace
 /// <reference types="react" />
