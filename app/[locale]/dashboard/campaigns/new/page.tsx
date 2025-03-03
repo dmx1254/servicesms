@@ -49,6 +49,7 @@ import { useSession } from "next-auth/react";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
 import {
+  SMSError,
   SMSErrorCode,
   formatSMSErrorMessage,
   getSMSErrorDetails,
@@ -1204,74 +1205,7 @@ export default function NewCampaign() {
             </motion.button>
           ))}
         </motion.div>
-
-        {/* Academic Filters - Only show for academic campaigns */}
-        {campaignType === "academic" && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="grid grid-cols-1 md:grid-cols-2 gap-4"
-          >
-            {/* <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#67B142]/10 rounded-xl">
-                  <GraduationCap className="w-5 h-5 text-[#67B142]" />
-                </div>
-                <span className="font-medium text-gray-800">Classe</span>
-              </div>
-              <Select value={selectedClass} onValueChange={setSelectedClass}>
-                <SelectTrigger className="w-full border-2 rounded-xl h-12">
-                  <SelectValue placeholder="Sélectionner une classe" />
-                </SelectTrigger>
-                <SelectContent>
-                  {classes.map((className) => (
-                    <SelectItem key={className} value={className}>
-                      {className}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div> */}
-
-            {/* <div className="p-6 bg-white rounded-2xl shadow-sm space-y-4">
-              <div className="flex items-center gap-3">
-                <div className="p-2 bg-[#67B142]/10 rounded-xl">
-                  <Trophy className="w-5 h-5 text-[#67B142]" />
-                </div>
-                <span className="font-medium text-gray-800">
-                  Moyenne de l&apos;élève
-                </span>
-              </div>
-              <div className="space-y-4">
-                <Input
-                  type="text"
-                  placeholder="Nom de l'élève"
-                  className="w-full border-2 rounded-xl"
-                  value={studentName}
-                  onChange={(e) => setStudentName(e.target.value)}
-                />
-                <div className="flex gap-4 items-center">
-                  <Input
-                    type="number"
-                    min="0"
-                    max="20"
-                    step="0.01"
-                    placeholder="Moyenne /20"
-                    className="flex-1 border-2 rounded-xl text-lg font-medium"
-                    value={studentGrade || ""}
-                    onChange={(e) =>
-                      setStudentGrade(parseFloat(e.target.value) || 0)
-                    }
-                  />
-                  <div className="text-2xl font-bold text-[#67B142]">
-                    {studentGrade.toFixed(2)}/20
-                  </div>
-                </div>
-              </div>
-            </div> */}
-          </motion.div>
-        )}
+      
 
         {/* Quick Templates Section - Filtered by campaign type */}
         <motion.div
