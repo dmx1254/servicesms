@@ -384,6 +384,7 @@ export default function NewCampaign() {
   const handleTemplateChange = (templateId: TemplateId) => {
     setSelectedTemplate(templateId);
     const template = TEMPLATES.find((t) => t.id === templateId);
+    
     if (template) {
       let messageText = template.desc;
 
@@ -392,6 +393,7 @@ export default function NewCampaign() {
         const contact = contacts[0]; // Preview with first contact
 
         // Common replacements
+
         messageText = messageText
           .replace(/{first_name}/g, contact.firstname)
           .replace(/{last_name}/g, contact.lastname);
@@ -444,6 +446,7 @@ export default function NewCampaign() {
         }
       }
 
+      console.log(messageText);
       setMessage(messageText);
     }
   };
@@ -811,98 +814,99 @@ export default function NewCampaign() {
   };
 
   const handleSendCampaign = async () => {
-    if (!campaignData.name.trim()) {
-      toast.error("Veuillez donner un nom à votre campagne", {
-        style: { backgroundColor: "#EF4444", color: "white" },
-      });
-      return;
-    }
+    alert(message);
+    // if (!campaignData.name.trim()) {
+    //   toast.error("Veuillez donner un nom à votre campagne", {
+    //     style: { backgroundColor: "#EF4444", color: "white" },
+    //   });
+    //   return;
+    // }
 
-    setLoading(true);
-    const failedMessages: MessageStatus[] = [];
-    const successMessages: MessageStatus[] = [];
+    // setLoading(true);
+    // const failedMessages: MessageStatus[] = [];
+    // const successMessages: MessageStatus[] = [];
 
-    try {
-      for (const contact of contacts) {
-        try {
-          const response = await fetch("/api/sms/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              recipient: contact.phone,
-              message: message,
-              campaignId: campaignData.id,
-              campaignName: campaignData.name,
-              signature: campaignData.signature,
-            }),
-          });
+    // try {
+    //   for (const contact of contacts) {
+    //     try {
+    //       const response = await fetch("/api/sms/send", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({
+    //           recipient: contact.phone,
+    //           message: message,
+    //           campaignId: campaignData.id,
+    //           campaignName: campaignData.name,
+    //           signature: campaignData.signature,
+    //         }),
+    //       });
 
-          const responseText = await response.text();
-          const parsedResponse = parseHTMLResponse(responseText);
+    //       const responseText = await response.text();
+    //       const parsedResponse = parseHTMLResponse(responseText);
 
-          if (!parsedResponse) {
-            throw new Error(`Failed to parse response for ${contact.phone}`);
-          }
+    //       if (!parsedResponse) {
+    //         throw new Error(`Failed to parse response for ${contact.phone}`);
+    //       }
 
-          const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
+    //       const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
 
-          if (parsedResponse.statusCode !== "200") {
-            throw new Error(formatSMSErrorMessage(errorDetails));
-          }
+    //       if (parsedResponse.statusCode !== "200") {
+    //         throw new Error(formatSMSErrorMessage(errorDetails));
+    //       }
 
-          await autoSaveCampaign();
+    //       await autoSaveCampaign();
 
-          // Add to message statuses
-          const messageStatus: MessageStatus = {
-            messageId: parsedResponse.messageId,
-            messageDetailId: parsedResponse.messageDetailId,
-            recipient: parsedResponse.recipient,
-            contact,
-            status: "sent",
-            timestamp: new Date(),
-            errorDetails:
-              parsedResponse.statusCode === "200" ? undefined : errorDetails,
-          };
+    //       // Add to message statuses
+    //       const messageStatus: MessageStatus = {
+    //         messageId: parsedResponse.messageId,
+    //         messageDetailId: parsedResponse.messageDetailId,
+    //         recipient: parsedResponse.recipient,
+    //         contact,
+    //         status: "sent",
+    //         timestamp: new Date(),
+    //         errorDetails:
+    //           parsedResponse.statusCode === "200" ? undefined : errorDetails,
+    //       };
 
-          setMessageStatuses((prev) => [...prev, messageStatus]);
-          successMessages.push(messageStatus);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Erreur inconnue";
-          failedMessages.push({
-            messageId: "",
-            messageDetailId: "",
-            recipient: contact.phone,
-            contact,
-            status: "failed",
-            timestamp: new Date(),
-            errorMessage,
-          });
-        }
-      }
+    //       setMessageStatuses((prev) => [...prev, messageStatus]);
+    //       successMessages.push(messageStatus);
+    //     } catch (error) {
+    //       const errorMessage =
+    //         error instanceof Error ? error.message : "Erreur inconnue";
+    //       failedMessages.push({
+    //         messageId: "",
+    //         messageDetailId: "",
+    //         recipient: contact.phone,
+    //         contact,
+    //         status: "failed",
+    //         timestamp: new Date(),
+    //         errorMessage,
+    //       });
+    //     }
+    //   }
 
-      // Count successes and failures
-      const successful = successMessages.length;
-      const failed = failedMessages.length;
+    //   // Count successes and failures
+    //   const successful = successMessages.length;
+    //   const failed = failedMessages.length;
 
-      if (failed === 0) {
-        setSuccess(`${successful} message(s) envoyé(s) avec succès`);
-        setShowStatusModal(true);
-      } else {
-        console.log(failedMessages);
-        const failureDetails = failedMessages
-          .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
-          .join("\n");
-        setError(
-          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
-        );
-      }
-    } catch (error) {
-      setError("Une erreur est survenue lors de l'envoi de la campagne");
-      console.error("Campaign error:", error);
-    } finally {
-      setLoading(false);
-    }
+    //   if (failed === 0) {
+    //     setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+    //     setShowStatusModal(true);
+    //   } else {
+    //     console.log(failedMessages);
+    //     const failureDetails = failedMessages
+    //       .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
+    //       .join("\n");
+    //     setError(
+    //       `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
+    //     );
+    //   }
+    // } catch (error) {
+    //   setError("Une erreur est survenue lors de l'envoi de la campagne");
+    //   console.error("Campaign error:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   // Add status modal component
@@ -1194,6 +1198,9 @@ export default function NewCampaign() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
               onClick={() => handleCampaignTypeChange(type.id)}
+              style={{
+                boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+              }}
               className={`px-6 py-3 rounded-xl font-medium transition-all duration-300 flex items-center gap-2 ${
                 campaignType === type.id
                   ? "bg-[#67B142] text-white shadow-lg"
@@ -1205,7 +1212,6 @@ export default function NewCampaign() {
             </motion.button>
           ))}
         </motion.div>
-      
 
         {/* Quick Templates Section - Filtered by campaign type */}
         <motion.div
@@ -1222,6 +1228,9 @@ export default function NewCampaign() {
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={() => handleTemplateChange(template.id)}
+              style={{
+                boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+              }}
               className={`cursor-pointer p-6 bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 ${
                 selectedTemplate === template.id
                   ? "border-2 border-[#67B142]"

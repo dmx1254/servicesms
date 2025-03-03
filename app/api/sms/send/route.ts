@@ -39,7 +39,7 @@ export async function POST(request: Request) {
 
     const { recipient, message, campaignId, campaignName, signature } =
       await request.json();
-      const data = await request.json();
+      // const data = await request.json();
       
 
     if (!recipient || !message || !campaignId || !campaignName) {
