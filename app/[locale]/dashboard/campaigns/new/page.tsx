@@ -313,7 +313,7 @@ export default function NewCampaign() {
     name: "",
     contacts: [],
     message: "",
-    signature: session?.user?.companyName || "",
+    signature,
     responseType: "no-response",
   });
 
@@ -832,7 +832,7 @@ export default function NewCampaign() {
               message: message,
               campaignId: campaignData.id,
               campaignName: campaignData.name,
-              signature: campaignData.signature,
+              signature,
             }),
           });
 
@@ -1939,6 +1939,7 @@ export default function NewCampaign() {
                     <SelectItem value={session?.user.companyName || ""}>
                       {session?.user.companyName || ""}
                     </SelectItem>
+                    <SelectItem value="SY-PRESSING">SY-PRESSING</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
