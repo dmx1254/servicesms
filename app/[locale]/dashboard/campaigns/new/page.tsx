@@ -1322,72 +1322,72 @@ export default function NewCampaign() {
     //       //   signature,
     //       // });
 
-    //       const responseText = await response.text();
-    //       const parsedResponse = parseHTMLResponse(responseText);
+          const responseText = await response.text();
+          const parsedResponse = parseHTMLResponse(responseText);
 
-    //       if (!parsedResponse) {
-    //         throw new Error(`Failed to parse response for ${contact.phone}`);
-    //       }
+          if (!parsedResponse) {
+            throw new Error(`Failed to parse response for ${contact.phone}`);
+          }
 
-    //       const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
+          const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
 
-    //       if (parsedResponse.statusCode !== "200") {
-    //         throw new Error(formatSMSErrorMessage(errorDetails));
-    //       }
+          if (parsedResponse.statusCode !== "200") {
+            throw new Error(formatSMSErrorMessage(errorDetails));
+          }
 
-    //       await autoSaveCampaign();
+          await autoSaveCampaign();
 
-    //       // Add to message statuses
-    //       const messageStatus: MessageStatus = {
-    //         messageId: parsedResponse.messageId,
-    //         messageDetailId: parsedResponse.messageDetailId,
-    //         recipient: parsedResponse.recipient,
-    //         contact,
-    //         status: "sent",
-    //         timestamp: new Date(),
-    //         errorDetails:
-    //           parsedResponse.statusCode === "200" ? undefined : errorDetails,
-    //       };
+          // Add to message statuses
+          const messageStatus: MessageStatus = {
+            messageId: parsedResponse.messageId,
+            messageDetailId: parsedResponse.messageDetailId,
+            recipient: parsedResponse.recipient,
+            contact,
+            status: "sent",
+            timestamp: new Date(),
+            errorDetails:
+              parsedResponse.statusCode === "200" ? undefined : errorDetails,
+          };
 
-    //       // setMessageStatuses((prev) => [...prev, messageStatus]);
-    //       successMessages.push(messageStatus);
-    //     } catch (error) {
-    //       const errorMessage =
-    //         error instanceof Error ? error.message : "Erreur inconnue";
-    //       failedMessages.push({
-    //         messageId: "",
-    //         messageDetailId: "",
-    //         recipient: contact.phone,
-    //         contact,
-    //         status: "failed",
-    //         timestamp: new Date(),
-    //         errorMessage,
-    //       });
-    //     }
-    //   }
+          // setMessageStatuses((prev) => [...prev, messageStatus]);
+          successMessages.push(messageStatus);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Erreur inconnue";
+          failedMessages.push({
+            messageId: "",
+            messageDetailId: "",
+            recipient: contact.phone,
+            contact,
+            status: "failed",
+            timestamp: new Date(),
+            errorMessage,
+          });
+        }
+      }
 
-    //   // Count successes and failures
-    //   const successful = successMessages.length;
-    //   const failed = failedMessages.length;
+      // Count successes and failures
+      const successful = successMessages.length;
+      const failed = failedMessages.length;
 
-    //   if (failed === 0) {
-    //     setSuccess(`${successful} message(s) envoyé(s) avec succès`);
-    //     setShowStatusModal(true);
-    //   } else {
-    //     console.log(failedMessages);
-    //     const failureDetails = failedMessages
-    //       .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
-    //       .join("\n");
-    //     setError(
-    //       `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
-    //     );
-    //   }
-    // } catch (error) {
-    //   setError("Une erreur est survenue lors de l'envoi de la campagne");
-    //   console.error("Campaign error:", error);
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (failed === 0) {
+        setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+        setShowStatusModal(true);
+      } else {
+        console.log(failedMessages);
+        const failureDetails = failedMessages
+          .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
+          .join("\n");
+        setError(
+          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
+        );
+      }
+    } catch (error) {
+      setError("Une erreur est survenue lors de l'envoi de la campagne");
+      console.error("Campaign error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Add status modal component
