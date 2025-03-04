@@ -283,7 +283,7 @@ const ContactsPage = () => {
           <div className="mb-8">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">Groupes de contacts</h3>
             <ScrollArea className="w-full">
-              <div className="flex gap-4 pb-2" style={{ minWidth: 'max-content' }}>
+              <div className="flex gap-4 pb-2">
                 {isLoadingGroups ? (
                   // Placeholders de chargement pour les groupes
                   Array.from({ length: 4 }).map((_, index) => (
@@ -302,7 +302,7 @@ const ContactsPage = () => {
                     <Card
                       key={group.name}
                       onClick={() => handleGroupChange(group.name)}
-                      className={`cursor-pointer transition-all duration-200 ${
+                      className={`cursor-pointer transition-all duration-200 mt-2 ${
                         selectedGroup === group.name
                           ? 'ring-2 ring-[#67B142] ring-offset-2 shadow-lg bg-[#67B142]/5'
                           : 'shadow-sm hover:shadow-md hover:bg-gray-50'

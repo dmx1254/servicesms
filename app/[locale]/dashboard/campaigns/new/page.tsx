@@ -54,6 +54,9 @@ import {
   formatSMSErrorMessage,
   getSMSErrorDetails,
 } from "@/app/lib/utils/smsErrorCodes";
+import { useDropzone } from "react-dropzone";
+import LoadingDialog from "@/components/LoadingImport";
+import { rewriteMessage } from "@/app/lib/utils/parseMessage";
 
 type TemplateId =
   // Academic templates
@@ -96,8 +99,8 @@ const TEMPLATES: Template[] = [
     icon: Tag,
     desc: "Profitez de notre promotion exceptionnelle ! {discount}% de réduction sur {product_name}. Offre valable jusqu'au {expiry_date}. {company}",
     category: "marketing",
-    requiredFields: ["Nom", "Prénom", "Téléphone"],
-    optionalFields: ["Email", "Segment"],
+    requiredFields: ["nom", "prenom", "telephone"],
+    optionalFields: ["email", "segment"],
     variables: [
       "{first_name}",
       "{last_name}",
@@ -113,8 +116,8 @@ const TEMPLATES: Template[] = [
     icon: Sparkles,
     desc: "Découvrez notre nouveauté ! {product_name} est maintenant disponible chez {company}. Venez vite l'essayer !",
     category: "marketing",
-    requiredFields: ["Nom", "Prénom", "Téléphone"],
-    optionalFields: ["Email", "Dernière_visite"],
+    requiredFields: ["nom", "prenom", "telephone"],
+    optionalFields: ["email", "derniere_visite"],
     variables: ["{first_name}", "{last_name}", "{product_name}", "{company}"],
   },
   {
@@ -123,8 +126,8 @@ const TEMPLATES: Template[] = [
     icon: Star,
     desc: "Offre exclusive pour {first_name} ! Utilisez le code {offer_code} et bénéficiez de {discount}% sur votre prochain achat chez {company}.",
     category: "marketing",
-    requiredFields: ["Nom", "Prénom", "Téléphone"],
-    optionalFields: ["Email", "Code_promo", "Pourcentage"],
+    requiredFields: ["nom", "prenom", "telephone"],
+    optionalFields: ["email", "code_promo", "pourcentage"],
     variables: [
       "{first_name}",
       "{last_name}",
@@ -139,8 +142,8 @@ const TEMPLATES: Template[] = [
     icon: Calendar,
     desc: "Cher(e) {first_name}, nous vous invitons à notre événement le {event_date}. {company} vous réserve des surprises !",
     category: "marketing",
-    requiredFields: ["Nom", "Prénom", "Téléphone"],
-    optionalFields: ["Email", "Date_événement"],
+    requiredFields: ["nom", "prenom", "telephone"],
+    optionalFields: ["email", "date_evenement"],
     variables: ["{first_name}", "{last_name}", "{event_date}", "{company}"],
   },
 
@@ -152,13 +155,13 @@ const TEMPLATES: Template[] = [
     desc: "Bonjour {first_name}, votre commande #{order_number} est confirmée. Montant: {payment_amount} FCFA. Merci de votre confiance !",
     category: "transactional",
     requiredFields: [
-      "Nom",
-      "Prénom",
-      "Téléphone",
-      "Numéro_commande",
-      "Montant",
+      "nom",
+      "prenom",
+      "telephone",
+      "numero_commande",
+      "montant",
     ],
-    optionalFields: ["Email", "Date_commande"],
+    optionalFields: ["email", "date_commande"],
     variables: [
       "{first_name}",
       "{order_number}",
@@ -172,8 +175,8 @@ const TEMPLATES: Template[] = [
     icon: Send,
     desc: "Votre colis #{tracking_code} sera livré le {delivery_date}. Suivez votre livraison sur notre site. {company}",
     category: "transactional",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Numéro_suivi"],
-    optionalFields: ["Email", "Date_livraison"],
+    requiredFields: ["nom", "prenom", "telephone", "numero_suivi"],
+    optionalFields: ["email", "date_livraison"],
     variables: [
       "{first_name}",
       "{tracking_code}",
@@ -188,14 +191,14 @@ const TEMPLATES: Template[] = [
     desc: "Reçu de paiement - {payment_amount} FCFA pour {service_name}. Référence: {reference}. Merci de votre confiance, {company}",
     category: "transactional",
     requiredFields: [
-      "Nom",
-      "Prénom",
-      "Téléphone",
-      "Montant",
-      "Service",
-      "Référence",
+      "nom",
+      "prenom",
+      "telephone",
+      "montant",
+      "service",
+      "reference",
     ],
-    optionalFields: ["Email"],
+    optionalFields: ["email"],
     variables: [
       "{first_name}",
       "{payment_amount}",
@@ -210,8 +213,8 @@ const TEMPLATES: Template[] = [
     icon: Clock,
     desc: "Rappel: Votre RDV est prévu le {appointment_time} pour {service_name}. En cas d'empêchement, merci de nous contacter.",
     category: "transactional",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Heure_RDV", "Service"],
-    optionalFields: ["Email", "Lieu"],
+    requiredFields: ["nom", "prenom", "telephone", "heure_rdv", "service"],
+    optionalFields: ["email", "lieu"],
     variables: ["{first_name}", "{appointment_time}", "{service_name}"],
   },
 
@@ -222,8 +225,8 @@ const TEMPLATES: Template[] = [
     icon: Star,
     desc: "Bonjour, la moyenne trimestrielle de {student_name} en classe de {class_name} est de {average_grade}/20. Cordialement, {school_name}",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"],
-    optionalFields: ["Trimestre", "Établissement"],
+    requiredFields: ["nom", "prenom", "telephone", "classe", "moyenne"],
+    optionalFields: ["trimestre", "etablissement"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -238,14 +241,14 @@ const TEMPLATES: Template[] = [
     desc: "Les résultats de {student_name} ({class_name}): {exam_results}. Moyenne générale: {overall_average}/20. {school_name}",
     category: "academic",
     requiredFields: [
-      "Nom",
-      "Prénom",
-      "Téléphone",
-      "Classe",
-      "Résultats",
-      "Moyenne_générale",
+      "nom",
+      "prenom",
+      "telephone",
+      "classe",
+      "resultats",
+      "moyenne_generale",
     ],
-    optionalFields: ["Établissement"],
+    optionalFields: ["etablissement"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -260,7 +263,7 @@ const TEMPLATES: Template[] = [
     icon: PartyPopper,
     desc: "Félicitations à {student_name} pour son excellente moyenne de {average_grade}/20 en {class_name} ! Continuez ainsi ! {school_name}",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"],
+    requiredFields: ["nom", "prenom", "telephone", "classe", "moyenne"],
     optionalFields: ["Établissement", "Matière"],
     variables: [
       "{student_name}",
@@ -275,7 +278,7 @@ const TEMPLATES: Template[] = [
     icon: Calendar,
     desc: "Nous vous informons de l'absence de {student_name} le {absence_date} en classe de {class_name}. Merci de justifier cette absence.",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Date_absence"],
+    requiredFields: ["nom", "prenom", "telephone", "classe", "date_absence"],
     optionalFields: ["Motif_absence"],
     variables: ["{student_name}", "{class_name}", "{absence_date}"],
   },
@@ -285,8 +288,8 @@ const TEMPLATES: Template[] = [
     icon: Clock,
     desc: "Notification de retard",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Heure_arrivée"],
-    optionalFields: ["Date", "Motif"],
+    requiredFields: ["nom", "prenom", "telephone", "classe", "heure_arrivee"],
+    optionalFields: ["date", "motif"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -301,8 +304,8 @@ const TEMPLATES: Template[] = [
     icon: Users,
     desc: "Invitation réunion parents-profs",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe"],
-    optionalFields: ["Date_réunion", "Heure_réunion", "Salle"],
+    requiredFields: ["nom", "prenom", "telephone", "classe"],
+    optionalFields: ["date_reunion", "heure_reunion", "salle"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -318,8 +321,8 @@ const TEMPLATES: Template[] = [
     icon: CalendarDays,
     desc: "Événements scolaires",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe"],
-    optionalFields: ["Nom_événement", "Date_événement", "Lieu"],
+    requiredFields: ["nom", "prenom", "telephone", "classe"],
+    optionalFields: ["nom_evenement", "date_evenement", "lieu"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -335,8 +338,8 @@ const TEMPLATES: Template[] = [
     icon: AlertCircle,
     desc: "Rapport de comportement",
     category: "academic",
-    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Incident"],
-    optionalFields: ["Date_incident", "Mesure_prise"],
+    requiredFields: ["nom", "prenom", "telephone", "classe", "incident"],
+    optionalFields: ["date_incident", "mesure_prise"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -353,14 +356,14 @@ const TEMPLATES: Template[] = [
     desc: "Rappel des devoirs",
     category: "academic",
     requiredFields: [
-      "Nom",
-      "Prénom",
-      "Téléphone",
-      "Classe",
-      "Matière",
-      "Devoir",
+      "nom",
+      "prenom",
+      "telephone",
+      "classe",
+      "matiere",
+      "devoir",
     ],
-    optionalFields: ["Date_limite"],
+    optionalFields: ["date_limite"],
     variables: [
       "{student_name}",
       "{class_name}",
@@ -373,11 +376,11 @@ const TEMPLATES: Template[] = [
 ];
 
 interface Contact {
-  lastname: string;
-  firstname: string;
-  phone: string;
-  average?: number;
-  class?: string;
+  prenom: string;
+  nom: string;
+  telephone: string;
+  moyenne?: number;
+  classe?: string;
   additionalFields?: Record<string, string>; // Pour stocker des champs dynamiques
 }
 
@@ -435,6 +438,13 @@ const CAMPAIGN_NAME_TEMPLATES = {
   ],
 };
 
+interface FileUploadState {
+  loading: boolean;
+  error: string | null;
+  success: boolean;
+  fileName: string | null;
+}
+
 export default function NewCampaign() {
   const { data: session } = useSession();
   const [message, setMessage] = useState<string>("");
@@ -456,18 +466,90 @@ export default function NewCampaign() {
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [signature, setSignature] = useState<string>(
-    session?.user?.companyName || "SY-PRESSING"
-  );
+  const [signature, setSignature] = useState<string>("");
   const [messageStatuses, setMessageStatuses] = useState<MessageStatus[]>([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
+  const [uploadState, setUploadState] = useState<FileUploadState>({
+    loading: false,
+    error: null,
+    success: false,
+    fileName: null,
+  });
 
   // New state for single contact form
   const [singleContact, setSingleContact] = useState<Contact>({
-    lastname: "",
-    firstname: "",
-    phone: "",
-    average: undefined,
+    prenom: "",
+    nom: "",
+    telephone: "",
+    moyenne: undefined,
+    classe: undefined,
+  });
+
+  const onDrop = async (acceptedFiles: File[]) => {
+    const file = acceptedFiles[0];
+    if (!file) return;
+
+    setUploadState({
+      loading: true,
+      error: null,
+      success: false,
+      fileName: file.name,
+    });
+
+    // console.log(file);
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const fileType = file.name.endsWith(".csv") ? "csv" : "excel";
+      const response = await fetch(`/api/campaigns/${fileType}`, {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await response.json();
+
+      // console.log(data);
+      setContacts(data.res);
+
+      if (!response.ok) {
+        throw new Error(data.error || "Échec du téléchargement du fichier");
+      }
+
+      setUploadState((prev) => ({
+        ...prev,
+        loading: false,
+        success: true,
+        error: null,
+      }));
+
+      toast.success(`${data.count} contacts importés avec succès !`);
+    } catch (error: unknown) {
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "Une erreur inconnue est survenue";
+      setUploadState((prev) => ({
+        ...prev,
+        loading: false,
+        error: errorMessage,
+        success: false,
+      }));
+      toast.error(errorMessage);
+    }
+  };
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      "text/csv": [".csv"],
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": [
+        ".xlsx",
+      ],
+      "application/vnd.ms-excel": [".xls"],
+    },
+    multiple: false,
   });
 
   // Add new state for file input reference
@@ -553,64 +635,64 @@ export default function NewCampaign() {
       let messageText = template.desc;
 
       // Replace variables based on campaign type and contact data
-      if (contacts.length > 0 && contacts[0]) {
-        const contact = contacts[0]; // Preview with first contact
+      // if (contacts.length > 0 && contacts[0]) {
+      //   const contact = contacts[0]; // Preview with first contact
 
-        // Common replacements
+      //   // Common replacements
 
-        messageText = messageText
-          .replace(/{first_name}/g, contact.firstname)
-          .replace(/{last_name}/g, contact.lastname);
+      //   messageText = messageText
+      //     .replace(/{first_name}/g, contact.firstname)
+      //     .replace(/{last_name}/g, contact.lastname);
 
-        // Academic specific replacements
-        if (template.category === "academic") {
-          messageText = messageText
-            .replace(
-              /{student_name}/g,
-              `${contact.firstname} ${contact.lastname}`
-            )
-            .replace(/{average_grade}/g, contact.average?.toString() || "--")
-            .replace(/{class_name}/g, contact.class || selectedClass)
-            .replace(/{school_name}/g, "École Example");
-        }
+      //   // Academic specific replacements
+      //   if (template.category === "academic") {
+      //     messageText = messageText
+      //       .replace(
+      //         /{student_name}/g,
+      //         `${contact.firstname} ${contact.lastname}`
+      //       )
+      //       .replace(/{average_grade}/g, contact.moyenne?.toString() || "--")
+      //       .replace(/{class_name}/g, contact.classe || selectedClass)
+      //       .replace(/{school_name}/g, "École Example");
+      //   }
 
-        // Marketing specific replacements
-        if (template.category === "marketing") {
-          messageText = messageText
-            .replace(/{company}/g, signature)
-            .replace(/{discount}/g, "20")
-            .replace(/{product_name}/g, "Nouveau Produit")
-            .replace(/{offer_code}/g, "PROMO20")
-            .replace(
-              /{expiry_date}/g,
-              format(addDays(new Date(), 7), "dd/MM/yyyy")
-            )
-            .replace(
-              /{event_date}/g,
-              format(addDays(new Date(), 14), "dd/MM/yyyy")
-            );
-        }
+      //   // Marketing specific replacements
+      //   if (template.category === "marketing") {
+      //     messageText = messageText
+      //       .replace(/{company}/g, signature)
+      //       .replace(/{discount}/g, "20")
+      //       .replace(/{product_name}/g, "Nouveau Produit")
+      //       .replace(/{offer_code}/g, "PROMO20")
+      //       .replace(
+      //         /{expiry_date}/g,
+      //         format(addDays(new Date(), 7), "dd/MM/yyyy")
+      //       )
+      //       .replace(
+      //         /{event_date}/g,
+      //         format(addDays(new Date(), 14), "dd/MM/yyyy")
+      //       );
+      //   }
 
-        // Transactional specific replacements
-        if (template.category === "transactional") {
-          messageText = messageText
-            .replace(/{order_number}/g, "12345")
-            .replace(/{tracking_code}/g, "TRK123456")
-            .replace(
-              /{delivery_date}/g,
-              format(addDays(new Date(), 3), "dd/MM/yyyy")
-            )
-            .replace(/{payment_amount}/g, "15000")
-            .replace(/{service_name}/g, "Service Premium")
-            .replace(/{reference}/g, "REF123456")
-            .replace(
-              /{appointment_time}/g,
-              format(addDays(new Date(), 1), "dd/MM/yyyy à HH:mm")
-            );
-        }
-      }
+      //   // Transactional specific replacements
+      //   if (template.category === "transactional") {
+      //     messageText = messageText
+      //       .replace(/{order_number}/g, "12345")
+      //       .replace(/{tracking_code}/g, "TRK123456")
+      //       .replace(
+      //         /{delivery_date}/g,
+      //         format(addDays(new Date(), 3), "dd/MM/yyyy")
+      //       )
+      //       .replace(/{payment_amount}/g, "15000")
+      //       .replace(/{service_name}/g, "Service Premium")
+      //       .replace(/{reference}/g, "REF123456")
+      //       .replace(
+      //         /{appointment_time}/g,
+      //         format(addDays(new Date(), 1), "dd/MM/yyyy à HH:mm")
+      //       );
+      //   }
+      // }
 
-      console.log(messageText);
+      // console.log(messageText);
       setMessage(messageText);
     }
   };
@@ -798,15 +880,16 @@ export default function NewCampaign() {
           </div>
           <div className="space-y-1 text-gray-600">
             <p>• Fichier CSV (séparateur: virgule)</p>
+            <p>• Fichier Excel (séparateur: virgule)</p>
             <p>• Encodage UTF-8</p>
             <p>• Colonnes requises :</p>
             <div className="pl-4">
               {campaignType === "academic" ? (
                 <code className="text-[#67B142]">
-                  Nom,Prénom,Téléphone,Classe,Moyenne
+                  nom,prenom,telephone,classe,moyenne
                 </code>
               ) : (
-                <code className="text-[#67B142]">Nom,Prénom,Téléphone</code>
+                <code className="text-[#67B142]">nom,prenom,telephone</code>
               )}
             </div>
             {campaignType === "academic" && (
@@ -872,7 +955,7 @@ export default function NewCampaign() {
     setSingleContact((prev) => ({
       ...prev,
       [field]: value,
-      ...(field === "class" ? { class: value as string } : {}),
+      ...(field === "classe" ? { class: value as string } : {}),
     }));
   };
 
@@ -880,9 +963,9 @@ export default function NewCampaign() {
   const handleAddContact = () => {
     // Validate required fields
     if (
-      !singleContact.lastname ||
-      !singleContact.firstname ||
-      !singleContact.phone
+      !singleContact.prenom ||
+      !singleContact.nom ||
+      !singleContact.telephone
     ) {
       setFileError("Veuillez remplir tous les champs obligatoires");
       return;
@@ -890,17 +973,17 @@ export default function NewCampaign() {
 
     // Validate phone number format
     const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-    if (!phoneRegex.test(singleContact.phone)) {
-      setFileError("Format de numéro de téléphone invalide (ex: +33612345678)");
+    if (!phoneRegex.test(singleContact.telephone)) {
+      setFileError("Format de numéro de téléphone invalide (ex: 778413584)");
       return;
     }
 
     // Validate average for academic campaigns
     if (
       campaignType === "academic" &&
-      (singleContact.average === undefined ||
-        singleContact.average < 0 ||
-        singleContact.average > 20)
+      (singleContact.moyenne === undefined ||
+        Number(singleContact.moyenne) < 0 ||
+        Number(singleContact.moyenne) > 20)
     ) {
       setFileError("La moyenne doit être comprise entre 0 et 20");
       return;
@@ -912,324 +995,329 @@ export default function NewCampaign() {
 
     // Reset form
     setSingleContact({
-      lastname: "",
-      firstname: "",
-      phone: "",
-      average: undefined,
+      prenom: "",
+      nom: "",
+      telephone: "",
+      moyenne: undefined,
+      classe: undefined,
     });
   };
 
+  console.log(singleContact);
+
   // Mise à jour de la fonction d'importation de fichiers
-  const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  // const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  //   const file = e.target.files?.[0];
+  //   if (!file) return;
 
-    if (!file.name.toLowerCase().endsWith(".csv")) {
-      setFileError("Seuls les fichiers CSV sont acceptés");
-      e.target.value = "";
-      return;
-    }
+  //   if (!file.name.toLowerCase().endsWith(".csv")) {
+  //     setFileError("Seuls les fichiers CSV sont acceptés");
+  //     e.target.value = "";
+  //     return;
+  //   }
 
-    const reader = new FileReader();
-    reader.onload = async (event) => {
-      try {
-        const text = event.target?.result as string;
-        const lines = text.split("\n").filter((line) => line.trim());
+  //   const reader = new FileReader();
+  //   reader.onload = async (event) => {
+  //     try {
+  //       const text = event.target?.result as string;
+  //       const lines = text.split("\n").filter((line) => line.trim());
 
-        if (lines.length < 2) {
-          setFileError("Le fichier est vide ou ne contient que les en-têtes");
-          return;
-        }
+  //       if (lines.length < 2) {
+  //         setFileError("Le fichier est vide ou ne contient que les en-têtes");
+  //         return;
+  //       }
 
-        // Normaliser les en-têtes (supprimer les accents, espaces et convertir en minuscules)
-        const headers = lines[0]
-          .toLowerCase()
-          .normalize("NFD")
-          .replace(/[\u0300-\u036f]/g, "")
-          .split(",")
-          .map((h) => h.trim());
+  //       // Normaliser les en-têtes (supprimer les accents, espaces et convertir en minuscules)
+  //       const headers = lines[0]
+  //         .toLowerCase()
+  //         .normalize("NFD")
+  //         .replace(/[\u0300-\u036f]/g, "")
+  //         .split(",")
+  //         .map((h) => h.trim());
 
-        // Dictionnaire de correspondance des en-têtes
-        const headerMap = {
-          nom: ["nom", "name", "lastname", "family"],
-          prenom: ["prenom", "firstname", "prénom", "first"],
-          telephone: [
-            "telephone",
-            "phone",
-            "tel",
-            "téléphone",
-            "mobile",
-            "portable",
-          ],
-          classe: ["classe", "class", "level"],
-          moyenne: ["moyenne", "average", "note", "grade", "avg"],
-          numerocommande: [
-            "numerocommande",
-            "ordernum",
-            "commande",
-            "order",
-            "order_number",
-            "numero",
-          ],
-          montant: [
-            "montant",
-            "amount",
-            "prix",
-            "payment",
-            "payment_amount",
-            "price",
-            "total",
-          ],
-          email: ["email", "courriel", "mail", "e-mail"],
-          datecommande: [
-            "datecommande",
-            "orderdate",
-            "date_commande",
-            "dateorder",
-          ],
-          trimestre: ["trimestre", "term", "semester"],
-          matiere: ["matiere", "matière", "subject", "course"],
-          numerosuivi: [
-            "numerosuivi",
-            "tracking",
-            "tracking_code",
-            "tracking_number",
-            "suivi",
-          ],
-          datelivraison: [
-            "datelivraison",
-            "delivery_date",
-            "date_livraison",
-            "deliverydate",
-          ],
-          service: ["service", "service_name", "servicename", "prestation"],
-          reference: ["reference", "ref", "reference_number"],
-          heurerdv: [
-            "heurerdv",
-            "appointment",
-            "rdv",
-            "horaire",
-            "time",
-            "appointment_time",
-          ],
-          dateabsence: ["dateabsence", "absence_date", "date_absence"],
-          etablissement: [
-            "etablissement",
-            "ecole",
-            "school",
-            "school_name",
-            "institution",
-          ],
-          resultats: ["resultats", "results", "exam_results", "notes"],
-          moyennegenerale: [
-            "moyennegenerale",
-            "overall_average",
-            "general_average",
-            "global_average",
-          ],
-          incident: ["incident", "behavior", "comportement"],
-          mesure_prise: ["mesure_prise", "mesure", "measure", "action"],
-        };
+  //       // Dictionnaire de correspondance des en-têtes
+  //       const headerMap = {
+  //         nom: ["nom", "name", "lastname", "family"],
+  //         prenom: ["prenom", "firstname", "prénom", "first"],
+  //         telephone: [
+  //           "telephone",
+  //           "phone",
+  //           "tel",
+  //           "téléphone",
+  //           "mobile",
+  //           "portable",
+  //         ],
+  //         classe: ["classe", "class", "level"],
+  //         moyenne: ["moyenne", "average", "note", "grade", "avg"],
+  //         numerocommande: [
+  //           "numerocommande",
+  //           "ordernum",
+  //           "commande",
+  //           "order",
+  //           "order_number",
+  //           "numero",
+  //         ],
+  //         montant: [
+  //           "montant",
+  //           "amount",
+  //           "prix",
+  //           "payment",
+  //           "payment_amount",
+  //           "price",
+  //           "total",
+  //         ],
+  //         email: ["email", "courriel", "mail", "e-mail"],
+  //         datecommande: [
+  //           "datecommande",
+  //           "orderdate",
+  //           "date_commande",
+  //           "dateorder",
+  //         ],
+  //         trimestre: ["trimestre", "term", "semester"],
+  //         matiere: ["matiere", "matière", "subject", "course"],
+  //         numerosuivi: [
+  //           "numerosuivi",
+  //           "tracking",
+  //           "tracking_code",
+  //           "tracking_number",
+  //           "suivi",
+  //         ],
+  //         datelivraison: [
+  //           "datelivraison",
+  //           "delivery_date",
+  //           "date_livraison",
+  //           "deliverydate",
+  //         ],
+  //         service: ["service", "service_name", "servicename", "prestation"],
+  //         reference: ["reference", "ref", "reference_number"],
+  //         heurerdv: [
+  //           "heurerdv",
+  //           "appointment",
+  //           "rdv",
+  //           "horaire",
+  //           "time",
+  //           "appointment_time",
+  //         ],
+  //         dateabsence: ["dateabsence", "absence_date", "date_absence"],
+  //         etablissement: [
+  //           "etablissement",
+  //           "ecole",
+  //           "school",
+  //           "school_name",
+  //           "institution",
+  //         ],
+  //         resultats: ["resultats", "results", "exam_results", "notes"],
+  //         moyennegenerale: [
+  //           "moyennegenerale",
+  //           "overall_average",
+  //           "general_average",
+  //           "global_average",
+  //         ],
+  //         incident: ["incident", "behavior", "comportement"],
+  //         mesure_prise: ["mesure_prise", "mesure", "measure", "action"],
+  //       };
 
-        // Obtenir les champs requis en fonction du template sélectionné
-        let requiredFields: string[] = [];
+  //       // Obtenir les champs requis en fonction du template sélectionné
+  //       let requiredFields: string[] = [];
 
-        if (selectedTemplate) {
-          // Si un template spécifique est sélectionné
-          const template = TEMPLATES.find((t) => t.id === selectedTemplate);
-          if (template) {
-            requiredFields = template.requiredFields.map((field) =>
-              field
-                .toLowerCase()
-                .normalize("NFD")
-                .replace(/[\u0300-\u036f]/g, "")
-            );
-          }
-        } else {
-          // Par défaut, basé sur le type de campagne
-          if (campaignType === "academic") {
-            requiredFields = [
-              "nom",
-              "prenom",
-              "telephone",
-              "classe",
-              "moyenne",
-            ];
-          } else {
-            requiredFields = ["nom", "prenom", "telephone"];
-          }
-        }
+  //       if (selectedTemplate) {
+  //         // Si un template spécifique est sélectionné
+  //         const template = TEMPLATES.find((t) => t.id === selectedTemplate);
+  //         if (template) {
+  //           requiredFields = template.requiredFields.map((field) =>
+  //             field
+  //               .toLowerCase()
+  //               .normalize("NFD")
+  //               .replace(/[\u0300-\u036f]/g, "")
+  //           );
+  //         }
+  //       } else {
+  //         // Par défaut, basé sur le type de campagne
+  //         if (campaignType === "academic") {
+  //           requiredFields = [
+  //             "nom",
+  //             "prenom",
+  //             "telephone",
+  //             "classe",
+  //             "moyenne",
+  //           ];
+  //         } else {
+  //           requiredFields = ["nom", "prenom", "telephone"];
+  //         }
+  //       }
 
-        // Fonction pour trouver l'index de la colonne
-        const findColumnIndex = (fieldName: string): number => {
-          const possibleNames = headerMap[
-            fieldName as keyof typeof headerMap
-          ] || [fieldName];
-          return headers.findIndex((h) => possibleNames.includes(h));
-        };
+  //       // Fonction pour trouver l'index de la colonne
+  //       const findColumnIndex = (fieldName: string): number => {
+  //         const possibleNames = headerMap[
+  //           fieldName as keyof typeof headerMap
+  //         ] || [fieldName];
+  //         return headers.findIndex((h) => possibleNames.includes(h));
+  //       };
 
-        // Vérifier les champs requis
-        const missingRequired = [];
-        for (const field of requiredFields) {
-          if (findColumnIndex(field) === -1) {
-            // Récupérer le nom d'origine pour l'affichage
-            const originalField = selectedTemplate
-              ? TEMPLATES.find(
-                  (t) => t.id === selectedTemplate
-                )?.requiredFields.find(
-                  (f) =>
-                    f
-                      .toLowerCase()
-                      .normalize("NFD")
-                      .replace(/[\u0300-\u036f]/g, "") === field
-                )
-              : field.charAt(0).toUpperCase() + field.slice(1);
+  //       // Vérifier les champs requis
+  //       const missingRequired = [];
+  //       for (const field of requiredFields) {
+  //         if (findColumnIndex(field) === -1) {
+  //           // Récupérer le nom d'origine pour l'affichage
+  //           const originalField = selectedTemplate
+  //             ? TEMPLATES.find(
+  //                 (t) => t.id === selectedTemplate
+  //               )?.requiredFields.find(
+  //                 (f) =>
+  //                   f
+  //                     .toLowerCase()
+  //                     .normalize("NFD")
+  //                     .replace(/[\u0300-\u036f]/g, "") === field
+  //               )
+  //             : field.charAt(0).toUpperCase() + field.slice(1);
 
-            if (originalField) {
-              missingRequired.push(originalField);
-            }
-          }
-        }
+  //           if (originalField) {
+  //             missingRequired.push(originalField);
+  //           }
+  //         }
+  //       }
 
-        if (missingRequired.length > 0) {
-          setFileError(
-            `Colonnes requises manquantes: ${missingRequired.join(", ")}`
-          );
-          return;
-        }
+  //       if (missingRequired.length > 0) {
+  //         setFileError(
+  //           `Colonnes requises manquantes: ${missingRequired.join(", ")}`
+  //         );
+  //         return;
+  //       }
 
-        // Le reste de votre code reste identique
-        // ...
+  //       // Le reste de votre code reste identique
+  //       // ...
 
-        // Normaliser le nom de classe
-        const normalizeClassName = (className: string) => {
-          const normalized = className
-            .trim()
-            .toLowerCase()
-            .replace(/(\d+)(?:ere|ème|eme)?\s*([a-z])/i, (_, num, letter) => {
-              return `${num}ème ${letter.toUpperCase()}`;
-            });
-          return normalized;
-        };
+  //       // Normaliser le nom de classe
+  //       const normalizeClassName = (className: string) => {
+  //         const normalized = className
+  //           .trim()
+  //           .toLowerCase()
+  //           .replace(/(\d+)(?:ere|ème|eme)?\s*([a-z])/i, (_, num, letter) => {
+  //             return `${num}ème ${letter.toUpperCase()}`;
+  //           });
+  //         return normalized;
+  //       };
 
-        // Parse contacts with validation
-        const importedContacts: Contact[] = [];
-        const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-        let lineNumber = 1;
+  //       // Parse contacts with validation
+  //       const importedContacts: Contact[] = [];
+  //       const phoneRegex = /^\+?[1-9]\d{1,14}$/;
+  //       let lineNumber = 1;
 
-        for (const line of lines.slice(1)) {
-          lineNumber++;
-          const values = line.split(",").map((v) => v.trim());
+  //       for (const line of lines.slice(1)) {
+  //         lineNumber++;
+  //         const values = line.split(",").map((v) => v.trim());
 
-          // Skip empty lines
-          if (values.length < 3) continue;
+  //         // Skip empty lines
+  //         if (values.length < 3) continue;
 
-          let className =
-            findColumnIndex("classe") !== -1
-              ? normalizeClassName(values[findColumnIndex("classe")])
-              : undefined;
+  //         let className =
+  //           findColumnIndex("classe") !== -1
+  //             ? normalizeClassName(values[findColumnIndex("classe")])
+  //             : undefined;
 
-          // Validate class against predefined list for academic campaigns
-          if (campaignType === "academic" && className) {
-            if (!classes.includes(className)) {
-              console.warn(
-                `Ligne ${lineNumber}: Classe invalide "${className}". Classes valides: ${classes.join(
-                  ", "
-                )}`
-              );
-              continue;
-            }
-          }
+  //         // Validate class against predefined list for academic campaigns
+  //         if (campaignType === "academic" && className) {
+  //           if (!classes.includes(className)) {
+  //             console.warn(
+  //               `Ligne ${lineNumber}: Classe invalide "${className}". Classes valides: ${classes.join(
+  //                 ", "
+  //               )}`
+  //             );
+  //             continue;
+  //           }
+  //         }
 
-          // Construire le contact dynamiquement en fonction des champs présents
-          const contact: Partial<Contact> = {};
+  //         // Construire le contact dynamiquement en fonction des champs présents
+  //         const contact: Partial<Contact> = {};
 
-          // Traiter tous les champs disponibles
-          for (const [key, alternatives] of Object.entries(headerMap)) {
-            const index = headers.findIndex((h) => alternatives.includes(h));
-            if (index !== -1 && values[index]) {
-              if (key === "moyenne") {
-                contact.average = parseFloat(values[index].replace(",", "."));
-              } else if (key === "classe") {
-                contact.class = normalizeClassName(values[index]);
-              } else if (key === "nom") {
-                contact.lastname = values[index];
-              } else if (key === "prenom") {
-                contact.firstname = values[index];
-              } else if (key === "telephone") {
-                contact.phone = values[index];
-              }
-              // D'autres propriétés peuvent être ajoutées au besoin
-            }
-          }
+  //         // Traiter tous les champs disponibles
+  //         for (const [key, alternatives] of Object.entries(headerMap)) {
+  //           const index = headers.findIndex((h) => alternatives.includes(h));
+  //           if (index !== -1 && values[index]) {
+  //             if (key === "moyenne") {
+  //               contact.average = parseFloat(values[index].replace(",", "."));
+  //             } else if (key === "classe") {
+  //               contact.class = normalizeClassName(values[index]);
+  //             } else if (key === "nom") {
+  //               contact.lastname = values[index];
+  //             } else if (key === "prenom") {
+  //               contact.firstname = values[index];
+  //             } else if (key === "telephone") {
+  //               contact.phone = values[index];
+  //             }
+  //             // D'autres propriétés peuvent être ajoutées au besoin
+  //           }
+  //         }
 
-          // Validate required fields
-          if (!contact.lastname || !contact.firstname || !contact.phone) {
-            console.warn(`Ligne ${lineNumber}: Champs requis manquants`);
-            continue;
-          }
+  //         // Validate required fields
+  //         if (!contact.lastname || !contact.firstname || !contact.phone) {
+  //           console.warn(`Ligne ${lineNumber}: Champs requis manquants`);
+  //           continue;
+  //         }
 
-          // Validate phone number
-          if (!contact.phone || !phoneRegex.test(contact.phone)) {
-            console.warn(
-              `Ligne ${lineNumber}: Format de téléphone invalide "${contact.phone}"`
-            );
-            continue;
-          }
+  //         // Validate phone number
+  //         if (!contact.phone || !phoneRegex.test(contact.phone)) {
+  //           console.warn(
+  //             `Ligne ${lineNumber}: Format de téléphone invalide "${contact.phone}"`
+  //           );
+  //           continue;
+  //         }
 
-          // Validate class for academic campaigns
-          if (campaignType === "academic" && !contact.class) {
-            console.warn(
-              `Ligne ${lineNumber}: Classe manquante pour contact académique`
-            );
-            continue;
-          }
+  //         // Validate class for academic campaigns
+  //         if (campaignType === "academic" && !contact.class) {
+  //           console.warn(
+  //             `Ligne ${lineNumber}: Classe manquante pour contact académique`
+  //           );
+  //           continue;
+  //         }
 
-          // Validate average for academic campaigns
-          if (
-            campaignType === "academic" &&
-            typeof contact.average !== "undefined"
-          ) {
-            const avg = contact.average;
-            if (isNaN(avg) || avg < 0 || avg > 20) {
-              console.warn(
-                `Ligne ${lineNumber}: Moyenne invalide "${
-                  values[findColumnIndex("moyenne")]
-                }"`
-              );
-              continue;
-            }
-          }
+  //         // Validate average for academic campaigns
+  //         if (
+  //           campaignType === "academic" &&
+  //           typeof contact.average !== "undefined"
+  //         ) {
+  //           const avg = contact.average;
+  //           if (isNaN(avg) || avg < 0 || avg > 20) {
+  //             console.warn(
+  //               `Ligne ${lineNumber}: Moyenne invalide "${
+  //                 values[findColumnIndex("moyenne")]
+  //               }"`
+  //             );
+  //             continue;
+  //           }
+  //         }
 
-          importedContacts.push(contact as Contact);
-        }
+  //         importedContacts.push(contact as Contact);
+  //       }
 
-        if (importedContacts.length === 0) {
-          setFileError("Aucun contact valide trouvé dans le fichier");
-          return;
-        }
+  //       if (importedContacts.length === 0) {
+  //         setFileError("Aucun contact valide trouvé dans le fichier");
+  //         return;
+  //       }
 
-        console.log("Contacts importés:", importedContacts);
-        setContacts(importedContacts);
-        setFileError("");
-        e.target.value = "";
+  //       console.log("Contacts importés:", importedContacts);
+  //       setContacts(importedContacts);
+  //       setFileError("");
+  //       e.target.value = "";
 
-        // Mise à jour du message si un template est sélectionné
-        if (selectedTemplate) {
-          handleTemplateChange(selectedTemplate);
-        }
-      } catch (err) {
-        console.error("Error importing file:", err);
-        setFileError("Erreur lors de l'importation du fichier");
-      }
-    };
-    reader.readAsText(file);
-  };
+  //       // Mise à jour du message si un template est sélectionné
+  //       if (selectedTemplate) {
+  //         handleTemplateChange(selectedTemplate);
+  //       }
+  //     } catch (err) {
+  //       console.error("Error importing file:", err);
+  //       setFileError("Erreur lors de l'importation du fichier");
+  //     }
+  //   };
+  //   reader.readAsText(file);
+  // };
 
   // Add function to trigger file input
   const handleBulkImportClick = () => {
     fileInputRef.current?.click();
   };
+
+  // console.log(message);
 
   // Handle schedule change
   const handleScheduleChange = (date: Date | undefined) => {
@@ -1274,7 +1362,7 @@ export default function NewCampaign() {
     if (!template) return [];
 
     // Filtrer pour exclure les champs déjà présents dans le formulaire de base
-    const standardFields = ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"];
+    const standardFields = ["nom", "prenom", "telephone", "classe", "moyenne"];
     const additionalFields = [
       ...template.requiredFields,
       ...(template.optionalFields || []),
@@ -1287,107 +1375,146 @@ export default function NewCampaign() {
     setCampaignData((prev) => ({ ...prev, name }));
   };
 
-  const handleSendCampaign = async () => {
-    if (!campaignData.name.trim()) {
-      toast.error("Veuillez donner un nom à votre campagne", {
-        style: { backgroundColor: "#EF4444", color: "white" },
-      });
-      return;
-    }
+  const autoSaveCampaign = async () => {
+    if (!campaignData.name || !session?.user?.id) return;
 
-    setLoading(true);
-    const failedMessages: MessageStatus[] = [];
-    const successMessages: MessageStatus[] = [];
-
+    setIsSaving(true);
     try {
-      for (const contact of contacts) {
-        try {
-          const response = await fetch("/api/sms/send", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              recipient: contact.phone,
-              message: message,
-              campaignId: campaignData.id,
-              campaignName: campaignData.name,
-              signature,
-            }),
-          });
-
-    //       // console.log({
-    //       //   recipient: contact.phone,
-    //       //   message: message,
-    //       //   campaignId: campaignData.id,
-    //       //   campaignName: campaignData.name,
-    //       //   signature,
-    //       // });
-
-          const responseText = await response.text();
-          const parsedResponse = parseHTMLResponse(responseText);
-
-          if (!parsedResponse) {
-            throw new Error(`Failed to parse response for ${contact.phone}`);
-          }
-
-          const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
-
-          if (parsedResponse.statusCode !== "200") {
-            throw new Error(formatSMSErrorMessage(errorDetails));
-          }
-
-          await autoSaveCampaign();
-
-          // Add to message statuses
-          const messageStatus: MessageStatus = {
-            messageId: parsedResponse.messageId,
-            messageDetailId: parsedResponse.messageDetailId,
-            recipient: parsedResponse.recipient,
-            contact,
-            status: "sent",
-            timestamp: new Date(),
-            errorDetails:
-              parsedResponse.statusCode === "200" ? undefined : errorDetails,
-          };
-
-          // setMessageStatuses((prev) => [...prev, messageStatus]);
-          successMessages.push(messageStatus);
-        } catch (error) {
-          const errorMessage =
-            error instanceof Error ? error.message : "Erreur inconnue";
-          failedMessages.push({
-            messageId: "",
-            messageDetailId: "",
-            recipient: contact.phone,
-            contact,
-            status: "failed",
-            timestamp: new Date(),
-            errorMessage,
-          });
-        }
-      }
-
-      // Count successes and failures
-      const successful = successMessages.length;
-      const failed = failedMessages.length;
-
-      if (failed === 0) {
-        setSuccess(`${successful} message(s) envoyé(s) avec succès`);
-        setShowStatusModal(true);
-      } else {
-        console.log(failedMessages);
-        const failureDetails = failedMessages
-          .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
-          .join("\n");
-        setError(
-          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
-        );
-      }
+      await fetch("/api/campaigns", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...campaignData,
+          type: campaignType,
+          message: message,
+          contacts,
+          status: "draft",
+        }),
+      });
+      setLastSaved(new Date());
     } catch (error) {
-      setError("Une erreur est survenue lors de l'envoi de la campagne");
-      console.error("Campaign error:", error);
+      console.error("Erreur de sauvegarde:", error);
     } finally {
-      setLoading(false);
+      setIsSaving(false);
     }
+  };
+
+  const handleSendCampaign = async () => {
+    for (const contact of contacts) {
+      const newMessage = rewriteMessage(contact, message, signature);
+      console.log(contact);
+
+      console.log(newMessage);
+    }
+
+    // if (!campaignData.name.trim()) {
+    //   toast.error("Veuillez donner un nom à votre campagne", {
+    //     style: { backgroundColor: "#EF4444", color: "white" },
+    //   });
+    //   return;
+    // }
+
+    // if (contacts.length < 1) {
+    //   toast.error("Veuillez ajouter au moins un contact", {
+    //     style: { backgroundColor: "#EF4444", color: "white" },
+    //   });
+    //   return;
+    // }
+
+    // setLoading(true);
+    // const failedMessages: MessageStatus[] = [];
+    // const successMessages: MessageStatus[] = [];
+
+    // try {
+    //   for (const contact of contacts) {
+    //     try {
+    //       const newMessage = rewriteMessage(contact, message, signature);
+    //       const response = await fetch("/api/sms/send", {
+    //         method: "POST",
+    //         headers: { "Content-Type": "application/json" },
+    //         body: JSON.stringify({
+    //           recipient: contact.phone,
+    //           message: message,
+    //           campaignId: campaignData.id,
+    //           campaignName: campaignData.name,
+    //           signature,
+    //         }),
+    //       });
+
+    //       //       // console.log({
+    //       //       //   recipient: contact.phone,
+    //       //       //   message: message,
+    //       //       //   campaignId: campaignData.id,
+    //       //       //   campaignName: campaignData.name,
+    //       //       //   signature,
+    //       //       // });
+
+    //       const responseText = await response.text();
+    //       const parsedResponse = parseHTMLResponse(responseText);
+
+    //       if (!parsedResponse) {
+    //         throw new Error(`Failed to parse response for ${contact.phone}`);
+    //       }
+
+    //       const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
+
+    //       if (parsedResponse.statusCode !== "200") {
+    //         throw new Error(formatSMSErrorMessage(errorDetails));
+    //       }
+
+    //       await autoSaveCampaign();
+
+    //       // Add to message statuses
+    //       const messageStatus: MessageStatus = {
+    //         messageId: parsedResponse.messageId,
+    //         messageDetailId: parsedResponse.messageDetailId,
+    //         recipient: parsedResponse.recipient,
+    //         contact,
+    //         status: "sent",
+    //         timestamp: new Date(),
+    //         errorDetails:
+    //           parsedResponse.statusCode === "200" ? undefined : errorDetails,
+    //       };
+
+    //       // setMessageStatuses((prev) => [...prev, messageStatus]);
+    //       successMessages.push(messageStatus);
+    //     } catch (error) {
+    //       const errorMessage =
+    //         error instanceof Error ? error.message : "Erreur inconnue";
+    //       failedMessages.push({
+    //         messageId: "",
+    //         messageDetailId: "",
+    //         recipient: contact.phone,
+    //         contact,
+    //         status: "failed",
+    //         timestamp: new Date(),
+    //         errorMessage,
+    //       });
+    //     }
+    //   }
+
+    //   // Count successes and failures
+    //   const successful = successMessages.length;
+    //   const failed = failedMessages.length;
+
+    //   if (failed === 0) {
+    //     setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+    //     setShowStatusModal(true);
+    //   } else {
+    //     console.log(failedMessages);
+    //     const failureDetails = failedMessages
+    //       .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
+    //       .join("\n");
+    //     setError(
+    //       `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
+    //     );
+    //   }
+    // } catch (error) {
+    //   setError("Une erreur est survenue lors de l'envoi de la campagne");
+    //   console.error("Campaign error:", error);
+    // } finally {
+    //   setLoading(false);
+    // }
   };
 
   // Add status modal component
@@ -1455,29 +1582,6 @@ export default function NewCampaign() {
   };
 
   // Fonction de sauvegarde automatique
-  const autoSaveCampaign = async () => {
-    if (!campaignData.name || !session?.user?.id) return;
-
-    setIsSaving(true);
-    try {
-      await fetch("/api/campaigns", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...campaignData,
-          type: campaignType,
-          message: message,
-          contacts,
-          status: "draft",
-        }),
-      });
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error("Erreur de sauvegarde:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
 
   // Obtenir les variables en fonction du template sélectionné
   const getVariablesForTemplate = (templateId: TemplateId): string[] => {
@@ -1527,7 +1631,7 @@ export default function NewCampaign() {
           type="file"
           accept=".csv"
           className="hidden"
-          onChange={handleFileImport}
+          onChange={() => console.log("Yes")}
         />
 
         {/* Header with dynamic gradient and floating elements */}
@@ -2090,14 +2194,17 @@ export default function NewCampaign() {
                     Contact unique
                   </Button>
                   <Button
+                    {...getRootProps()}
                     variant="outline"
                     size="sm"
                     className={`rounded-xl transition-all duration-300 ${
                       contacts.length > 0 ? "bg-[#67B142] text-white" : ""
                     }`}
-                    onClick={handleBulkImportClick}
+                    // onClick={handleBulkImportClick}
+                    // onClick={() => importRef.current?.click()}
                   >
                     Import en masse
+                    <input {...getInputProps()} />
                   </Button>
                 </div>
               </div>
@@ -2112,26 +2219,26 @@ export default function NewCampaign() {
                     <Input
                       placeholder="Nom"
                       className="border-2 rounded-xl"
-                      value={singleContact.lastname}
+                      value={singleContact.nom}
                       onChange={(e) =>
-                        handleSingleContactChange("lastname", e.target.value)
+                        handleSingleContactChange("nom", e.target.value)
                       }
                     />
                     <Input
                       placeholder="Prénom"
                       className="border-2 rounded-xl"
-                      value={singleContact.firstname}
+                      value={singleContact.prenom}
                       onChange={(e) =>
-                        handleSingleContactChange("firstname", e.target.value)
+                        handleSingleContactChange("prenom", e.target.value)
                       }
                     />
                   </div>
                   <Input
                     placeholder="Numéro de téléphone"
                     className="border-2 rounded-xl"
-                    value={singleContact.phone}
+                    value={singleContact.telephone}
                     onChange={(e) =>
-                      handleSingleContactChange("phone", e.target.value)
+                      handleSingleContactChange("telephone", e.target.value)
                     }
                   />
                   {campaignType === "academic" && (
@@ -2143,10 +2250,10 @@ export default function NewCampaign() {
                         step="0.01"
                         placeholder="Moyenne /20"
                         className="border-2 rounded-xl"
-                        value={singleContact.average || ""}
+                        value={singleContact.moyenne || ""}
                         onChange={(e) =>
                           handleSingleContactChange(
-                            "average",
+                            "moyenne",
                             parseFloat(e.target.value)
                           )
                         }
@@ -2159,9 +2266,9 @@ export default function NewCampaign() {
                           <SelectValue placeholder="Classe" />
                         </SelectTrigger>
                         <SelectContent>
-                          {classes.map((className) => (
-                            <SelectItem key={className} value={className}>
-                              {className}
+                          {classes.map((c) => (
+                            <SelectItem key={c} value={c}>
+                              {c}
                             </SelectItem>
                           ))}
                         </SelectContent>
@@ -2228,13 +2335,15 @@ export default function NewCampaign() {
                       whileTap={{ scale: 0.98 }}
                     >
                       <Button
+                        {...getRootProps()}
                         variant="outline"
                         className="w-full h-24 rounded-xl border-2 hover:border-[#67B142] hover:text-[#67B142] transition-all duration-300"
-                        onClick={handleBulkImportClick}
+                        // onClick={handleBulkImportClick}
                       >
                         <div className="flex flex-col items-center gap-3">
                           <Upload className="w-6 h-6" />
-                          <span>Importer un fichier</span>
+                          <input {...getInputProps()} />
+                          Importer un fichier
                         </div>
                       </Button>
                     </motion.div>
@@ -2265,16 +2374,16 @@ export default function NewCampaign() {
                             <div className="flex items-center gap-2">
                               <Users className="w-4 h-4 text-gray-400" />
                               <span className="font-medium">
-                                {contact.firstname} {contact.lastname}
+                                {contact.prenom} {contact.nom}
                               </span>
                             </div>
                             <div className="flex items-center gap-4">
                               <span className="text-sm text-gray-500">
-                                {contact.phone}
+                                {contact.telephone}
                               </span>
-                              {contact.average !== undefined && (
+                              {contact.moyenne !== undefined && (
                                 <span className="font-medium text-[#67B142]">
-                                  {contact.average.toFixed(2)}/20
+                                  {Number(contact.moyenne).toFixed(2)}/20
                                 </span>
                               )}
                             </div>
@@ -2452,6 +2561,7 @@ export default function NewCampaign() {
 
       {/* Add StatusModal before closing div */}
       <StatusModal />
+      <LoadingDialog open={uploadState.loading} />
     </div>
   );
 }

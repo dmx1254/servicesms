@@ -59,9 +59,8 @@ body {
     --chart-3: 140 74% 24%;
     --chart-4: 137 55% 15%;
     --chart-5: 141 40% 9%;
-    }
+  }
 }
-
 
 @layer base {
   * {
@@ -84,8 +83,8 @@ body {
 }
 
 .PhoneInput:focus-within {
-  border-color: #67B142;
-  box-shadow: 0 0 0 1px #67B142;
+  border-color: #67b142;
+  box-shadow: 0 0 0 1px #67b142;
 }
 
 .PhoneInput--error {
@@ -126,4 +125,15 @@ body {
   width: 1.5rem;
   height: 1rem;
   margin-right: 0.5rem;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
 }

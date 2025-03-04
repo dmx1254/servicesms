@@ -20,7 +20,7 @@ export async function GET() {
       groupName: { $exists: true, $ne: "" },
     });
 
-    console.log("Groupes distincts trouvés:", distinctGroups);
+    // console.log("Groupes distincts trouvés:", distinctGroups);
 
     // Compter les contacts pour chaque groupe
     const groups = await Promise.all(

@@ -58,7 +58,7 @@ export default function LanguageSwitcher() {
       <DropdownMenuContent
         align="center"
         onMouseLeave={() => setIsOpen(false)}
-        className="min-w-[5rem] hover:bg-none"
+        className="min-w-[5rem] hover:bg-none z-[99999]"
       >
         <DropdownMenuItem
           onClick={() => switchLanguage(currentLocale === "fr" ? "en" : "fr")}
