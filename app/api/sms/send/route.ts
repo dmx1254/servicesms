@@ -30,7 +30,7 @@ function generateKey(
     .digest("hex");
 }
 
-export async function POST(request: Request) {
+export async function POST(req: Request) {
   try {
     const session = await getServerSession(options);
     if (!session?.user?.id) {
@@ -38,9 +38,16 @@ export async function POST(request: Request) {
     }
 
     const { recipient, message, campaignId, campaignName, signature } =
-      await request.json();
-      // const data = await request.json();
-      
+      await req.json();
+    // const data = await request.json();
+
+    console.log("Données reçues:", {
+      recipient,
+      message,
+      campaignId,
+      campaignName,
+      signature,
+    });
 
     if (!recipient || !message || !campaignId || !campaignName) {
       return NextResponse.json(
@@ -82,9 +89,9 @@ export async function POST(request: Request) {
       }
     );
 
-    console.log(response);
-    console.log(response.data);
-    console.log(message);
+    // console.log(response);
+    // console.log(response.data);
+    // console.log(message);
 
     const sms = await SMSModel.create({
       userId: session.user.id,
@@ -104,21 +111,20 @@ export async function POST(request: Request) {
       data: sms,
     });
   } catch (error) {
-    console.log('=== ERREUR ENVOI SMS ===');
-    console.log('Error complet:', error);
+    console.log(error);
     if (error instanceof AxiosError) {
-      console.log('Response data:', error.response?.data);
-      console.log('Response status:', error.response?.status);
-      console.log('Response headers:', error.response?.headers);
+      console.log("Response data:", error.response?.data);
+      console.log("Response status:", error.response?.status);
+      console.log("Response headers:", error.response?.headers);
     }
-    console.log('========================');
+    console.log(error);
 
-    if (error instanceof AxiosError && error.response?.data) {
-      return NextResponse.json(
-        { error: error.response.data },
-        { status: error.response.status || 500 }
-      );
-    }
+    // if (error instanceof AxiosError && error.response?.data) {
+    //   return NextResponse.json(
+    //     { error: error.response.data },
+    //     { status: error.response.status || 500 }
+    //   );
+    // }
 
     return NextResponse.json(
       { error: "Erreur lors de l'envoi du SMS" },

@@ -83,16 +83,29 @@ interface Template {
   icon: LucideIcon;
   desc: string;
   category: "academic" | "marketing" | "transactional";
+  requiredFields: string[]; // Nouveaux champs requis pour l'importation
+  optionalFields?: string[]; // Champs optionnels (? pour rendre la propriété facultative)
+  variables: string[]; // Variables utilisées dans ce template
 }
 
 const TEMPLATES: Template[] = [
-  // Marketing Templates
+  // Marketing Templates (4)
   {
     id: "promotional",
     title: "Promotion",
     icon: Tag,
     desc: "Profitez de notre promotion exceptionnelle ! {discount}% de réduction sur {product_name}. Offre valable jusqu'au {expiry_date}. {company}",
     category: "marketing",
+    requiredFields: ["Nom", "Prénom", "Téléphone"],
+    optionalFields: ["Email", "Segment"],
+    variables: [
+      "{first_name}",
+      "{last_name}",
+      "{discount}",
+      "{product_name}",
+      "{expiry_date}",
+      "{company}",
+    ],
   },
   {
     id: "new_product",
@@ -100,6 +113,9 @@ const TEMPLATES: Template[] = [
     icon: Sparkles,
     desc: "Découvrez notre nouveauté ! {product_name} est maintenant disponible chez {company}. Venez vite l'essayer !",
     category: "marketing",
+    requiredFields: ["Nom", "Prénom", "Téléphone"],
+    optionalFields: ["Email", "Dernière_visite"],
+    variables: ["{first_name}", "{last_name}", "{product_name}", "{company}"],
   },
   {
     id: "special_offer",
@@ -107,6 +123,15 @@ const TEMPLATES: Template[] = [
     icon: Star,
     desc: "Offre exclusive pour {first_name} ! Utilisez le code {offer_code} et bénéficiez de {discount}% sur votre prochain achat chez {company}.",
     category: "marketing",
+    requiredFields: ["Nom", "Prénom", "Téléphone"],
+    optionalFields: ["Email", "Code_promo", "Pourcentage"],
+    variables: [
+      "{first_name}",
+      "{last_name}",
+      "{offer_code}",
+      "{discount}",
+      "{company}",
+    ],
   },
   {
     id: "event_invitation",
@@ -114,14 +139,32 @@ const TEMPLATES: Template[] = [
     icon: Calendar,
     desc: "Cher(e) {first_name}, nous vous invitons à notre événement le {event_date}. {company} vous réserve des surprises !",
     category: "marketing",
+    requiredFields: ["Nom", "Prénom", "Téléphone"],
+    optionalFields: ["Email", "Date_événement"],
+    variables: ["{first_name}", "{last_name}", "{event_date}", "{company}"],
   },
-  // Transactional Templates
+
+  // Transactional Templates (4)
   {
     id: "order_confirmation",
     title: "Confirmation",
     icon: Check,
     desc: "Bonjour {first_name}, votre commande #{order_number} est confirmée. Montant: {payment_amount} FCFA. Merci de votre confiance !",
     category: "transactional",
+    requiredFields: [
+      "Nom",
+      "Prénom",
+      "Téléphone",
+      "Numéro_commande",
+      "Montant",
+    ],
+    optionalFields: ["Email", "Date_commande"],
+    variables: [
+      "{first_name}",
+      "{order_number}",
+      "{payment_amount}",
+      "{company}",
+    ],
   },
   {
     id: "delivery_status",
@@ -129,6 +172,14 @@ const TEMPLATES: Template[] = [
     icon: Send,
     desc: "Votre colis #{tracking_code} sera livré le {delivery_date}. Suivez votre livraison sur notre site. {company}",
     category: "transactional",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Numéro_suivi"],
+    optionalFields: ["Email", "Date_livraison"],
+    variables: [
+      "{first_name}",
+      "{tracking_code}",
+      "{delivery_date}",
+      "{company}",
+    ],
   },
   {
     id: "payment_receipt",
@@ -136,6 +187,22 @@ const TEMPLATES: Template[] = [
     icon: FileText,
     desc: "Reçu de paiement - {payment_amount} FCFA pour {service_name}. Référence: {reference}. Merci de votre confiance, {company}",
     category: "transactional",
+    requiredFields: [
+      "Nom",
+      "Prénom",
+      "Téléphone",
+      "Montant",
+      "Service",
+      "Référence",
+    ],
+    optionalFields: ["Email"],
+    variables: [
+      "{first_name}",
+      "{payment_amount}",
+      "{service_name}",
+      "{reference}",
+      "{company}",
+    ],
   },
   {
     id: "appointment_reminder",
@@ -143,14 +210,26 @@ const TEMPLATES: Template[] = [
     icon: Clock,
     desc: "Rappel: Votre RDV est prévu le {appointment_time} pour {service_name}. En cas d'empêchement, merci de nous contacter.",
     category: "transactional",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Heure_RDV", "Service"],
+    optionalFields: ["Email", "Lieu"],
+    variables: ["{first_name}", "{appointment_time}", "{service_name}"],
   },
-  // Academic Templates
+
+  // Academic Templates (9)
   {
     id: "trimester_grades",
     title: "Moyenne Trimestrielle",
     icon: Star,
     desc: "Bonjour, la moyenne trimestrielle de {student_name} en classe de {class_name} est de {average_grade}/20. Cordialement, {school_name}",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"],
+    optionalFields: ["Trimestre", "Établissement"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{average_grade}",
+      "{school_name}",
+    ],
   },
   {
     id: "exam_results",
@@ -158,6 +237,22 @@ const TEMPLATES: Template[] = [
     icon: Trophy,
     desc: "Les résultats de {student_name} ({class_name}): {exam_results}. Moyenne générale: {overall_average}/20. {school_name}",
     category: "academic",
+    requiredFields: [
+      "Nom",
+      "Prénom",
+      "Téléphone",
+      "Classe",
+      "Résultats",
+      "Moyenne_générale",
+    ],
+    optionalFields: ["Établissement"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{exam_results}",
+      "{overall_average}",
+      "{school_name}",
+    ],
   },
   {
     id: "success_congrats",
@@ -165,6 +260,14 @@ const TEMPLATES: Template[] = [
     icon: PartyPopper,
     desc: "Félicitations à {student_name} pour son excellente moyenne de {average_grade}/20 en {class_name} ! Continuez ainsi ! {school_name}",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"],
+    optionalFields: ["Établissement", "Matière"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{average_grade}",
+      "{school_name}",
+    ],
   },
   {
     id: "absence_alert",
@@ -172,6 +275,9 @@ const TEMPLATES: Template[] = [
     icon: Calendar,
     desc: "Nous vous informons de l'absence de {student_name} le {absence_date} en classe de {class_name}. Merci de justifier cette absence.",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Date_absence"],
+    optionalFields: ["Motif_absence"],
+    variables: ["{student_name}", "{class_name}", "{absence_date}"],
   },
   {
     id: "late_arrival",
@@ -179,6 +285,15 @@ const TEMPLATES: Template[] = [
     icon: Clock,
     desc: "Notification de retard",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Heure_arrivée"],
+    optionalFields: ["Date", "Motif"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{arrival_time}",
+      "{date}",
+      "{school_name}",
+    ],
   },
   {
     id: "parent_meeting",
@@ -186,6 +301,16 @@ const TEMPLATES: Template[] = [
     icon: Users,
     desc: "Invitation réunion parents-profs",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe"],
+    optionalFields: ["Date_réunion", "Heure_réunion", "Salle"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{meeting_date}",
+      "{meeting_time}",
+      "{room}",
+      "{school_name}",
+    ],
   },
   {
     id: "school_event",
@@ -193,6 +318,16 @@ const TEMPLATES: Template[] = [
     icon: CalendarDays,
     desc: "Événements scolaires",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe"],
+    optionalFields: ["Nom_événement", "Date_événement", "Lieu"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{event_name}",
+      "{event_date}",
+      "{location}",
+      "{school_name}",
+    ],
   },
   {
     id: "behavior_report",
@@ -200,6 +335,16 @@ const TEMPLATES: Template[] = [
     icon: AlertCircle,
     desc: "Rapport de comportement",
     category: "academic",
+    requiredFields: ["Nom", "Prénom", "Téléphone", "Classe", "Incident"],
+    optionalFields: ["Date_incident", "Mesure_prise"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{incident}",
+      "{date}",
+      "{measure}",
+      "{school_name}",
+    ],
   },
   {
     id: "homework_reminder",
@@ -207,6 +352,23 @@ const TEMPLATES: Template[] = [
     icon: FileText,
     desc: "Rappel des devoirs",
     category: "academic",
+    requiredFields: [
+      "Nom",
+      "Prénom",
+      "Téléphone",
+      "Classe",
+      "Matière",
+      "Devoir",
+    ],
+    optionalFields: ["Date_limite"],
+    variables: [
+      "{student_name}",
+      "{class_name}",
+      "{subject}",
+      "{homework}",
+      "{due_date}",
+      "{school_name}",
+    ],
   },
 ];
 
@@ -216,6 +378,7 @@ interface Contact {
   phone: string;
   average?: number;
   class?: string;
+  additionalFields?: Record<string, string>; // Pour stocker des champs dynamiques
 }
 
 // Add interface for SMS response
@@ -293,7 +456,9 @@ export default function NewCampaign() {
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [signature, setSignature] = useState<string>("");
+  const [signature, setSignature] = useState<string>(
+    session?.user?.companyName || "SY-PRESSING"
+  );
   const [messageStatuses, setMessageStatuses] = useState<MessageStatus[]>([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
 
@@ -384,7 +549,6 @@ export default function NewCampaign() {
   const handleTemplateChange = (templateId: TemplateId) => {
     setSelectedTemplate(templateId);
     const template = TEMPLATES.find((t) => t.id === templateId);
-    
     if (template) {
       let messageText = template.desc;
 
@@ -449,6 +613,83 @@ export default function NewCampaign() {
       console.log(messageText);
       setMessage(messageText);
     }
+  };
+
+  // Fonction pour générer les en-têtes de modèle en fonction du template
+  const getTemplateHeadersForTemplate = (templateId: TemplateId): string => {
+    const template = TEMPLATES.find((t) => t.id === templateId);
+    if (!template) {
+      // Retour par défaut basé sur la catégorie
+      return getTemplateHeaders();
+    }
+
+    // Combiner les champs requis et optionnels
+    const allFields = [
+      ...template.requiredFields,
+      ...(template.optionalFields || []),
+    ];
+    const header = allFields.join(",");
+
+    // Créer des données d'exemple basées sur le type de champ
+    const sampleData = allFields
+      .map((field) => {
+        const normalizedField = field
+          .toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "");
+
+        switch (normalizedField) {
+          case "nom":
+            return "Dupont";
+          case "prenom":
+            return "Jean";
+          case "telephone":
+            return "+33612345678";
+          case "classe":
+            return "6ème A";
+          case "moyenne":
+            return "15.5";
+          case "numerocommande":
+            return "CMD12345";
+          case "montant":
+            return "15000";
+          case "email":
+            return "jean.dupont@email.com";
+          case "datecommande":
+            return "01/03/2025";
+          case "trimestre":
+            return "T1";
+          case "matiere":
+            return "Mathématiques";
+          case "numerosuivi":
+            return "TRK12345";
+          case "datelivraison":
+            return "05/03/2025";
+          case "service":
+            return "Consultation";
+          case "reference":
+            return "REF98765";
+          case "heurerdv":
+            return "14:30";
+          case "dateabsence":
+            return "28/02/2025";
+          case "etablissement":
+            return "Collège Saint-Exupéry";
+          case "resultats":
+            return "Math:16,Français:14,Histoire:15";
+          case "moyennegenerale":
+            return "15.2";
+          case "incident":
+            return "Comportement perturbateur";
+          case "mesure_prise":
+            return "Convocation des parents";
+          default:
+            return "Exemple";
+        }
+      })
+      .join(",");
+
+    return `${header}\n${sampleData}`;
   };
 
   // Campaign options based on type
@@ -521,16 +762,106 @@ export default function NewCampaign() {
 
   // Handle file download
   const handleDownloadTemplate = () => {
-    const headers = getTemplateHeaders();
+    let headers;
+    if (selectedTemplate) {
+      headers = getTemplateHeadersForTemplate(selectedTemplate);
+    } else {
+      headers = getTemplateHeaders();
+    }
+
     const blob = new Blob([headers], { type: "text/csv" });
     const url = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `template_${campaignType}.csv`;
+    a.download = selectedTemplate
+      ? `template_${selectedTemplate}.csv`
+      : `template_${campaignType}.csv`;
     document.body.appendChild(a);
     a.click();
     window.URL.revokeObjectURL(url);
     document.body.removeChild(a);
+  };
+
+  // Composant pour afficher les informations sur les champs requis
+  const RequiredFieldsInfo = () => {
+    // Obtenir le template actuellement sélectionné
+    const template = selectedTemplate
+      ? TEMPLATES.find((t) => t.id === selectedTemplate)
+      : null;
+
+    // Si aucun template n'est sélectionné, montrer les informations par défaut
+    if (!template) {
+      return (
+        <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
+          <div className="font-medium text-gray-700">
+            Format de fichier requis :
+          </div>
+          <div className="space-y-1 text-gray-600">
+            <p>• Fichier CSV (séparateur: virgule)</p>
+            <p>• Encodage UTF-8</p>
+            <p>• Colonnes requises :</p>
+            <div className="pl-4">
+              {campaignType === "academic" ? (
+                <code className="text-[#67B142]">
+                  Nom,Prénom,Téléphone,Classe,Moyenne
+                </code>
+              ) : (
+                <code className="text-[#67B142]">Nom,Prénom,Téléphone</code>
+              )}
+            </div>
+            {campaignType === "academic" && (
+              <p>• Format moyenne : nombre décimal (ex: 15.5)</p>
+            )}
+          </div>
+        </div>
+      );
+    }
+
+    // Si un template est sélectionné, montrer les informations spécifiques
+    return (
+      <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
+        <div className="font-medium text-gray-700">
+          Format de fichier requis pour "{template.title}" :
+        </div>
+        <div className="space-y-1 text-gray-600">
+          <p>• Fichier CSV (séparateur: virgule)</p>
+          <p>• Encodage UTF-8</p>
+          <p>• Colonnes requises :</p>
+          <div className="pl-4">
+            <code className="text-[#67B142]">
+              {template.requiredFields.join(",")}
+            </code>
+          </div>
+          {template.optionalFields && template.optionalFields.length > 0 && (
+            <>
+              <p>• Colonnes optionnelles :</p>
+              <div className="pl-4">
+                <code className="text-blue-500">
+                  {template.optionalFields.join(",")}
+                </code>
+              </div>
+            </>
+          )}
+          {template.category === "academic" && (
+            <p>• Format moyenne : nombre décimal (ex: 15.5)</p>
+          )}
+
+          {/* Ajout d'exemples de variables */}
+          <p className="mt-2">• Variables disponibles dans ce template :</p>
+          <div className="pl-4 mt-1 flex flex-wrap gap-2">
+            {template.variables &&
+              template.variables.map((variable) => (
+                <span
+                  key={variable}
+                  className="px-2 py-1 bg-[#67B142]/10 text-[#67B142] rounded-md text-xs"
+                >
+                  {variable}
+                </span>
+              ))}
+          </div>
+        </div>
+      </div>
+    );
   };
 
   // Handle single contact form changes
@@ -588,7 +919,7 @@ export default function NewCampaign() {
     });
   };
 
-  // Update handleFileImport to properly handle class information
+  // Mise à jour de la fonction d'importation de fichiers
   const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -610,7 +941,7 @@ export default function NewCampaign() {
           return;
         }
 
-        // Normalize headers (remove accents, spaces, and convert to lowercase)
+        // Normaliser les en-têtes (supprimer les accents, espaces et convertir en minuscules)
         const headers = lines[0]
           .toLowerCase()
           .normalize("NFD")
@@ -618,54 +949,160 @@ export default function NewCampaign() {
           .split(",")
           .map((h) => h.trim());
 
-        // Map normalized headers to expected headers
+        // Dictionnaire de correspondance des en-têtes
         const headerMap = {
-          nom: ["nom", "name", "lastname"],
-          prenom: ["prenom", "firstname", "prénom"],
-          telephone: ["telephone", "phone", "tel", "téléphone"],
-          classe: ["classe", "class"],
-          moyenne: ["moyenne", "average", "note"],
+          nom: ["nom", "name", "lastname", "family"],
+          prenom: ["prenom", "firstname", "prénom", "first"],
+          telephone: [
+            "telephone",
+            "phone",
+            "tel",
+            "téléphone",
+            "mobile",
+            "portable",
+          ],
+          classe: ["classe", "class", "level"],
+          moyenne: ["moyenne", "average", "note", "grade", "avg"],
+          numerocommande: [
+            "numerocommande",
+            "ordernum",
+            "commande",
+            "order",
+            "order_number",
+            "numero",
+          ],
+          montant: [
+            "montant",
+            "amount",
+            "prix",
+            "payment",
+            "payment_amount",
+            "price",
+            "total",
+          ],
+          email: ["email", "courriel", "mail", "e-mail"],
+          datecommande: [
+            "datecommande",
+            "orderdate",
+            "date_commande",
+            "dateorder",
+          ],
+          trimestre: ["trimestre", "term", "semester"],
+          matiere: ["matiere", "matière", "subject", "course"],
+          numerosuivi: [
+            "numerosuivi",
+            "tracking",
+            "tracking_code",
+            "tracking_number",
+            "suivi",
+          ],
+          datelivraison: [
+            "datelivraison",
+            "delivery_date",
+            "date_livraison",
+            "deliverydate",
+          ],
+          service: ["service", "service_name", "servicename", "prestation"],
+          reference: ["reference", "ref", "reference_number"],
+          heurerdv: [
+            "heurerdv",
+            "appointment",
+            "rdv",
+            "horaire",
+            "time",
+            "appointment_time",
+          ],
+          dateabsence: ["dateabsence", "absence_date", "date_absence"],
+          etablissement: [
+            "etablissement",
+            "ecole",
+            "school",
+            "school_name",
+            "institution",
+          ],
+          resultats: ["resultats", "results", "exam_results", "notes"],
+          moyennegenerale: [
+            "moyennegenerale",
+            "overall_average",
+            "general_average",
+            "global_average",
+          ],
+          incident: ["incident", "behavior", "comportement"],
+          mesure_prise: ["mesure_prise", "mesure", "measure", "action"],
         };
 
-        // Find column indices using normalized headers
-        const findColumnIndex = (headerTypes: string[]) => {
-          return headers.findIndex((h) => headerTypes.includes(h));
-        };
+        // Obtenir les champs requis en fonction du template sélectionné
+        let requiredFields: string[] = [];
 
-        const nameIndex = findColumnIndex(headerMap.nom);
-        const firstNameIndex = findColumnIndex(headerMap.prenom);
-        const phoneIndex = findColumnIndex(headerMap.telephone);
-        const classIndex = findColumnIndex(headerMap.classe);
-        const averageIndex = findColumnIndex(headerMap.moyenne);
-
-        // Validate required headers
-        const missingRequired = [];
-        if (nameIndex === -1) missingRequired.push("Nom");
-        if (firstNameIndex === -1) missingRequired.push("Prénom");
-        if (phoneIndex === -1) missingRequired.push("Téléphone");
-
-        if (missingRequired.length > 0) {
-          setFileError(`Colonnes manquantes: ${missingRequired.join(", ")}`);
-          return;
-        }
-
-        // Additional validation for academic campaigns
-        if (campaignType === "academic") {
-          const missingAcademic = [];
-          if (classIndex === -1) missingAcademic.push("Classe");
-          if (averageIndex === -1) missingAcademic.push("Moyenne");
-
-          if (missingAcademic.length > 0) {
-            setFileError(
-              `Colonnes académiques manquantes: ${missingAcademic.join(", ")}`
+        if (selectedTemplate) {
+          // Si un template spécifique est sélectionné
+          const template = TEMPLATES.find((t) => t.id === selectedTemplate);
+          if (template) {
+            requiredFields = template.requiredFields.map((field) =>
+              field
+                .toLowerCase()
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
             );
-            return;
+          }
+        } else {
+          // Par défaut, basé sur le type de campagne
+          if (campaignType === "academic") {
+            requiredFields = [
+              "nom",
+              "prenom",
+              "telephone",
+              "classe",
+              "moyenne",
+            ];
+          } else {
+            requiredFields = ["nom", "prenom", "telephone"];
           }
         }
 
-        // Normalize class name to match predefined format
+        // Fonction pour trouver l'index de la colonne
+        const findColumnIndex = (fieldName: string): number => {
+          const possibleNames = headerMap[
+            fieldName as keyof typeof headerMap
+          ] || [fieldName];
+          return headers.findIndex((h) => possibleNames.includes(h));
+        };
+
+        // Vérifier les champs requis
+        const missingRequired = [];
+        for (const field of requiredFields) {
+          if (findColumnIndex(field) === -1) {
+            // Récupérer le nom d'origine pour l'affichage
+            const originalField = selectedTemplate
+              ? TEMPLATES.find(
+                  (t) => t.id === selectedTemplate
+                )?.requiredFields.find(
+                  (f) =>
+                    f
+                      .toLowerCase()
+                      .normalize("NFD")
+                      .replace(/[\u0300-\u036f]/g, "") === field
+                )
+              : field.charAt(0).toUpperCase() + field.slice(1);
+
+            if (originalField) {
+              missingRequired.push(originalField);
+            }
+          }
+        }
+
+        if (missingRequired.length > 0) {
+          setFileError(
+            `Colonnes requises manquantes: ${missingRequired.join(", ")}`
+          );
+          return;
+        }
+
+        // Le reste de votre code reste identique
+        // ...
+
+        // Normaliser le nom de classe
         const normalizeClassName = (className: string) => {
-          // Remove extra spaces and convert to proper format
           const normalized = className
             .trim()
             .toLowerCase()
@@ -688,8 +1125,8 @@ export default function NewCampaign() {
           if (values.length < 3) continue;
 
           let className =
-            classIndex !== -1
-              ? normalizeClassName(values[classIndex])
+            findColumnIndex("classe") !== -1
+              ? normalizeClassName(values[findColumnIndex("classe")])
               : undefined;
 
           // Validate class against predefined list for academic campaigns
@@ -704,17 +1141,27 @@ export default function NewCampaign() {
             }
           }
 
-          const contact: Contact = {
-            lastname: values[nameIndex],
-            firstname: values[firstNameIndex],
-            phone: values[phoneIndex],
-            ...(className ? { class: className } : {}),
-            ...(averageIndex !== -1
-              ? {
-                  average: parseFloat(values[averageIndex].replace(",", ".")),
-                }
-              : {}),
-          };
+          // Construire le contact dynamiquement en fonction des champs présents
+          const contact: Partial<Contact> = {};
+
+          // Traiter tous les champs disponibles
+          for (const [key, alternatives] of Object.entries(headerMap)) {
+            const index = headers.findIndex((h) => alternatives.includes(h));
+            if (index !== -1 && values[index]) {
+              if (key === "moyenne") {
+                contact.average = parseFloat(values[index].replace(",", "."));
+              } else if (key === "classe") {
+                contact.class = normalizeClassName(values[index]);
+              } else if (key === "nom") {
+                contact.lastname = values[index];
+              } else if (key === "prenom") {
+                contact.firstname = values[index];
+              } else if (key === "telephone") {
+                contact.phone = values[index];
+              }
+              // D'autres propriétés peuvent être ajoutées au besoin
+            }
+          }
 
           // Validate required fields
           if (!contact.lastname || !contact.firstname || !contact.phone) {
@@ -723,7 +1170,7 @@ export default function NewCampaign() {
           }
 
           // Validate phone number
-          if (!phoneRegex.test(contact.phone)) {
+          if (!contact.phone || !phoneRegex.test(contact.phone)) {
             console.warn(
               `Ligne ${lineNumber}: Format de téléphone invalide "${contact.phone}"`
             );
@@ -739,17 +1186,22 @@ export default function NewCampaign() {
           }
 
           // Validate average for academic campaigns
-          if (campaignType === "academic") {
+          if (
+            campaignType === "academic" &&
+            typeof contact.average !== "undefined"
+          ) {
             const avg = contact.average;
-            if (avg === undefined || isNaN(avg) || avg < 0 || avg > 20) {
+            if (isNaN(avg) || avg < 0 || avg > 20) {
               console.warn(
-                `Ligne ${lineNumber}: Moyenne invalide "${values[averageIndex]}"`
+                `Ligne ${lineNumber}: Moyenne invalide "${
+                  values[findColumnIndex("moyenne")]
+                }"`
               );
               continue;
             }
           }
 
-          importedContacts.push(contact);
+          importedContacts.push(contact as Contact);
         }
 
         if (importedContacts.length === 0) {
@@ -761,6 +1213,11 @@ export default function NewCampaign() {
         setContacts(importedContacts);
         setFileError("");
         e.target.value = "";
+
+        // Mise à jour du message si un template est sélectionné
+        if (selectedTemplate) {
+          handleTemplateChange(selectedTemplate);
+        }
       } catch (err) {
         console.error("Error importing file:", err);
         setFileError("Erreur lors de l'importation du fichier");
@@ -809,12 +1266,39 @@ export default function NewCampaign() {
     }
   };
 
+  // Fonction auxiliaire pour obtenir les champs requis pour le formulaire
+  const getDynamicFields = () => {
+    if (!selectedTemplate) return [];
+
+    const template = TEMPLATES.find((t) => t.id === selectedTemplate);
+    if (!template) return [];
+
+    // Filtrer pour exclure les champs déjà présents dans le formulaire de base
+    const standardFields = ["Nom", "Prénom", "Téléphone", "Classe", "Moyenne"];
+    const additionalFields = [
+      ...template.requiredFields,
+      ...(template.optionalFields || []),
+    ].filter((field) => !standardFields.includes(field));
+
+    return additionalFields;
+  };
+
   const handleCampaignNameChange = (name: string) => {
     setCampaignData((prev) => ({ ...prev, name }));
   };
 
   const handleSendCampaign = async () => {
-    alert(message);
+    for (const contact of contacts) {
+      console.log({
+        recipient: contact.phone,
+        message: message,
+        campaignId: campaignData.id,
+        campaignName: campaignData.name,
+        signature,
+      });
+    }
+
+    // alert(message);
     // if (!campaignData.name.trim()) {
     //   toast.error("Veuillez donner un nom à votre campagne", {
     //     style: { backgroundColor: "#EF4444", color: "white" },
@@ -829,6 +1313,7 @@ export default function NewCampaign() {
     // try {
     //   for (const contact of contacts) {
     //     try {
+
     //       const response = await fetch("/api/sms/send", {
     //         method: "POST",
     //         headers: { "Content-Type": "application/json" },
@@ -837,9 +1322,17 @@ export default function NewCampaign() {
     //           message: message,
     //           campaignId: campaignData.id,
     //           campaignName: campaignData.name,
-    //           signature: campaignData.signature,
+    //           signature,
     //         }),
     //       });
+
+    //       // console.log({
+    //       //   recipient: contact.phone,
+    //       //   message: message,
+    //       //   campaignId: campaignData.id,
+    //       //   campaignName: campaignData.name,
+    //       //   signature,
+    //       // });
 
     //       const responseText = await response.text();
     //       const parsedResponse = parseHTMLResponse(responseText);
@@ -868,7 +1361,7 @@ export default function NewCampaign() {
     //           parsedResponse.statusCode === "200" ? undefined : errorDetails,
     //       };
 
-    //       setMessageStatuses((prev) => [...prev, messageStatus]);
+    //       // setMessageStatuses((prev) => [...prev, messageStatus]);
     //       successMessages.push(messageStatus);
     //     } catch (error) {
     //       const errorMessage =
@@ -996,6 +1489,15 @@ export default function NewCampaign() {
     } finally {
       setIsSaving(false);
     }
+  };
+
+  // Obtenir les variables en fonction du template sélectionné
+  const getVariablesForTemplate = (templateId: TemplateId): string[] => {
+    const template = TEMPLATES.find((t) => t.id === templateId);
+    if (template) {
+      return template.variables;
+    }
+    return getVariables();
   };
 
   // Déclencher la sauvegarde automatique lors des modifications
@@ -1246,6 +1748,21 @@ export default function NewCampaign() {
                 </span>
               </div>
               <p className="text-sm text-gray-600">{template.desc}</p>
+              {selectedTemplate === template.id && (
+                <div className="mt-3 pt-3 border-t border-dashed border-gray-200">
+                  <div className="text-xs text-gray-500">Variables:</div>
+                  <div className="flex flex-wrap gap-1 mt-1">
+                    {template.variables.map((variable) => (
+                      <span
+                        key={variable}
+                        className="px-1.5 py-0.5 bg-[#67B142]/10 text-[#67B142] rounded text-xs"
+                      >
+                        {variable}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
             </motion.div>
           ))}
         </motion.div>
@@ -1331,7 +1848,7 @@ export default function NewCampaign() {
               </div>
             </div>
 
-            {/* Variables Section - Dynamic based on campaign type */}
+            {/* Variables Section - Dynamic based on template/campaign type */}
             <div className="space-y-4">
               <div className="flex items-center gap-2">
                 <Tag className="w-4 h-4 text-[#67B142]" />
@@ -1340,22 +1857,41 @@ export default function NewCampaign() {
                 </span>
               </div>
               <div className="flex flex-wrap gap-2">
-                {getVariables().map((variable) => (
-                  <motion.div
-                    key={variable}
-                    whileHover={{ scale: 1.05 }}
-                    whileTap={{ scale: 0.95 }}
-                  >
-                    <Button
-                      variant="secondary"
-                      size="sm"
-                      className="bg-[#67B142]/10 hover:bg-[#67B142]/20 text-[#67B142] border-none rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
-                      onClick={() => setMessage(message + variable)}
-                    >
-                      {variable}
-                    </Button>
-                  </motion.div>
-                ))}
+                {selectedTemplate
+                  ? getVariablesForTemplate(selectedTemplate).map(
+                      (variable) => (
+                        <motion.div
+                          key={variable}
+                          whileHover={{ scale: 1.05 }}
+                          whileTap={{ scale: 0.95 }}
+                        >
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            className="bg-[#67B142]/10 hover:bg-[#67B142]/20 text-[#67B142] border-none rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                            onClick={() => setMessage(message + variable)}
+                          >
+                            {variable}
+                          </Button>
+                        </motion.div>
+                      )
+                    )
+                  : getVariables().map((variable) => (
+                      <motion.div
+                        key={variable}
+                        whileHover={{ scale: 1.05 }}
+                        whileTap={{ scale: 0.95 }}
+                      >
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          className="bg-[#67B142]/10 hover:bg-[#67B142]/20 text-[#67B142] border-none rounded-xl shadow-sm hover:shadow-md transition-all duration-300"
+                          onClick={() => setMessage(message + variable)}
+                        >
+                          {variable}
+                        </Button>
+                      </motion.div>
+                    ))}
               </div>
             </div>
 
@@ -1578,31 +2114,8 @@ export default function NewCampaign() {
                 </div>
               </div>
 
-              {/* File Format Information */}
-              <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
-                <div className="font-medium text-gray-700">
-                  Format de fichier requis :
-                </div>
-                <div className="space-y-1 text-gray-600">
-                  <p>• Fichier CSV (séparateur: virgule)</p>
-                  <p>• Encodage UTF-8</p>
-                  <p>• Colonnes requises :</p>
-                  <div className="pl-4">
-                    {campaignType === "academic" ? (
-                      <code className="text-[#67B142]">
-                        Nom,Prénom,Téléphone,Classe,Moyenne
-                      </code>
-                    ) : (
-                      <code className="text-[#67B142]">
-                        Nom,Prénom,Téléphone
-                      </code>
-                    )}
-                  </div>
-                  {campaignType === "academic" && (
-                    <p>• Format moyenne : nombre décimal (ex: 15.5)</p>
-                  )}
-                </div>
-              </div>
+              {/* File Format Information - Dynamic based on template */}
+              <RequiredFieldsInfo />
 
               {contacts.length === 0 ? (
                 // Single Contact Form
@@ -1665,6 +2178,28 @@ export default function NewCampaign() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+                  )}
+                  {/* AJOUTEZ LA SECTION DYNAMIQUE ICI, JUSTE APRÈS LES CHAMPS ACADÉMIQUES */}
+                  {selectedTemplate && getDynamicFields().length > 0 && (
+                    <div className="space-y-4 pt-3 border-t border-dashed border-gray-200">
+                      <h3 className="text-sm font-medium text-gray-700">
+                        Champs spécifiques au template
+                      </h3>
+
+                      <div className="grid grid-cols-1 gap-3">
+                        {getDynamicFields().map((field) => (
+                          <Input
+                            key={field}
+                            placeholder={field}
+                            className="border-2 rounded-xl"
+                            onChange={(e) => {
+                              // Ici, vous auriez besoin d'un système pour stocker ces valeurs
+                              console.log(`${field}:`, e.target.value);
+                            }}
+                          />
+                        ))}
+                      </div>
                     </div>
                   )}
                   {fileError && (
@@ -1882,6 +2417,7 @@ export default function NewCampaign() {
                     <SelectItem value={session?.user.companyName || ""}>
                       {session?.user.companyName || ""}
                     </SelectItem>
+                    <SelectItem value="SY-PRESSING">SY-PRESSING</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
