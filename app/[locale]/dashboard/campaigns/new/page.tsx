@@ -1310,7 +1310,7 @@ export default function NewCampaign() {
               message: message,
               campaignId: campaignData.id,
               campaignName: campaignData.name,
-              signature: campaignData.signature,
+              signature,
             }),
           });
 

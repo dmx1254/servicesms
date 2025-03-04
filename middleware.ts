@@ -58,7 +58,7 @@ export const config = {
     // Routes i18n (exclut les fichiers statiques et les API)
     "/((?!api|static|.*\\..*|_next|favicon.ico|robots.txt).*)",
     "/dashboard/:path*",
-    "/api/sms/:path*",
-    "/api/payments/:path*",
+    // "/api/sms/:path*",
+    // "/api/payments/:path*",
   ],
 };
