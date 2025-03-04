@@ -479,7 +479,7 @@ export default function NewCampaign() {
     name: "",
     contacts: [],
     message: "",
-    signature: session?.user?.companyName || "",
+    signature,
     responseType: "no-response",
   });
 
@@ -1288,43 +1288,31 @@ export default function NewCampaign() {
   };
 
   const handleSendCampaign = async () => {
-    for (const contact of contacts) {
-      console.log({
-        recipient: contact.phone,
-        message: message,
-        campaignId: campaignData.id,
-        campaignName: campaignData.name,
-        signature,
+    if (!campaignData.name.trim()) {
+      toast.error("Veuillez donner un nom à votre campagne", {
+        style: { backgroundColor: "#EF4444", color: "white" },
       });
+      return;
     }
 
-    // alert(message);
-    // if (!campaignData.name.trim()) {
-    //   toast.error("Veuillez donner un nom à votre campagne", {
-    //     style: { backgroundColor: "#EF4444", color: "white" },
-    //   });
-    //   return;
-    // }
+    setLoading(true);
+    const failedMessages: MessageStatus[] = [];
+    const successMessages: MessageStatus[] = [];
 
-    // setLoading(true);
-    // const failedMessages: MessageStatus[] = [];
-    // const successMessages: MessageStatus[] = [];
-
-    // try {
-    //   for (const contact of contacts) {
-    //     try {
-
-    //       const response = await fetch("/api/sms/send", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({
-    //           recipient: contact.phone,
-    //           message: message,
-    //           campaignId: campaignData.id,
-    //           campaignName: campaignData.name,
-    //           signature,
-    //         }),
-    //       });
+    try {
+      for (const contact of contacts) {
+        try {
+          const response = await fetch("/api/sms/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              recipient: contact.phone,
+              message: message,
+              campaignId: campaignData.id,
+              campaignName: campaignData.name,
+              signature: campaignData.signature,
+            }),
+          });
 
     //       // console.log({
     //       //   recipient: contact.phone,
