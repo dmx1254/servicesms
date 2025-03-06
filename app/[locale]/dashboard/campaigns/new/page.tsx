@@ -2043,12 +2043,12 @@ export default function NewCampaign() {
               </div>
               <div className="relative">
                 <Input
-                  placeholder="Nom de l'émetteur"
+                  placeholder={session?.user?.companyName || "?"}
                   maxLength={11}
                   className="max-w-[200px] border-2 focus:border-[#67B142] rounded-xl"
                 />
                 <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm font-medium text-[#67B142]">
-                  8/11
+                  {session?.user?.companyName.length ?? 8}/11
                 </div>
               </div>
             </motion.div>
