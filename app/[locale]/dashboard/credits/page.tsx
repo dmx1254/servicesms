@@ -23,6 +23,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { color } from "framer-motion";
+import { toast } from "sonner";
 // import { toast } from "sonner";
 
 interface SMSPackage {
@@ -94,7 +95,6 @@ export default function CreditsPage() {
   const [phoneNumber, setPhoneNumber] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPaymentDialog, setShowPaymentDialog] = useState(false);
-  import { toast } from "sonner";
 
   const handlePurchase = async (pkg: SMSPackage) => {
     setSelectedPackage(pkg);
@@ -138,10 +138,10 @@ export default function CreditsPage() {
       window.location.href = data.paymentUrl;
     } catch (error) {
       console.error("Payment error:", error);
-      toast({
-        title: "Erreur de paiement",
-        description: "Une erreur est survenue lors du paiement",
-        variant: "destructive",
+      toast.error("Une erreur est survenue lors du paiement", {
+        style:{
+          color: "#ef4444"
+        }
       });
     } finally {
       setLoading(false);

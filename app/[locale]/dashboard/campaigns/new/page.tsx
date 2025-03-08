@@ -475,6 +475,12 @@ export default function NewCampaign() {
     success: false,
     fileName: null,
   });
+  const [timest, setTimest] = useState<number>(0);
+
+  // console.log("scheduledDate: " + scheduledDate);
+  // console.log("selectedHour: " + selectedHour);
+
+  // console.log(timest);
 
   // New state for single contact form
   const [singleContact, setSingleContact] = useState<Contact>({
@@ -495,6 +501,21 @@ export default function NewCampaign() {
       success: false,
       fileName: file.name,
     });
+
+    // useEffect(() => {
+    //   // Extraction des heures et minutes de selectedHour
+    //   if (!scheduledDate) return;
+    //   const [hours, minutes] = selectedHour.split(":").map(Number);
+
+    //   // Création d'une nouvelle date en combinant scheduledDate et selectedHour
+    //   const combinedDateTime = new Date(scheduledDate);
+    //   combinedDateTime.setHours(hours, minutes, 0, 0);
+    //   const timestamp = combinedDateTime.getTime();
+    //   console.log(scheduledDate);
+    //   console.log(selectedHour);
+    //   console.log(timestamp);
+    //   setTimest(timestamp);
+    // }, [scheduledDate, selectedHour]);
 
     // console.log(file);
 
@@ -816,10 +837,11 @@ export default function NewCampaign() {
     setSelectedTemplate(undefined);
     setContacts([]);
     setSingleContact({
-      lastname: "",
-      firstname: "",
-      phone: "",
-      average: undefined,
+      prenom: "",
+      nom: "",
+      telephone: "",
+      moyenne: undefined,
+      classe: undefined,
     });
     if (type === "academic") {
       setStudentGrade(0);
@@ -1003,7 +1025,7 @@ export default function NewCampaign() {
     });
   };
 
-  console.log(singleContact);
+  // console.log(singleContact);
 
   // Mise à jour de la fonction d'importation de fichiers
   // const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {

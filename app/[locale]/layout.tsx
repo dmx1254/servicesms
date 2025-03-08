@@ -34,7 +34,7 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className={rubik.className}>
         <Providers locale={locale}>
-          <div className="min-h-screen antialiased">
+          <div className={`${rubik.variable} min-h-screen antialiased`}>
             <Toaster />
             {children}
           </div>

@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useCurrentLocale, useScopedI18n } from "@/locales/client";
+import DashTopBar from "@/components/DashTopBar";
 
 export default function DashboardLayout({
   children,
@@ -175,14 +176,20 @@ export default function DashboardLayout({
                     <div
                       className={cn(
                         "transition-transform duration-200",
-                        pathname === `/${locale}${item.href.split(locale)[1]}` && "scale-110"
+                        pathname ===
+                          `/${locale}${item.href.split(locale)[1]}` &&
+                          "scale-110"
                       )}
                     >
                       {item.icon}
                     </div>
                     <motion.span
                       variants={textVariants}
-                      className={cn(pathname === `/${locale}${item.href.split(locale)[1]}` && "font-medium")}
+                      className={cn(
+                        pathname ===
+                          `/${locale}${item.href.split(locale)[1]}` &&
+                          "font-medium"
+                      )}
                     >
                       {item.title}
                     </motion.span>
@@ -246,10 +253,11 @@ export default function DashboardLayout({
           transition: { duration: 0.3, ease: "easeInOut" },
         }}
       >
-        <header className="sticky top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-gray-200">
-          <div className="px-8 py-4">
+        <header className="sticky flex items-center justify-end h-14 top-0 z-30 bg-white/80 backdrop-blur-sm border-b border-gray-200">
+          {/* <div className="px-8 py-4">
             <Breadcrumb />
-          </div>
+          </div> */}
+          <DashTopBar />
         </header>
         <main className="p-8">{children}</main>
       </motion.div>

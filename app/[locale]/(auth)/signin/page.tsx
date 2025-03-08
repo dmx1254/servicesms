@@ -207,7 +207,7 @@ export default function SignIn() {
               </Button>
             </motion.div>
 
-            <div className="relative my-8">
+            {/* <div className="relative my-8">
               <div className="absolute inset-0 flex items-center">
                 <div className="w-full border-t border-gray-200"></div>
               </div>
@@ -216,7 +216,7 @@ export default function SignIn() {
                   Ou continuez avec
                 </span>
               </div>
-            </div>
+            </div> */}
 
             {/* <motion.div
               initial={{ opacity: 0, y: 20 }}

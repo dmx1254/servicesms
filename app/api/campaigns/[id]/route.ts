@@ -41,7 +41,7 @@ export async function GET(
       userId: session.user.id,
     });
 
-    console.log("Résultat de la recherche:", campaign);
+    // console.log("Résultat de la recherche:", campaign);
 
     if (!campaign) {
       console.log("Campagne non trouvée pour l'ID:", campaignId.id);
