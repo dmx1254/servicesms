@@ -37,7 +37,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    const { recipient, message, campaignId, campaignName, signature } =
+    const { recipient, message, campaignId, campaignName, signature, timest } =
       await req.json();
     // const data = await request.json();
 
@@ -47,6 +47,7 @@ export async function POST(req: Request) {
       campaignId,
       campaignName,
       signature,
+      timest,
     });
 
     if (!recipient || !message || !campaignId || !campaignName) {
@@ -56,7 +57,7 @@ export async function POST(req: Request) {
       );
     }
 
-    const timestamp = Math.floor(Date.now() / 1000);
+    const timestamp = timest ? timest : Math.floor(Date.now() / 1000);
     const subject = "API_SMS";
     const key = generateKey(
       SMS_PRO_TOKEN,

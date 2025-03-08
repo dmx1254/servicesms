@@ -1,9 +1,9 @@
 import mongoose, { Document } from "mongoose";
 
 interface IContact {
-  firstname: string;
-  lastname: string;
-  phone: string;
+  prenom: string;
+  nom: string;
+  telephone: string;
   status?: "sent" | "delivered" | "failed";
   errorMessage?: string;
 }
@@ -25,9 +25,9 @@ interface ICampaign extends Document {
 }
 
 const contactSchema = new mongoose.Schema<IContact>({
-  firstname: { type: String, required: true },
-  lastname: { type: String, required: true },
-  phone: { type: String, required: true },
+  prenom: { type: String, required: true },
+  nom: { type: String, required: true },
+  telephone: { type: String, required: true },
   status: {
     type: String,
     enum: ["sent", "delivered", "failed"],
@@ -38,6 +38,7 @@ const contactSchema = new mongoose.Schema<IContact>({
 
 const campaignSchema = new mongoose.Schema<ICampaign>(
   {
+    id: { type: String, required: true },
     userId: { type: String, required: true, index: true },
     name: { type: String, required: true },
     type: {
@@ -64,18 +65,20 @@ const campaignSchema = new mongoose.Schema<ICampaign>(
   }
 );
 
-// Convertir _id en id
-campaignSchema.set("toJSON", {
-  virtuals: true,
-  versionKey: false,
-  transform: function (doc: Document, ret: Record<string, unknown>) {
-    ret.id = ret._id;
-    delete ret._id;
-    delete ret.__v;
-  },
-});
+// // Convertir _id en id
+// campaignSchema.set("toJSON", {
+//   virtuals: true,
+//   versionKey: false,
+//   transform: function (doc: Document, ret: Record<string, unknown>) {
+//     ret.id = ret._id;
+//     delete ret._id;
+//     delete ret.__v;
+//   },
+// });
 
-const CampaignModel = mongoose.models.Campaign || mongoose.model<ICampaign>("Campaign", campaignSchema);
+const CampaignModel =
+  mongoose.models.Campaign ||
+  mongoose.model<ICampaign>("Campaign", campaignSchema);
 
 export type { ICampaign, IContact };
 export default CampaignModel;

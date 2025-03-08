@@ -2,12 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useUser } from "@/app/hooks/useUser";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import {
   AreaChart,
@@ -97,15 +92,18 @@ export default function Dashboard() {
     recentCampaigns: [],
   });
 
+  // console.log(stats);
+
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         const response = await fetch("/api/campaigns");
         const data = await response.json();
-        
-        if (data.success) {
-          const campaigns: Campaign[] = data.data;
-          
+
+        // console.log(data);
+        if (data) {
+          const campaigns: Campaign[] = data;
+
           // Calculate statistics
           const totalContacts = campaigns.reduce(
             (sum, campaign) => sum + campaign.contacts.length,
@@ -115,7 +113,8 @@ export default function Dashboard() {
           const campaignsByType = {
             academic: campaigns.filter((c) => c.type === "academic").length,
             marketing: campaigns.filter((c) => c.type === "marketing").length,
-            transactional: campaigns.filter((c) => c.type === "transactional").length,
+            transactional: campaigns.filter((c) => c.type === "transactional")
+              .length,
           };
 
           const campaignsByStatus = {
@@ -132,7 +131,11 @@ export default function Dashboard() {
             campaignsByType,
             campaignsByStatus,
             recentCampaigns: campaigns
-              .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+              .sort(
+                (a, b) =>
+                  new Date(b.createdAt).getTime() -
+                  new Date(a.createdAt).getTime()
+              )
               .slice(0, 5),
           });
         }
@@ -145,12 +148,14 @@ export default function Dashboard() {
   }, []);
 
   // Generate sample timeline data
-  const timelineData: TimelineData[] = Array.from({ length: 7 }).map((_, i) => ({
-    date: format(subDays(new Date(), i), "dd MMM", { locale: fr }),
-    academic: Math.floor(Math.random() * 5),
-    marketing: Math.floor(Math.random() * 8),
-    transactional: Math.floor(Math.random() * 6),
-  })).reverse();
+  const timelineData: TimelineData[] = Array.from({ length: 7 })
+    .map((_, i) => ({
+      date: format(subDays(new Date(), i), "dd MMM", { locale: fr }),
+      academic: Math.floor(Math.random() * 5),
+      marketing: Math.floor(Math.random() * 8),
+      transactional: Math.floor(Math.random() * 6),
+    }))
+    .reverse();
 
   const statusData: ChartData[] = [
     { name: "Brouillons", value: stats.campaignsByStatus.draft },
@@ -195,7 +200,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalCampaigns}</div>
             <div className="mt-2 bg-emerald-100 rounded-full h-2 overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-emerald-500 transition-all duration-500"
                 style={{ width: `${(stats.totalCampaigns / 100) * 100}%` }}
               />
@@ -218,13 +223,14 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalContacts}</div>
             <div className="mt-2 bg-blue-100 rounded-full h-2 overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-blue-500 transition-all duration-500"
                 style={{ width: `${(stats.totalContacts / 1000) * 100}%` }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              {Math.round((stats.totalContacts / 1000) * 100)}% de l&apos;objectif
+              {Math.round((stats.totalContacts / 1000) * 100)}% de
+              l&apos;objectif
             </p>
           </CardContent>
         </Card>
@@ -241,13 +247,17 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{stats.totalSent}</div>
             <div className="mt-2 bg-purple-100 rounded-full h-2 overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-purple-500 transition-all duration-500"
-                style={{ width: `${(stats.totalSent / stats.totalCampaigns) * 100}%` }}
+                style={{
+                  width: `${(stats.totalSent / stats.totalCampaigns) * 100}%`,
+                }}
               />
             </div>
             <p className="text-xs text-gray-500 mt-2">
-              Taux d&apos;envoi: {Math.round((stats.totalSent / stats.totalCampaigns) * 100)}%
+              Taux d&apos;envoi:{" "}
+              {Math.round(Number(stats.totalSent / stats.totalCampaigns) * 100)}
+              %
             </p>
           </CardContent>
         </Card>
@@ -269,18 +279,18 @@ export default function Dashboard() {
               %
             </div>
             <div className="mt-2 bg-amber-100 rounded-full h-2 overflow-hidden">
-              <div 
+              <div
                 className="h-full bg-amber-500 transition-all duration-500"
-                style={{ 
-                  width: `${stats.totalSent > 0
-                    ? (stats.totalSent / stats.totalCampaigns) * 100
-                    : 0}%` 
+                style={{
+                  width: `${
+                    stats.totalSent > 0
+                      ? (stats.totalSent / stats.totalCampaigns) * 100
+                      : 0
+                  }%`,
                 }}
               />
             </div>
-            <p className="text-xs text-gray-500 mt-2">
-              Performance globale
-            </p>
+            <p className="text-xs text-gray-500 mt-2">Performance globale</p>
           </CardContent>
         </Card>
       </div>
@@ -327,7 +337,12 @@ export default function Dashboard() {
               <div className="mt-8">
                 <Legend
                   className="mb-6"
-                  categories={["Brouillons", "Programmées", "Envoyées", "Modèles"]}
+                  categories={[
+                    "Brouillons",
+                    "Programmées",
+                    "Envoyées",
+                    "Modèles",
+                  ]}
                   colors={["gray", "purple", "emerald", "pink"]}
                 />
                 <LineChart
@@ -410,4 +425,4 @@ export default function Dashboard() {
       </TremorCard>
     </div>
   );
-} 
+}

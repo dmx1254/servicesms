@@ -19,7 +19,9 @@ export async function GET() {
       userId: session.user.id,
     }).sort({ createdAt: -1 });
 
-    return NextResponse.json(campaigns);
+    console.log(campaigns);
+
+    return NextResponse.json(campaigns, { status: 200 });
   } catch (error) {
     console.error("Error fetching campaigns:", error);
     return NextResponse.json(
@@ -39,12 +41,12 @@ export async function POST(request: Request) {
 
     const body = await request.json();
 
-    const data  = {
+    const data = {
       ...body,
       userId: session.user.id,
       recipientCount: body.contacts?.length || 0,
-    }
-    console.log(body);
+    };
+    // console.log(body);
     const campaign = CampaignModel.create(data);
 
     return NextResponse.json(campaign, { status: 201 });

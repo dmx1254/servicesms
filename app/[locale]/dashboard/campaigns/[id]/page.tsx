@@ -68,6 +68,11 @@ export default function CampaignDetails() {
   const params = useParams();
   const campaignId = params.id as string;
 
+  // console.log(campaign);
+
+  // console.log("params ", params);
+  // console.log("campaignId ", campaignId);
+
   useEffect(() => {
     const fetchCampaign = async () => {
       try {
@@ -228,8 +233,10 @@ export default function CampaignDetails() {
 
   const successRate =
     campaign.recipientCount > 0
-      ? Math.round((campaign.successCount / campaign.recipientCount) * 100)
+      ? Math.round((campaign.contacts.length / campaign.recipientCount) * 100)
       : 0;
+
+      
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
@@ -379,7 +386,7 @@ export default function CampaignDetails() {
                   <div className="text-2xl font-bold">{successRate}%</div>
                   <Progress value={successRate} className="h-2" />
                   <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{campaign.successCount} réussis</span>
+                    <span>{campaign.recipientCount} réussis</span>
                     <span>{campaign.failureCount} échoués</span>
                   </div>
                 </div>

@@ -57,6 +57,7 @@ import {
 import { useDropzone } from "react-dropzone";
 import LoadingDialog from "@/components/LoadingImport";
 import { rewriteMessage } from "@/app/lib/utils/parseMessage";
+import { v4 as uuidv4 } from "uuid";
 
 type TemplateId =
   // Academic templates
@@ -502,23 +503,6 @@ export default function NewCampaign() {
       fileName: file.name,
     });
 
-    // useEffect(() => {
-    //   // Extraction des heures et minutes de selectedHour
-    //   if (!scheduledDate) return;
-    //   const [hours, minutes] = selectedHour.split(":").map(Number);
-
-    //   // Création d'une nouvelle date en combinant scheduledDate et selectedHour
-    //   const combinedDateTime = new Date(scheduledDate);
-    //   combinedDateTime.setHours(hours, minutes, 0, 0);
-    //   const timestamp = combinedDateTime.getTime();
-    //   console.log(scheduledDate);
-    //   console.log(selectedHour);
-    //   console.log(timestamp);
-    //   setTimest(timestamp);
-    // }, [scheduledDate, selectedHour]);
-
-    // console.log(file);
-
     const formData = new FormData();
     formData.append("file", file);
 
@@ -578,7 +562,7 @@ export default function NewCampaign() {
 
   // Add new state for campaign data
   const [campaignData, setCampaignData] = useState<CampaignData>({
-    id: crypto.randomUUID(),
+    id: uuidv4(),
     name: "",
     contacts: [],
     message: "",
@@ -1397,7 +1381,7 @@ export default function NewCampaign() {
     setCampaignData((prev) => ({ ...prev, name }));
   };
 
-  const autoSaveCampaign = async () => {
+  const autoSaveCampaign = async (campagnType?: string) => {
     if (!campaignData.name || !session?.user?.id) return;
 
     setIsSaving(true);
@@ -1410,7 +1394,11 @@ export default function NewCampaign() {
           type: campaignType,
           message: message,
           contacts,
-          status: "draft",
+          status: campagnType
+            ? campagnType
+            : scheduledTime === "scheduled"
+            ? "scheduled"
+            : "draft",
         }),
       });
       setLastSaved(new Date());
@@ -1421,122 +1409,128 @@ export default function NewCampaign() {
     }
   };
 
-  const handleSendCampaign = async () => {
-    for (const contact of contacts) {
-      const newMessage = rewriteMessage(contact, message, signature);
-      console.log(contact);
+  // console.log(campaignData);
 
-      console.log(newMessage);
+  const handleSendCampaign = async () => {
+    // for (const contact of contacts) {
+    //   const newMessage = rewriteMessage(contact, message, signature);
+    //   console.log(contact);
+
+    //   console.log(newMessage);
+    // }
+
+    if (!campaignData.name.trim()) {
+      toast.error("Veuillez donner un nom à votre campagne", {
+        style: { backgroundColor: "#EF4444", color: "white" },
+      });
+      return;
     }
 
-    // if (!campaignData.name.trim()) {
-    //   toast.error("Veuillez donner un nom à votre campagne", {
-    //     style: { backgroundColor: "#EF4444", color: "white" },
-    //   });
-    //   return;
-    // }
+    if (contacts.length < 1) {
+      toast.error("Veuillez ajouter au moins un contact", {
+        style: { backgroundColor: "#EF4444", color: "white" },
+      });
+      return;
+    }
 
-    // if (contacts.length < 1) {
-    //   toast.error("Veuillez ajouter au moins un contact", {
-    //     style: { backgroundColor: "#EF4444", color: "white" },
-    //   });
-    //   return;
-    // }
+    setLoading(true);
+    const failedMessages: MessageStatus[] = [];
+    const successMessages: MessageStatus[] = [];
 
-    // setLoading(true);
-    // const failedMessages: MessageStatus[] = [];
-    // const successMessages: MessageStatus[] = [];
+    try {
+      for (const contact of contacts) {
+        try {
+          const newMessage = rewriteMessage(contact, message, signature);
+          const response = await fetch("/api/sms/send", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              recipient: contact.telephone,
+              message: newMessage,
+              campaignId: campaignData.id,
+              campaignName: campaignData.name,
+              signature,
+              timest: timest,
+            }),
+          });
 
-    // try {
-    //   for (const contact of contacts) {
-    //     try {
-    //       const newMessage = rewriteMessage(contact, message, signature);
-    //       const response = await fetch("/api/sms/send", {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({
-    //           recipient: contact.phone,
-    //           message: message,
-    //           campaignId: campaignData.id,
-    //           campaignName: campaignData.name,
-    //           signature,
-    //         }),
-    //       });
+          //       // console.log({
+          //       //   recipient: contact.phone,
+          //       //   message: message,
+          //       //   campaignId: campaignData.id,
+          //       //   campaignName: campaignData.name,
+          //       //   signature,
+          //       // });
 
-    //       //       // console.log({
-    //       //       //   recipient: contact.phone,
-    //       //       //   message: message,
-    //       //       //   campaignId: campaignData.id,
-    //       //       //   campaignName: campaignData.name,
-    //       //       //   signature,
-    //       //       // });
+          const responseText = await response.text();
+          await autoSaveCampaign("sent");
+          const parsedResponse = parseHTMLResponse(responseText);
 
-    //       const responseText = await response.text();
-    //       const parsedResponse = parseHTMLResponse(responseText);
+          if (!parsedResponse) {
+            throw new Error(
+              `Failed to parse response for ${contact.telephone}`
+            );
+          }
 
-    //       if (!parsedResponse) {
-    //         throw new Error(`Failed to parse response for ${contact.phone}`);
-    //       }
+          const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
 
-    //       const errorDetails = getSMSErrorDetails(parsedResponse.statusCode);
+          if (parsedResponse.statusCode !== "200") {
+            throw new Error(formatSMSErrorMessage(errorDetails));
+          }
 
-    //       if (parsedResponse.statusCode !== "200") {
-    //         throw new Error(formatSMSErrorMessage(errorDetails));
-    //       }
+          // Add to message statuses
+          const messageStatus: MessageStatus = {
+            messageId: parsedResponse.messageId,
+            messageDetailId: parsedResponse.messageDetailId,
+            recipient: parsedResponse.recipient,
+            contact,
+            status: "sent",
+            timestamp: new Date(),
+            errorDetails:
+              parsedResponse.statusCode === "200" ? undefined : errorDetails,
+          };
 
-    //       await autoSaveCampaign();
+          // setMessageStatuses((prev) => [...prev, messageStatus]);
+          successMessages.push(messageStatus);
+        } catch (error) {
+          const errorMessage =
+            error instanceof Error ? error.message : "Erreur inconnue";
+          failedMessages.push({
+            messageId: "",
+            messageDetailId: "",
+            recipient: contact.telephone,
+            contact,
+            status: "failed",
+            timestamp: new Date(),
+            errorMessage,
+          });
+        }
+      }
 
-    //       // Add to message statuses
-    //       const messageStatus: MessageStatus = {
-    //         messageId: parsedResponse.messageId,
-    //         messageDetailId: parsedResponse.messageDetailId,
-    //         recipient: parsedResponse.recipient,
-    //         contact,
-    //         status: "sent",
-    //         timestamp: new Date(),
-    //         errorDetails:
-    //           parsedResponse.statusCode === "200" ? undefined : errorDetails,
-    //       };
+      // Count successes and failures
+      console.log(failedMessages);
+      const successful = successMessages.length;
+      const failed = failedMessages.length;
 
-    //       // setMessageStatuses((prev) => [...prev, messageStatus]);
-    //       successMessages.push(messageStatus);
-    //     } catch (error) {
-    //       const errorMessage =
-    //         error instanceof Error ? error.message : "Erreur inconnue";
-    //       failedMessages.push({
-    //         messageId: "",
-    //         messageDetailId: "",
-    //         recipient: contact.phone,
-    //         contact,
-    //         status: "failed",
-    //         timestamp: new Date(),
-    //         errorMessage,
-    //       });
-    //     }
-    //   }
-
-    //   // Count successes and failures
-    //   const successful = successMessages.length;
-    //   const failed = failedMessages.length;
-
-    //   if (failed === 0) {
-    //     setSuccess(`${successful} message(s) envoyé(s) avec succès`);
-    //     setShowStatusModal(true);
-    //   } else {
-    //     console.log(failedMessages);
-    //     const failureDetails = failedMessages
-    //       .map((msg) => `${msg.contact.phone}: ${msg.errorMessage}`)
-    //       .join("\n");
-    //     setError(
-    //       `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
-    //     );
-    //   }
-    // } catch (error) {
-    //   setError("Une erreur est survenue lors de l'envoi de la campagne");
-    //   console.error("Campaign error:", error);
-    // } finally {
-    //   setLoading(false);
-    // }
+      if (failed === 0) {
+        setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+        setShowStatusModal(true);
+      } else {
+        console.log(failedMessages);
+        await autoSaveCampaign("failed");
+        const failureDetails = failedMessages
+          .map((msg) => `${msg.contact.telephone}: ${msg.errorMessage}`)
+          .join("\n");
+        setError(
+          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
+        );
+      }
+    } catch (error) {
+      setError("Une erreur est survenue lors de l'envoi de la campagne");
+      console.error("Campaign error:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Add status modal component
@@ -1566,7 +1560,7 @@ export default function NewCampaign() {
               >
                 <div>
                   <div className="font-medium">
-                    {status.contact.firstname} {status.contact.lastname}
+                    {status.contact.prenom} {status.contact.nom}
                   </div>
                   <div className="text-sm text-gray-500">
                     {status.recipient}
@@ -1643,6 +1637,28 @@ export default function NewCampaign() {
         ["Hiver", "Printemps", "Été", "Automne"][Math.floor(now.getMonth() / 3)]
       );
   };
+
+  useEffect(() => {
+    // Extraction des heures et minutes de selectedHour
+    if (!scheduledDate) return;
+    const [hours, minutes] = selectedHour.split(":").map(Number);
+
+    // Création d'une nouvelle date en combinant scheduledDate et selectedHour
+    const combinedDateTime = new Date(scheduledDate);
+    combinedDateTime.setHours(hours, minutes, 0, 0);
+    const timestamp = combinedDateTime.getTime();
+    // console.log(scheduledDate);
+    // console.log(selectedHour);
+    // console.log(timestamp);
+    setTimest(timestamp);
+  }, [scheduledDate, selectedHour]);
+
+  // console.log(file);
+
+  // useEffect(() => {
+  //   console.log("scheduledDate: " + scheduledDate);
+  //   console.log("selectedHour: " + selectedHour);
+  // }, [scheduledDate, selectedHour]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">

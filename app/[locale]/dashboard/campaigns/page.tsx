@@ -59,6 +59,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
 
 interface Campaign {
+  _id: string;
   id: string;
   name: string;
   type: "academic" | "marketing" | "transactional";
@@ -92,7 +93,9 @@ export default function CampaignsPage() {
         setCampaigns(data);
       } catch (error) {
         console.error("Error fetching campaigns:", error);
-        toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+        toast.error(
+          error instanceof Error ? error.message : "Une erreur est survenue"
+        );
       } finally {
         setLoading(false);
       }
@@ -103,13 +106,13 @@ export default function CampaignsPage() {
     }
   }, [session]);
 
+
   // Filter and search campaigns
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch = campaign.name
       .toLowerCase()
       .includes(searchTerm.toLowerCase());
-    const matchesType =
-      filterType === "all" || campaign.type === filterType;
+    const matchesType = filterType === "all" || campaign.type === filterType;
     const matchesStatus =
       filterStatus === "all" || campaign.status === filterStatus;
     return matchesSearch && matchesType && matchesStatus;
@@ -126,7 +129,7 @@ export default function CampaignsPage() {
   // Handle campaign deletion
   const handleDelete = async (id: string) => {
     try {
-      const response = await fetch("/api/campaigns/" + id, { 
+      const response = await fetch("/api/campaigns/" + id, {
         method: "DELETE",
         headers: {
           "Content-Type": "application/json",
@@ -141,7 +144,9 @@ export default function CampaignsPage() {
       toast.success("Campagne supprimée avec succès");
     } catch (error) {
       console.error("Error deleting campaign:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
   };
 
@@ -165,7 +170,9 @@ export default function CampaignsPage() {
       toast.success("Campagne dupliquée avec succès");
     } catch (error) {
       console.error("Error duplicating campaign:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
   };
 
@@ -177,7 +184,7 @@ export default function CampaignsPage() {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ 
+        body: JSON.stringify({
           action: "send",
           status: "sent",
         }),
@@ -188,13 +195,15 @@ export default function CampaignsPage() {
       }
 
       const updatedCampaign = await response.json();
-      setCampaigns((prev) => 
+      setCampaigns((prev) =>
         prev.map((c) => (c.id === campaign.id ? updatedCampaign : c))
       );
       toast.success("Campagne envoyée avec succès");
     } catch (error) {
       console.error("Error sending campaign:", error);
-      toast.error(error instanceof Error ? error.message : "Une erreur est survenue");
+      toast.error(
+        error instanceof Error ? error.message : "Une erreur est survenue"
+      );
     }
   };
 
@@ -358,7 +367,9 @@ export default function CampaignsPage() {
                     <CardTitle className="text-sm font-medium">
                       {stat.title}
                     </CardTitle>
-                    <div className={`p-2 rounded-full ${stat.color} group-hover:scale-110 transition-transform duration-200`}>
+                    <div
+                      className={`p-2 rounded-full ${stat.color} group-hover:scale-110 transition-transform duration-200`}
+                    >
                       <stat.icon className="w-4 h-4" />
                     </div>
                   </CardHeader>
@@ -375,7 +386,7 @@ export default function CampaignsPage() {
         </div>
 
         {/* Filters */}
-        <motion.div 
+        <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm"
@@ -437,9 +448,13 @@ export default function CampaignsPage() {
                     <TableHead className="font-semibold">Nom</TableHead>
                     <TableHead className="font-semibold">Type</TableHead>
                     <TableHead className="font-semibold">Statut</TableHead>
-                    <TableHead className="font-semibold">Destinataires</TableHead>
+                    <TableHead className="font-semibold">
+                      Destinataires
+                    </TableHead>
                     <TableHead className="font-semibold">Créée le</TableHead>
-                    <TableHead className="font-semibold text-right">Actions</TableHead>
+                    <TableHead className="font-semibold text-right">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -459,7 +474,9 @@ export default function CampaignsPage() {
                       <TableCell colSpan={6} className="text-center py-12">
                         <div className="flex flex-col items-center gap-3 text-gray-500">
                           <AlertCircle className="w-12 h-12 text-gray-400" />
-                          <p className="text-lg font-medium">Aucune campagne trouvée</p>
+                          <p className="text-lg font-medium">
+                            Aucune campagne trouvée
+                          </p>
                           <p className="text-sm text-gray-400">
                             Commencez par créer une nouvelle campagne
                           </p>
@@ -468,12 +485,12 @@ export default function CampaignsPage() {
                     </TableRow>
                   ) : (
                     filteredCampaigns.map((campaign) => (
-                      <TableRow 
-                        key={campaign.id}
+                      <TableRow
+                        key={campaign._id}
                         className="hover:bg-gray-50/50 cursor-pointer transition-colors"
                         onClick={(e) => {
                           e.preventDefault();
-                          handleViewDetails(campaign.id);
+                          handleViewDetails(campaign._id);
                         }}
                       >
                         <TableCell className="font-medium">
@@ -504,10 +521,13 @@ export default function CampaignsPage() {
                         </TableCell>
                         <TableCell className="text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger asChild onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}>
+                            <DropdownMenuTrigger
+                              asChild
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                              }}
+                            >
                               <Button
                                 variant="ghost"
                                 className="h-8 w-8 p-0 hover:bg-gray-100"
@@ -520,7 +540,7 @@ export default function CampaignsPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
-                                  handleViewDetails(campaign.id);
+                                  handleViewDetails(campaign._id);
                                 }}
                                 className="cursor-pointer"
                               >
@@ -556,7 +576,7 @@ export default function CampaignsPage() {
                                     onClick={(e) => {
                                       e.preventDefault();
                                       e.stopPropagation();
-                                      handleDelete(campaign.id);
+                                      handleDelete(campaign._id);
                                     }}
                                     className="cursor-pointer text-red-600 focus:text-red-600"
                                   >
@@ -579,4 +599,4 @@ export default function CampaignsPage() {
       </div>
     </div>
   );
-} 
+}
