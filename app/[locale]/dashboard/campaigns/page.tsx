@@ -106,7 +106,6 @@ export default function CampaignsPage() {
     }
   }, [session]);
 
-
   // Filter and search campaigns
   const filteredCampaigns = campaigns.filter((campaign) => {
     const matchesSearch = campaign.name
@@ -237,9 +236,10 @@ export default function CampaignsPage() {
 
     return (
       <Badge
-        className={`${config.color} flex items-center gap-1 font-medium py-1 px-2`}
+        variant="outline"
+        className={`${config.color} font-medium rounded-[10px] shadow-md p-1.5`}
       >
-        <Icon className="w-3 h-3" />
+        <Icon className="w-3 h-3 mr-1" />
         {config.label}
       </Badge>
     );
@@ -267,7 +267,7 @@ export default function CampaignsPage() {
     return (
       <Badge
         variant="outline"
-        className={`${config.color} capitalize font-medium`}
+        className={`${config.color} capitalize font-medium rounded-[10px] shadow-md p-1.5`}
       >
         {config.label}
       </Badge>
@@ -397,12 +397,12 @@ export default function CampaignsPage() {
               placeholder="Rechercher une campagne..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-200"
+              className="pl-10 rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-200"
             />
           </div>
           <div className="flex gap-4">
             <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px] bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
+              <SelectTrigger className="w-[180px] rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
                 <Filter className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Type" />
               </SelectTrigger>
@@ -414,7 +414,7 @@ export default function CampaignsPage() {
               </SelectContent>
             </Select>
             <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px] bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
+              <SelectTrigger className="w-[180px] rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
                 <Filter className="w-4 h-4 mr-2 text-gray-500" />
                 <SelectValue placeholder="Statut" />
               </SelectTrigger>
@@ -508,7 +508,7 @@ export default function CampaignsPage() {
                             <span>{campaign.recipientCount}</span>
                             {campaign.status === "sent" && (
                               <span className="text-sm text-gray-500">
-                                ({campaign.successCount} réussis,{" "}
+                                ({campaign.recipientCount} réussis,{" "}
                                 {campaign.failureCount} échoués)
                               </span>
                             )}
@@ -530,7 +530,10 @@ export default function CampaignsPage() {
                             >
                               <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0 hover:bg-gray-100"
+                                className="h-8 w-8 p-0 hover:bg-gray-100 rounded"
+                                style={{
+                                  boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+                                }}
                               >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
@@ -551,13 +554,24 @@ export default function CampaignsPage() {
                                 onClick={(e) => {
                                   e.preventDefault();
                                   e.stopPropagation();
+                                  handleDelete(campaign._id);
+                                }}
+                                className="cursor-pointer text-red-600 focus:text-red-600"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Supprimer
+                              </DropdownMenuItem>
+                              {/* <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
                                   handleDuplicate(campaign);
                                 }}
                                 className="cursor-pointer"
                               >
                                 <Copy className="mr-2 h-4 w-4" />
                                 Dupliquer
-                              </DropdownMenuItem>
+                              </DropdownMenuItem> */}
                               {campaign.status === "draft" && (
                                 <>
                                   <DropdownMenuSeparator />

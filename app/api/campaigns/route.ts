@@ -19,7 +19,7 @@ export async function GET() {
       userId: session.user.id,
     }).sort({ createdAt: -1 });
 
-    console.log(campaigns);
+    // console.log(campaigns);
 
     return NextResponse.json(campaigns, { status: 200 });
   } catch (error) {
