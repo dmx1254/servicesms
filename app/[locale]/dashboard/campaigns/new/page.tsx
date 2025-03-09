@@ -35,6 +35,8 @@ import {
   Download,
   Plus,
   CalendarIcon,
+  Zap,
+  Heart,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format, addDays } from "date-fns";
@@ -79,7 +81,9 @@ type TemplateId =
   | "order_confirmation"
   | "delivery_status"
   | "payment_receipt"
-  | "appointment_reminder";
+  | "appointment_reminder"
+  | "flash_sale"
+  | "thank_you";
 
 interface Template {
   id: TemplateId;
@@ -146,6 +150,16 @@ const TEMPLATES: Template[] = [
     requiredFields: ["nom", "prenom", "telephone"],
     optionalFields: ["email", "date_evenement"],
     variables: ["{first_name}", "{last_name}", "{event_date}", "{company}"],
+  },
+  {
+    id: "thank_you",
+    title: "Remerciement",
+    icon: Heart,
+    desc: "Merci {first_name} pour votre achat chez {company}. Utilisez le code {offer_code} pour bénéficier de {discount}% sur votre prochaine visite.",
+    category: "marketing",
+    requiredFields: ["nom", "prenom", "telephone", "code_promo"],
+    optionalFields: ["email", "pourcentage"],
+    variables: ["{first_name}", "{last_name}", "{offer_code}", "{discount}", "{company}"],
   },
 
   // Transactional Templates (4)
@@ -217,6 +231,16 @@ const TEMPLATES: Template[] = [
     requiredFields: ["nom", "prenom", "telephone", "heure_rdv", "service"],
     optionalFields: ["email", "lieu"],
     variables: ["{first_name}", "{appointment_time}", "{service_name}"],
+  },
+  {
+    id: "flash_sale",
+    title: "Vente Flash",
+    icon: Zap,
+    desc: "VENTE FLASH ! {first_name}, profitez de {discount}% sur tous nos produits chez {company} aujourd'hui seulement !",
+    category: "marketing",
+    requiredFields: ["nom", "prenom", "telephone", "discount"],
+    optionalFields: ["email", "pourcentage"],
+    variables: ["{first_name}", "{last_name}", "{discount}", "{company}"],
   },
 
   // Academic Templates (9)
@@ -639,64 +663,6 @@ export default function NewCampaign() {
     if (template) {
       let messageText = template.desc;
 
-      // Replace variables based on campaign type and contact data
-      // if (contacts.length > 0 && contacts[0]) {
-      //   const contact = contacts[0]; // Preview with first contact
-
-      //   // Common replacements
-
-      //   messageText = messageText
-      //     .replace(/{first_name}/g, contact.firstname)
-      //     .replace(/{last_name}/g, contact.lastname);
-
-      //   // Academic specific replacements
-      //   if (template.category === "academic") {
-      //     messageText = messageText
-      //       .replace(
-      //         /{student_name}/g,
-      //         `${contact.firstname} ${contact.lastname}`
-      //       )
-      //       .replace(/{average_grade}/g, contact.moyenne?.toString() || "--")
-      //       .replace(/{class_name}/g, contact.classe || selectedClass)
-      //       .replace(/{school_name}/g, "École Example");
-      //   }
-
-      //   // Marketing specific replacements
-      //   if (template.category === "marketing") {
-      //     messageText = messageText
-      //       .replace(/{company}/g, signature)
-      //       .replace(/{discount}/g, "20")
-      //       .replace(/{product_name}/g, "Nouveau Produit")
-      //       .replace(/{offer_code}/g, "PROMO20")
-      //       .replace(
-      //         /{expiry_date}/g,
-      //         format(addDays(new Date(), 7), "dd/MM/yyyy")
-      //       )
-      //       .replace(
-      //         /{event_date}/g,
-      //         format(addDays(new Date(), 14), "dd/MM/yyyy")
-      //       );
-      //   }
-
-      //   // Transactional specific replacements
-      //   if (template.category === "transactional") {
-      //     messageText = messageText
-      //       .replace(/{order_number}/g, "12345")
-      //       .replace(/{tracking_code}/g, "TRK123456")
-      //       .replace(
-      //         /{delivery_date}/g,
-      //         format(addDays(new Date(), 3), "dd/MM/yyyy")
-      //       )
-      //       .replace(/{payment_amount}/g, "15000")
-      //       .replace(/{service_name}/g, "Service Premium")
-      //       .replace(/{reference}/g, "REF123456")
-      //       .replace(
-      //         /{appointment_time}/g,
-      //         format(addDays(new Date(), 1), "dd/MM/yyyy à HH:mm")
-      //       );
-      //   }
-      // }
-
       // console.log(messageText);
       setMessage(messageText);
     }
@@ -1008,315 +974,6 @@ export default function NewCampaign() {
       classe: undefined,
     });
   };
-
-  // console.log(singleContact);
-
-  // Mise à jour de la fonction d'importation de fichiers
-  // const handleFileImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
-  //   const file = e.target.files?.[0];
-  //   if (!file) return;
-
-  //   if (!file.name.toLowerCase().endsWith(".csv")) {
-  //     setFileError("Seuls les fichiers CSV sont acceptés");
-  //     e.target.value = "";
-  //     return;
-  //   }
-
-  //   const reader = new FileReader();
-  //   reader.onload = async (event) => {
-  //     try {
-  //       const text = event.target?.result as string;
-  //       const lines = text.split("\n").filter((line) => line.trim());
-
-  //       if (lines.length < 2) {
-  //         setFileError("Le fichier est vide ou ne contient que les en-têtes");
-  //         return;
-  //       }
-
-  //       // Normaliser les en-têtes (supprimer les accents, espaces et convertir en minuscules)
-  //       const headers = lines[0]
-  //         .toLowerCase()
-  //         .normalize("NFD")
-  //         .replace(/[\u0300-\u036f]/g, "")
-  //         .split(",")
-  //         .map((h) => h.trim());
-
-  //       // Dictionnaire de correspondance des en-têtes
-  //       const headerMap = {
-  //         nom: ["nom", "name", "lastname", "family"],
-  //         prenom: ["prenom", "firstname", "prénom", "first"],
-  //         telephone: [
-  //           "telephone",
-  //           "phone",
-  //           "tel",
-  //           "téléphone",
-  //           "mobile",
-  //           "portable",
-  //         ],
-  //         classe: ["classe", "class", "level"],
-  //         moyenne: ["moyenne", "average", "note", "grade", "avg"],
-  //         numerocommande: [
-  //           "numerocommande",
-  //           "ordernum",
-  //           "commande",
-  //           "order",
-  //           "order_number",
-  //           "numero",
-  //         ],
-  //         montant: [
-  //           "montant",
-  //           "amount",
-  //           "prix",
-  //           "payment",
-  //           "payment_amount",
-  //           "price",
-  //           "total",
-  //         ],
-  //         email: ["email", "courriel", "mail", "e-mail"],
-  //         datecommande: [
-  //           "datecommande",
-  //           "orderdate",
-  //           "date_commande",
-  //           "dateorder",
-  //         ],
-  //         trimestre: ["trimestre", "term", "semester"],
-  //         matiere: ["matiere", "matière", "subject", "course"],
-  //         numerosuivi: [
-  //           "numerosuivi",
-  //           "tracking",
-  //           "tracking_code",
-  //           "tracking_number",
-  //           "suivi",
-  //         ],
-  //         datelivraison: [
-  //           "datelivraison",
-  //           "delivery_date",
-  //           "date_livraison",
-  //           "deliverydate",
-  //         ],
-  //         service: ["service", "service_name", "servicename", "prestation"],
-  //         reference: ["reference", "ref", "reference_number"],
-  //         heurerdv: [
-  //           "heurerdv",
-  //           "appointment",
-  //           "rdv",
-  //           "horaire",
-  //           "time",
-  //           "appointment_time",
-  //         ],
-  //         dateabsence: ["dateabsence", "absence_date", "date_absence"],
-  //         etablissement: [
-  //           "etablissement",
-  //           "ecole",
-  //           "school",
-  //           "school_name",
-  //           "institution",
-  //         ],
-  //         resultats: ["resultats", "results", "exam_results", "notes"],
-  //         moyennegenerale: [
-  //           "moyennegenerale",
-  //           "overall_average",
-  //           "general_average",
-  //           "global_average",
-  //         ],
-  //         incident: ["incident", "behavior", "comportement"],
-  //         mesure_prise: ["mesure_prise", "mesure", "measure", "action"],
-  //       };
-
-  //       // Obtenir les champs requis en fonction du template sélectionné
-  //       let requiredFields: string[] = [];
-
-  //       if (selectedTemplate) {
-  //         // Si un template spécifique est sélectionné
-  //         const template = TEMPLATES.find((t) => t.id === selectedTemplate);
-  //         if (template) {
-  //           requiredFields = template.requiredFields.map((field) =>
-  //             field
-  //               .toLowerCase()
-  //               .normalize("NFD")
-  //               .replace(/[\u0300-\u036f]/g, "")
-  //           );
-  //         }
-  //       } else {
-  //         // Par défaut, basé sur le type de campagne
-  //         if (campaignType === "academic") {
-  //           requiredFields = [
-  //             "nom",
-  //             "prenom",
-  //             "telephone",
-  //             "classe",
-  //             "moyenne",
-  //           ];
-  //         } else {
-  //           requiredFields = ["nom", "prenom", "telephone"];
-  //         }
-  //       }
-
-  //       // Fonction pour trouver l'index de la colonne
-  //       const findColumnIndex = (fieldName: string): number => {
-  //         const possibleNames = headerMap[
-  //           fieldName as keyof typeof headerMap
-  //         ] || [fieldName];
-  //         return headers.findIndex((h) => possibleNames.includes(h));
-  //       };
-
-  //       // Vérifier les champs requis
-  //       const missingRequired = [];
-  //       for (const field of requiredFields) {
-  //         if (findColumnIndex(field) === -1) {
-  //           // Récupérer le nom d'origine pour l'affichage
-  //           const originalField = selectedTemplate
-  //             ? TEMPLATES.find(
-  //                 (t) => t.id === selectedTemplate
-  //               )?.requiredFields.find(
-  //                 (f) =>
-  //                   f
-  //                     .toLowerCase()
-  //                     .normalize("NFD")
-  //                     .replace(/[\u0300-\u036f]/g, "") === field
-  //               )
-  //             : field.charAt(0).toUpperCase() + field.slice(1);
-
-  //           if (originalField) {
-  //             missingRequired.push(originalField);
-  //           }
-  //         }
-  //       }
-
-  //       if (missingRequired.length > 0) {
-  //         setFileError(
-  //           `Colonnes requises manquantes: ${missingRequired.join(", ")}`
-  //         );
-  //         return;
-  //       }
-
-  //       // Le reste de votre code reste identique
-  //       // ...
-
-  //       // Normaliser le nom de classe
-  //       const normalizeClassName = (className: string) => {
-  //         const normalized = className
-  //           .trim()
-  //           .toLowerCase()
-  //           .replace(/(\d+)(?:ere|ème|eme)?\s*([a-z])/i, (_, num, letter) => {
-  //             return `${num}ème ${letter.toUpperCase()}`;
-  //           });
-  //         return normalized;
-  //       };
-
-  //       // Parse contacts with validation
-  //       const importedContacts: Contact[] = [];
-  //       const phoneRegex = /^\+?[1-9]\d{1,14}$/;
-  //       let lineNumber = 1;
-
-  //       for (const line of lines.slice(1)) {
-  //         lineNumber++;
-  //         const values = line.split(",").map((v) => v.trim());
-
-  //         // Skip empty lines
-  //         if (values.length < 3) continue;
-
-  //         let className =
-  //           findColumnIndex("classe") !== -1
-  //             ? normalizeClassName(values[findColumnIndex("classe")])
-  //             : undefined;
-
-  //         // Validate class against predefined list for academic campaigns
-  //         if (campaignType === "academic" && className) {
-  //           if (!classes.includes(className)) {
-  //             console.warn(
-  //               `Ligne ${lineNumber}: Classe invalide "${className}". Classes valides: ${classes.join(
-  //                 ", "
-  //               )}`
-  //             );
-  //             continue;
-  //           }
-  //         }
-
-  //         // Construire le contact dynamiquement en fonction des champs présents
-  //         const contact: Partial<Contact> = {};
-
-  //         // Traiter tous les champs disponibles
-  //         for (const [key, alternatives] of Object.entries(headerMap)) {
-  //           const index = headers.findIndex((h) => alternatives.includes(h));
-  //           if (index !== -1 && values[index]) {
-  //             if (key === "moyenne") {
-  //               contact.average = parseFloat(values[index].replace(",", "."));
-  //             } else if (key === "classe") {
-  //               contact.class = normalizeClassName(values[index]);
-  //             } else if (key === "nom") {
-  //               contact.lastname = values[index];
-  //             } else if (key === "prenom") {
-  //               contact.firstname = values[index];
-  //             } else if (key === "telephone") {
-  //               contact.phone = values[index];
-  //             }
-  //             // D'autres propriétés peuvent être ajoutées au besoin
-  //           }
-  //         }
-
-  //         // Validate required fields
-  //         if (!contact.lastname || !contact.firstname || !contact.phone) {
-  //           console.warn(`Ligne ${lineNumber}: Champs requis manquants`);
-  //           continue;
-  //         }
-
-  //         // Validate phone number
-  //         if (!contact.phone || !phoneRegex.test(contact.phone)) {
-  //           console.warn(
-  //             `Ligne ${lineNumber}: Format de téléphone invalide "${contact.phone}"`
-  //           );
-  //           continue;
-  //         }
-
-  //         // Validate class for academic campaigns
-  //         if (campaignType === "academic" && !contact.class) {
-  //           console.warn(
-  //             `Ligne ${lineNumber}: Classe manquante pour contact académique`
-  //           );
-  //           continue;
-  //         }
-
-  //         // Validate average for academic campaigns
-  //         if (
-  //           campaignType === "academic" &&
-  //           typeof contact.average !== "undefined"
-  //         ) {
-  //           const avg = contact.average;
-  //           if (isNaN(avg) || avg < 0 || avg > 20) {
-  //             console.warn(
-  //               `Ligne ${lineNumber}: Moyenne invalide "${
-  //                 values[findColumnIndex("moyenne")]
-  //               }"`
-  //             );
-  //             continue;
-  //           }
-  //         }
-
-  //         importedContacts.push(contact as Contact);
-  //       }
-
-  //       if (importedContacts.length === 0) {
-  //         setFileError("Aucun contact valide trouvé dans le fichier");
-  //         return;
-  //       }
-
-  //       console.log("Contacts importés:", importedContacts);
-  //       setContacts(importedContacts);
-  //       setFileError("");
-  //       e.target.value = "";
-
-  //       // Mise à jour du message si un template est sélectionné
-  //       if (selectedTemplate) {
-  //         handleTemplateChange(selectedTemplate);
-  //       }
-  //     } catch (err) {
-  //       console.error("Error importing file:", err);
-  //       setFileError("Erreur lors de l'importation du fichier");
-  //     }
-  //   };
-  //   reader.readAsText(file);
-  // };
 
   // Add function to trigger file input
   const handleBulkImportClick = () => {

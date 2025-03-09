@@ -12,14 +12,18 @@ import { Separator } from "../ui/separator";
 import SearchIconComp from "../home/SearchIconComp";
 import Image from "next/image";
 import { NavigationMe } from "../home/NavigationMe";
+import { useSession } from "next-auth/react";
 
 export default function Header() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
+  const { data: session, status } = useSession();
 
   const tScope = useScopedI18n("navigation");
   const tScope2 = useScopedI18n("common");
+
+  console.log(session);
 
   // Handle scroll effect for transparent to solid header
   useEffect(() => {
@@ -84,16 +88,36 @@ export default function Header() {
               className="mx-2 text-[#646464] w-[1px] h-5"
             />
 
-            <Link href="/signin" className="text-[#67B142] bg-transparent text-base shadow-none font-semibold">
-              Connexion
-            </Link>
-            <Separator
-              orientation="vertical"
-              className="mx-2 text-[#646464] w-[1px] h-5"
-            />
-            <Link href="/signup" className="bg-[#67B142] text-white p-2 text-base rounded-2xl font-semibold transition-colors hover:bg-black/80">
-              S&apos;inscrire
-            </Link>
+            {session?.user ? (
+              <Link href="/dashboard" className="cursor-pointer max-sm:hidden">
+                <Image
+                  src="/avatar.png"
+                  alt="user"
+                  height={50}
+                  width={50}
+                  className="h-6 w-6 object-cover object-center rounded-full"
+                />
+              </Link>
+            ) : (
+              <>
+                <Link
+                  href="/signin"
+                  className="text-[#67B142] bg-transparent text-base shadow-none font-semibold"
+                >
+                  Connexion
+                </Link>
+                <Separator
+                  orientation="vertical"
+                  className="mx-2 text-[#646464] w-[1px] h-5"
+                />
+                <Link
+                  href="/signup"
+                  className="bg-[#67B142] text-white p-2 text-base rounded-2xl font-semibold transition-colors hover:bg-black/80"
+                >
+                  S&apos;inscrire
+                </Link>
+              </>
+            )}
 
             {/* Mobile menu button */}
             <Button

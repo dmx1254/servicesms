@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   description:
     "Servicesms.sn est un service en ligne de premier plan au Sénégal",
   icons: {
-    icon: "/logo.png",
+    icon: "/icons/logo.png",
   },
 };
 

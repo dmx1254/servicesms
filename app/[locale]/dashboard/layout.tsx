@@ -122,7 +122,7 @@ export default function DashboardLayout({
         <div className="flex flex-col h-full">
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
-            <Link href="/dashboard" className="flex items-center gap-3">
+            <Link href="/" className="flex items-center gap-3">
               <div className="relative w-10 h-10 rounded-lg overflow-hidden">
                 <Image
                   src="/logo.png"

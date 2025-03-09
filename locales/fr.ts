@@ -50,4 +50,10 @@ export default {
   "common.readMore": "Lire plus",
   "common.myAccount": "Mon compte",
   "common.logout": "Se déconnecter",
+
+  "notFound.title": "Page non trouvée",
+  "notFound.subtitle": "Oups ! La page que vous recherchez n'existe pas.",
+  "notFound.backHome": "Retour à l'accueil",
+  "notFound.desc":
+    "Si vous pensez qu'il s'agit d'une erreur, veuillez contacter le support.",
 } as const;

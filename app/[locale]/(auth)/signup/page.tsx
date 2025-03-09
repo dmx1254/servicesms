@@ -421,7 +421,7 @@ export default function SignUp() {
                             className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                               errors.firstName ? "border-red-500" : ""
                             }`}
-                            placeholder="John"
+                            placeholder="Prénom"
                           />
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                         </div>
@@ -447,7 +447,7 @@ export default function SignUp() {
                             className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                               errors.lastName ? "border-red-500" : ""
                             }`}
-                            placeholder="Doe"
+                            placeholder="Nom"
                           />
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                         </div>

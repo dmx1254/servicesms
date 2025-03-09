@@ -4,6 +4,8 @@ import { options } from '../auth/[...nextauth]/option';
 import Contact from '@/app/lib/models/Contact';
 import { connectDB } from '@/app/lib/db';
 
+await connectDB();
+
 interface QueryParams {
   userId: string;
   $or?: Array<{
@@ -19,7 +21,6 @@ const ITEMS_PER_PAGE = 10;
 
 export async function GET(req: NextRequest) {
   try {
-    await connectDB();
     const session = await getServerSession(options);
     if (!session?.user) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });
@@ -69,7 +70,6 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   try {
-    await connectDB();
     const session = await getServerSession(options);
     if (!session?.user) {
       return NextResponse.json({ error: 'Non autorisé' }, { status: 401 });

@@ -1,73 +1,4 @@
-// "{first_name}",
-//       "{last_name}",
-//       "{discount}",
-//       "{product_name}",
-//       "{expiry_date}",
-//       "{company}",
-// "{first_name}", "{last_name}", "{product_name}", "{company}"
-// "{first_name}",
-//       "{last_name}",
-//       "{offer_code}",
-//       "{discount}",
-//       "{company}",
-// "{first_name}", "{last_name}", "{event_date}", "{company}"
-// "{first_name}",
-//       "{order_number}",
-//       "{payment_amount}",
-//       "{company}",
-// "{first_name}",
-//       "{tracking_code}",
-//       "{delivery_date}",
-//       "{company}",
-//  "{first_name}",
-//       "{payment_amount}",
-//       "{service_name}",
-//       "{reference}",
-//       "{company}",
-// "{first_name}", "{appointment_time}", "{service_name}"
-// "{student_name}",
-//       "{class_name}",
-//       "{average_grade}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{exam_results}",
-//       "{overall_average}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{average_grade}",
-//       "{school_name}",
-// "{student_name}", "{class_name}", "{absence_date}"
-// "{student_name}",
-//       "{class_name}",
-//       "{arrival_time}",
-//       "{date}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{meeting_date}",
-//       "{meeting_time}",
-//       "{room}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{event_name}",
-//       "{event_date}",
-//       "{location}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{incident}",
-//       "{date}",
-//       "{measure}",
-//       "{school_name}",
-// "{student_name}",
-//       "{class_name}",
-//       "{subject}",
-//       "{homework}",
-//       "{due_date}",
-//       "{school_name}",
+
 
 export const rewriteMessage = (
   contact: any,
@@ -89,7 +20,7 @@ export const rewriteMessage = (
     .replace(/{discount}/g, contact.discount || "")
     .replace(/{product_name}/g, contact.product_name || "")
     .replace(/{expiry_date}/g, contact.expiry_date || "")
-    .replace(/{offer_code}/g, contact.offer_code || "")
+    .replace(/{offer_code}/g, contact.offer_code || contact.code_promo || "")
     .replace(
       /{event_date}/g,
       contact.event_date || contact.date_evenement || ""
