@@ -34,11 +34,11 @@ import {
 } from "lucide-react";
 
 interface Contact {
-  firstname: string;
-  lastname: string;
-  phone: string;
-  class?: string;
-  average?: number;
+  prenom: string;
+  nom: string;
+  telephone: string;
+  classe?: string;
+  moyenne?: number;
 }
 
 interface Campaign {
@@ -48,8 +48,9 @@ interface Campaign {
   status: string;
   message: string;
   contacts: Array<{
-    phoneNumber: string;
+    telephone: string;
     status: string;
+    classe?: string;
   }>;
   recipientCount: number;
   successCount: number;
@@ -478,7 +479,7 @@ export default function CampaignDetails() {
               <div className="divide-y divide-gray-100">
                 {campaign.contacts.map((contact, index) => (
                   <motion.div
-                    key={contact.phoneNumber}
+                    key={contact.telephone}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: 0.1 * index }}
@@ -486,14 +487,14 @@ export default function CampaignDetails() {
                   >
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="font-medium">{contact.phoneNumber}</p>
+                        <p className="font-medium">{contact.telephone}</p>
                         <p className="text-sm text-gray-500">
                           {contact.status}
                         </p>
                       </div>
-                      {contact.class && (
+                      {contact.classe && (
                         <Badge variant="outline" className="text-gray-600">
-                          {contact.class}
+                          {contact.classe}
                         </Badge>
                       )}
                     </div>
