@@ -4,15 +4,13 @@ import "next-auth";
 
 declare module "next-auth" {
   interface User {
-    user: {
-      id?: string;
-      email?: string;
-      phone?: string;
-      firstName?: string;
-      lastName?: string;
-      companyName?: string;
-      accountType?: string;
-    };
+    id?: string;
+    email?: string;
+    phone?: string;
+    firstName?: string;
+    lastName?: string;
+    companyName?: string;
+    accountType?: string;
   }
 }
 
@@ -26,7 +24,7 @@ declare module "next-auth" {
       phone: string;
       companyName: string;
       accountType: string;
-    }
+    };
   }
 }
 

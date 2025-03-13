@@ -7,9 +7,10 @@ import useStore from "@/app/lib/manage";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "next-auth/react";
 import { Bell, ChevronDown, Sparkles } from "lucide-react";
+import CountUp from "react-countup";
 
 const DashTopBar = () => {
-  const { data: session, status } = useSession();
+  const { data: session } = useSession();
   const { solde } = useStore();
   const [isOpen, setIsOpen] = useState(false);
   const [time, setTime] = useState(new Date());
@@ -31,19 +32,19 @@ const DashTopBar = () => {
     },
   };
 
-  const avatarColors = [
-    "bg-gradient-to-br from-purple-400 to-indigo-600",
-    "bg-gradient-to-br from-blue-400 to-teal-500",
-    "bg-gradient-to-br from-emerald-400 to-cyan-500",
-    "bg-gradient-to-br from-orange-400 to-rose-500",
-  ];
+  // const avatarColors = [
+  //   "bg-gradient-to-br from-purple-400 to-indigo-600",
+  //   "bg-gradient-to-br from-blue-400 to-teal-500",
+  //   "bg-gradient-to-br from-emerald-400 to-cyan-500",
+  //   "bg-gradient-to-br from-orange-400 to-rose-500",
+  // ];
 
   // Sélection d'une couleur basée sur le nom
-  const colorIndex = session?.user?.firstName
-    ? (session.user.firstName.charCodeAt(0) +
-        (session?.user?.lastName?.charCodeAt(0) || 0)) %
-      avatarColors.length
-    : 0;
+  // const colorIndex = session?.user?.firstName
+  //   ? (session.user.firstName.charCodeAt(0) +
+  //       (session?.user?.lastName?.charCodeAt(0) || 0)) %
+  //     avatarColors.length
+  //   : 0;
 
   return (
     <motion.div
@@ -92,17 +93,17 @@ const DashTopBar = () => {
       >
         <Sparkles size={16} className="text-green-500" />
         <span className="text-sm text-gray-700">Solde SMS</span>
-        <span className="font-bold text-base bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
-          {solde}
-        </span>
+        <div className="font-bold text-base bg-clip-text text-transparent bg-gradient-to-r from-green-600 to-emerald-600">
+          <CountUp end={solde} duration={3} />
+        </div>
       </motion.div>
 
-      <Separator
+      {/* <Separator
         orientation="vertical"
         className="mx-2 text-[#646464]/30 w-[1px] h-6"
-      />
+      /> */}
 
-      <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
+      {/* <motion.div whileHover={{ scale: 1.02 }} whileTap={{ scale: 0.98 }}>
         <button
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 p-1.5 pl-2 pr-3 hover:bg-gray-100 transition-all"
@@ -150,7 +151,7 @@ const DashTopBar = () => {
             }`}
           />
         </button>
-      </motion.div>
+      </motion.div> */}
     </motion.div>
   );
 };

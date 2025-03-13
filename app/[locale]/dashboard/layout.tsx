@@ -123,21 +123,21 @@ export default function DashboardLayout({
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-10 h-10 rounded-lg overflow-hidden">
+              <div className="relative w-28 h-28 rounded-lg overflow-hidden">
                 <Image
-                  src="/logo.png"
-                  alt="ServiceSMS"
+                  src="/images/axiomlogo.png"
+                  alt="AxiomTEXT"
                   fill
-                  className="object-cover"
+                  className="object-contain"
                   priority
                 />
               </div>
-              <motion.span
+              {/* <motion.span
                 variants={textVariants}
                 className="font-semibold text-gray-900 whitespace-nowrap"
               >
-                ServiceSMS
-              </motion.span>
+                AxiomTEXT
+              </motion.span> */}
             </Link>
             <Button
               variant="ghost"
@@ -228,10 +228,12 @@ export default function DashboardLayout({
               </DropdownMenuTrigger>
               <DropdownMenuContent
                 align="end"
-                className="w-56"
+                className="w-56 rounded-[6px]"
                 side={isSidebarOpen ? "right" : "top"}
               >
-                <DropdownMenuLabel>{tCommon("myAccount")}</DropdownMenuLabel>
+                <DropdownMenuLabel>
+                  <Link href="/dashboard/settings">{tCommon("myAccount")}</Link>
+                </DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                   className="text-red-600 focus:text-red-600 cursor-pointer"

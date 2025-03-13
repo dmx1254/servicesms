@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/option";
 import SMSModel from "@/app/lib/models/sms.model";
+import { connectDB } from "@/app/lib/db";
+
+await connectDB();
 
 export async function GET(request: Request) {
   try {
@@ -40,12 +43,18 @@ export async function GET(request: Request) {
     // Calculer les statistiques
     const stats = {
       total,
-      delivered: await SMSModel.countDocuments({ ...query, status: "delivered" }),
+      delivered: await SMSModel.countDocuments({
+        ...query,
+        status: "delivered",
+      }),
       failed: await SMSModel.countDocuments({ ...query, status: "failed" }),
-      totalCost: (await SMSModel.aggregate([
-        { $match: query },
-        { $group: { _id: null, total: { $sum: "$cost" } } },
-      ]))[0]?.total || 0,
+      totalCost:
+        (
+          await SMSModel.aggregate([
+            { $match: query },
+            { $group: { _id: null, total: { $sum: "$cost" } } },
+          ])
+        )[0]?.total || 0,
     };
 
     return NextResponse.json({
@@ -68,4 +77,4 @@ export async function GET(request: Request) {
       { status: 500 }
     );
   }
-} 
+}

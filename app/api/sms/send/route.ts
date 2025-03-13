@@ -1,10 +1,14 @@
 import { NextResponse } from "next/server";
-import axios, { AxiosError } from "axios";
+import axios from "axios";
 import crypto from "crypto";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/option";
 import SMSModel from "@/app/lib/models/sms.model";
+import UserModel from "@/app/lib/models/user.model";
+import { checkAmountOfSms } from "@/app/lib/utils/utils";
+import { connectDB } from "@/app/lib/db";
 
+await connectDB();
 const SMS_PRO_PRIVATE_KEY = process.env.SMS_PRO_PRIVATE_KEY || "";
 const SMS_PRO_TOKEN = process.env.SMS_PRO_TOKEN || "";
 const API_URL = "https://api.orangesmspro.sn:8443/api";
@@ -30,6 +34,7 @@ function generateKey(
     .digest("hex");
 }
 
+
 export async function POST(req: Request) {
   try {
     const session = await getServerSession(options);
@@ -37,22 +42,59 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
+    // Check is the company name is pending
+    const isCompanyNameApproved = await UserModel.findById(session?.user?.id);
+    if (isCompanyNameApproved?.companyNameStatus === "pending") {
+      return NextResponse.json(
+        { error: "Nom de société en attente de validation" },
+        { status: 401 }
+      );
+    }
+
+    // Check is the company name is rejected
+    const isCompanyNameRejected = await UserModel.findById(session?.user?.id);
+    if (isCompanyNameRejected?.companyNameStatus === "rejected") {
+      return NextResponse.json(
+        { error: "Nom de société rejeté" },
+        { status: 401 }
+      );
+    }
+
     const { recipient, message, campaignId, campaignName, signature, timest } =
       await req.json();
-    // const data = await request.json();
 
-    console.log("Données reçues:", {
-      recipient,
-      message,
-      campaignId,
-      campaignName,
-      signature,
-      timest,
-    });
+    // console.log("Données reçues:", {
+    //   recipient,
+    //   message,
+    //   campaignId,
+    //   campaignName,
+    //   signature,
+    //   timest,
+    // });
 
     if (!recipient || !message || !campaignId || !campaignName) {
       return NextResponse.json(
         { error: "Informations manquantes" },
+        { status: 400 }
+      );
+    }
+
+    // Vérifier le coût du SMS
+    const smsCost = await checkAmountOfSms(recipient);
+
+    // Récupérer l'utilisateur et vérifier ses crédits
+    const user = await UserModel.findById(session.user.id);
+    if (!user) {
+      return NextResponse.json(
+        { error: "Utilisateur non trouvé" },
+        { status: 404 }
+      );
+    }
+
+    // Vérifier si l'utilisateur a assez de crédits
+    if (user.smsCredits < smsCost) {
+      return NextResponse.json(
+        { error: "Crédits SMS insuffisants" },
         { status: 400 }
       );
     }
@@ -94,6 +136,10 @@ export async function POST(req: Request) {
     // console.log(response.data);
     // console.log(message);
 
+    // Mettre à jour les crédits de l'utilisateur
+    user.smsCredits -= smsCost;
+    await user.save();
+
     const sms = await SMSModel.create({
       userId: session.user.id,
       campaignId,
@@ -103,22 +149,27 @@ export async function POST(req: Request) {
       messageId: response.data.messageId || crypto.randomUUID(),
       status: "sent",
       sentAt: new Date(),
-      cost: response.data.cost || 0,
+      cost: smsCost,
       response: JSON.stringify(response.data),
     });
+
+    // console.log(sms);
+    // console.log(user.smsCredits);
+    // console.log(response.data);
 
     return NextResponse.json({
       success: true,
       data: sms,
+      remainingCredits: user.smsCredits,
     });
   } catch (error) {
     console.log(error);
-    if (error instanceof AxiosError) {
-      console.log("Response data:", error.response?.data);
-      console.log("Response status:", error.response?.status);
-      console.log("Response headers:", error.response?.headers);
-    }
-    console.log(error);
+    // if (error instanceof AxiosError) {
+    //   console.log("Response data:", error.response?.data);
+    //   console.log("Response status:", error.response?.status);
+    //   console.log("Response headers:", error.response?.headers);
+    // }
+    // console.log(error);
 
     // if (error instanceof AxiosError && error.response?.data) {
     //   return NextResponse.json(

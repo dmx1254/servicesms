@@ -57,12 +57,12 @@ export default function Header() {
           {/* Logo */}
           <div className="flex-shrink-0">
             <Link href="/" className="flex items-center">
-              <span className="sr-only">ServiceSMS</span>
+             
               <Image
-                src="/logo2.png"
-                alt="Service sms"
-                width={100}
-                height={100}
+                src="/images/axiomlogo.png"
+                alt="Axiom text"
+                width={140}
+                height={140}
                 className="object-cover object-center"
               />
             </Link>

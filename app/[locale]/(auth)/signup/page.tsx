@@ -6,6 +6,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -22,6 +29,7 @@ import {
   CheckCircle2,
   KeyRound,
   Loader,
+  X,
 } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
@@ -191,14 +199,14 @@ export default function SignUp() {
       }
 
       toast.success("Code de vérification envoyé par email", {
-        style: { backgroundColor: "#22C55E", color: "white" },
+        style: { color: "#22C55E" },
       });
       setStep("verification");
     } catch (error) {
       toast.error(
         error instanceof Error ? error.message : "Une erreur est survenue",
         {
-          style: { backgroundColor: "#EF4444", color: "white" },
+          style: { color: "#EF4444" },
         }
       );
       console.log(error);
@@ -250,40 +258,62 @@ export default function SignUp() {
 
   if (step === "verification") {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-50">
-        <div className="max-w-md w-full space-y-8 p-8 bg-white rounded-lg shadow-lg">
-          <h2 className="text-center text-3xl font-extrabold text-gray-900">
-            Vérification de l&apos;email
-          </h2>
-          <form onSubmit={handleVerification} className="mt-8 space-y-6">
-            <div>
-              <label htmlFor="code" className="sr-only">
+      <Dialog open={true} onOpenChange={() => setStep("form")}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
+              Vérification de l&apos;email
+            </DialogTitle>
+            <DialogDescription className="text-center text-gray-600">
+              Nous avons envoyé un code de vérification à
+              <span className="block font-medium text-gray-900 mt-1">
+                {formData.email}
+              </span>
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleVerification} className="space-y-6">
+            <div className="space-y-2">
+              <Label htmlFor="code" className="text-gray-700">
                 Code de vérification
-              </label>
-              <input
-                id="code"
-                type="text"
-                required
-                className="appearance-none rounded relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-green-500 focus:border-green-500 focus:z-10 sm:text-sm"
-                placeholder="Code de vérification"
-                value={verificationCode}
-                onChange={(e) => setVerificationCode(e.target.value)}
-              />
+              </Label>
+              <div className="relative group">
+                <Input
+                  id="code"
+                  type="text"
+                  required
+                  value={verificationCode}
+                  onChange={(e) => setVerificationCode(e.target.value)}
+                  className="h-11 pl-10 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 text-center tracking-[1em] text-lg font-mono"
+                  placeholder="000000"
+                  maxLength={6}
+                />
+                <KeyRound className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
+              </div>
             </div>
-            <button
-              type="submit"
-              disabled={isLoading}
-              className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-[#67B142] hover:opacity-80 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-            >
-              {isLoading ? (
-                <Loader className="h-4 w-4 animate-spin text-white" />
-              ) : (
-                "Vérifier"
-              )}
-            </button>
+            <div className="flex flex-col gap-3">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="w-full h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
+              >
+                {isLoading ? (
+                  <Loader className="h-5 w-5 animate-spin" />
+                ) : (
+                  "Vérifier"
+                )}
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                onClick={resendVerificationCode}
+                className="w-full h-11 text-[#67B142] hover:bg-[#67B142]/5 hover:text-[#34A853] transition-all duration-300"
+              >
+                Renvoyer le code
+              </Button>
+            </div>
           </form>
-        </div>
-      </div>
+        </DialogContent>
+      </Dialog>
     );
   }
 
@@ -411,7 +441,9 @@ export default function SignUp() {
                   >
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="firstName" className="text-gray-700">Prénom</Label>
+                        <Label htmlFor="firstName" className="text-gray-700">
+                          Prénom
+                        </Label>
                         <div className="relative group">
                           <Input
                             id="firstName"
@@ -437,7 +469,9 @@ export default function SignUp() {
                       </div>
 
                       <div className="space-y-2">
-                        <Label htmlFor="lastName" className="text-gray-700">Nom</Label>
+                        <Label htmlFor="lastName" className="text-gray-700">
+                          Nom
+                        </Label>
                         <div className="relative group">
                           <Input
                             id="lastName"
@@ -464,7 +498,9 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="email" className="text-gray-700">Email</Label>
+                      <Label htmlFor="email" className="text-gray-700">
+                        Email
+                      </Label>
                       <div className="relative group">
                         <Input
                           id="email"
@@ -491,15 +527,18 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-gray-700">Téléphone</Label>
+                      <Label htmlFor="phone" className="text-gray-700">
+                        Téléphone
+                      </Label>
                       <div className="relative group">
                         <PhoneInput
                           international
                           defaultCountry="SN"
                           value={formData.phone}
                           onChange={handlePhoneChange}
-                          className={`w-full ${errors.phone ? "PhoneInput--error" : ""}`}
-                          inputClassName="w-full h-11 pl-10 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50"
+                          className={`w-full h-11 pl-0 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
+                            errors.phone ? "PhoneInput--error" : ""
+                          }`}
                           placeholder="77 867 14 27"
                         />
                       </div>
@@ -540,7 +579,9 @@ export default function SignUp() {
                     className="space-y-4"
                   >
                     <div className="space-y-2">
-                      <Label htmlFor="accountType" className="text-gray-700">Type de compte</Label>
+                      <Label htmlFor="accountType" className="text-gray-700">
+                        Type de compte
+                      </Label>
                       <Select
                         name="accountType"
                         value={formData.accountType}
@@ -554,10 +595,16 @@ export default function SignUp() {
                           <SelectValue placeholder="Sélectionnez le type de compte" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="personal" className="cursor-pointer hover:bg-[#67B142]/10">
+                          <SelectItem
+                            value="personal"
+                            className="cursor-pointer hover:bg-[#67B142]/10"
+                          >
                             Personnel
                           </SelectItem>
-                          <SelectItem value="business" className="cursor-pointer hover:bg-[#67B142]/10">
+                          <SelectItem
+                            value="business"
+                            className="cursor-pointer hover:bg-[#67B142]/10"
+                          >
                             Professionnel
                           </SelectItem>
                         </SelectContent>
@@ -568,7 +615,9 @@ export default function SignUp() {
                       <Label htmlFor="companyName" className="text-gray-700">
                         Nom de l&apos;entreprise
                         {formData.accountType === "personal" && (
-                          <span className="text-sm text-gray-500 ml-1">(Optionnel)</span>
+                          <span className="text-sm text-gray-500 ml-1">
+                            (Optionnel)
+                          </span>
                         )}
                       </Label>
                       <div className="relative group">
@@ -596,7 +645,9 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="password" className="text-gray-700">Mot de passe</Label>
+                      <Label htmlFor="password" className="text-gray-700">
+                        Mot de passe
+                      </Label>
                       <div className="relative group">
                         <Input
                           id="password"
@@ -623,7 +674,10 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword" className="text-gray-700">
+                      <Label
+                        htmlFor="confirmPassword"
+                        className="text-gray-700"
+                      >
                         Confirmer le mot de passe
                       </Label>
                       <div className="relative group">
@@ -695,7 +749,10 @@ export default function SignUp() {
                     </div>
 
                     <div className="space-y-2">
-                      <Label htmlFor="verificationCode" className="text-gray-700">
+                      <Label
+                        htmlFor="verificationCode"
+                        className="text-gray-700"
+                      >
                         Code de vérification
                       </Label>
                       <div className="relative group">

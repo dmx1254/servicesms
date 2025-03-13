@@ -11,6 +11,10 @@ export interface IUser extends Document {
   smsCredits: number;
   isActive: boolean;
   companyName: string;
+  pendingCompanyName?: string;
+  companyNameStatus: "approved" | "pending" | "rejected";
+  companyNameRejectionReason?: string;
+  lastCompanyNameChange?: Date;
 }
 
 const userSchema = new Schema(
@@ -42,18 +46,29 @@ const userSchema = new Schema(
       enum: ["user", "admin"],
       default: "user",
     },
-
     accountType: {
       type: String,
       enum: ["personal", "business"],
       default: "personal",
     },
-
     companyName: {
       type: String,
       required: true,
     },
-
+    pendingCompanyName: {
+      type: String,
+    },
+    companyNameStatus: {
+      type: String,
+      enum: ["approved", "pending", "rejected"],
+      default: "pending",
+    },
+    companyNameRejectionReason: {
+      type: String,
+    },
+    lastCompanyNameChange: {
+      type: Date,
+    },
     smsCredits: {
       type: Number,
       default: 0,

@@ -27,6 +27,7 @@ import {
 import Link from "next/link";
 import { format, subDays } from "date-fns";
 import { fr } from "date-fns/locale";
+import useStore from "@/app/lib/manage";
 
 interface Campaign {
   id: string;
@@ -74,6 +75,7 @@ interface TimelineData {
 
 export default function Dashboard() {
   const { user } = useUser();
+  const { addSolde } = useStore();
   const [stats, setStats] = useState<DashboardStats>({
     totalCampaigns: 0,
     totalContacts: 0,
@@ -146,6 +148,19 @@ export default function Dashboard() {
 
     fetchDashboardData();
   }, []);
+
+  useEffect(() => {
+    const fetchsmsCredits = async () => {
+      const response = await fetch(`/api/user/${user?.id}/getSmsCredit`);
+      const data = await response.json();
+      if (data) {
+        addSolde(data.smsCredits);
+      }
+      console.log(data);
+    };
+
+    fetchsmsCredits();
+  }, [user?.id]);
 
   // Generate sample timeline data
   const timelineData: TimelineData[] = Array.from({ length: 7 })

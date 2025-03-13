@@ -60,6 +60,7 @@ import { useDropzone } from "react-dropzone";
 import LoadingDialog from "@/components/LoadingImport";
 import { rewriteMessage } from "@/app/lib/utils/parseMessage";
 import { v4 as uuidv4 } from "uuid";
+import useStore from "@/app/lib/manage";
 
 type TemplateId =
   // Academic templates
@@ -159,7 +160,13 @@ const TEMPLATES: Template[] = [
     category: "marketing",
     requiredFields: ["nom", "prenom", "telephone", "code_promo"],
     optionalFields: ["email", "pourcentage"],
-    variables: ["{first_name}", "{last_name}", "{offer_code}", "{discount}", "{company}"],
+    variables: [
+      "{first_name}",
+      "{last_name}",
+      "{offer_code}",
+      "{discount}",
+      "{company}",
+    ],
   },
 
   // Transactional Templates (4)
@@ -472,6 +479,7 @@ interface FileUploadState {
 
 export default function NewCampaign() {
   const { data: session } = useSession();
+  const { addSolde } = useStore();
   const [message, setMessage] = useState<string>("");
   const [optimize, setOptimize] = useState(false);
   const [campaignType, setCampaignType] =
@@ -661,7 +669,7 @@ export default function NewCampaign() {
     setSelectedTemplate(templateId);
     const template = TEMPLATES.find((t) => t.id === templateId);
     if (template) {
-      let messageText = template.desc;
+      const messageText = template.desc;
 
       // console.log(messageText);
       setMessage(messageText);
@@ -975,11 +983,6 @@ export default function NewCampaign() {
     });
   };
 
-  // Add function to trigger file input
-  const handleBulkImportClick = () => {
-    fileInputRef.current?.click();
-  };
-
   // console.log(message);
 
   // Handle schedule change
@@ -1038,34 +1041,6 @@ export default function NewCampaign() {
     setCampaignData((prev) => ({ ...prev, name }));
   };
 
-  const autoSaveCampaign = async (campagnType?: string) => {
-    if (!campaignData.name || !session?.user?.id) return;
-
-    setIsSaving(true);
-    try {
-      await fetch("/api/campaigns", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...campaignData,
-          type: campaignType,
-          message: message,
-          contacts,
-          status: campagnType
-            ? campagnType
-            : scheduledTime === "scheduled"
-            ? "scheduled"
-            : "draft",
-        }),
-      });
-      setLastSaved(new Date());
-    } catch (error) {
-      console.error("Erreur de sauvegarde:", error);
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
   // console.log(campaignData);
 
   const handleSendCampaign = async () => {
@@ -1075,6 +1050,8 @@ export default function NewCampaign() {
 
     //   console.log(newMessage);
     // }
+
+    const campagneID = uuidv4();
 
     if (!campaignData.name.trim()) {
       toast.error("Veuillez donner un nom à votre campagne", {
@@ -1093,6 +1070,32 @@ export default function NewCampaign() {
     setLoading(true);
     const failedMessages: MessageStatus[] = [];
     const successMessages: MessageStatus[] = [];
+    let errorResp: any;
+
+    // 1. Créer la campagne d'abord
+    const campaignResponse = await fetch("/api/campaigns", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        id: campagneID,
+        name: campaignData.name,
+        type: campaignType,
+        message: message,
+        contacts: contacts.map((contact) => ({
+          prenom: contact.prenom,
+          nom: contact.nom,
+          telephone: contact.telephone,
+        })),
+        status: "scheduled",
+      }),
+    });
+
+    if (!campaignResponse.ok) {
+      const errorData = await campaignResponse.json();
+      throw new Error(
+        errorData.error || "Erreur lors de la création de la campagne"
+      );
+    }
 
     try {
       for (const contact of contacts) {
@@ -1104,23 +1107,20 @@ export default function NewCampaign() {
             body: JSON.stringify({
               recipient: contact.telephone,
               message: newMessage,
-              campaignId: campaignData.id,
+              campaignId: campagneID,
               campaignName: campaignData.name,
               signature,
               timest: timest,
             }),
           });
 
-          //       // console.log({
-          //       //   recipient: contact.phone,
-          //       //   message: message,
-          //       //   campaignId: campaignData.id,
-          //       //   campaignName: campaignData.name,
-          //       //   signature,
-          //       // });
+     
+          const responseClone = response.clone();
+          const responseJson = await response.json();
+          errorResp = responseJson;
 
-          const responseText = await response.text();
-          await autoSaveCampaign("sent");
+          const responseText = await responseClone.text();
+
           const parsedResponse = parseHTMLResponse(responseText);
 
           if (!parsedResponse) {
@@ -1150,8 +1150,14 @@ export default function NewCampaign() {
           // setMessageStatuses((prev) => [...prev, messageStatus]);
           successMessages.push(messageStatus);
         } catch (error) {
+          console.log(error);
+          // toast.error(error.response.data.error, {
+          //   style: { color: "#EF4444" },
+          //   position: "top-right",
+          // });
           const errorMessage =
             error instanceof Error ? error.message : "Erreur inconnue";
+          // console.log(errorMessage);
           failedMessages.push({
             messageId: "",
             messageDetailId: "",
@@ -1165,28 +1171,67 @@ export default function NewCampaign() {
       }
 
       // Count successes and failures
-      console.log(failedMessages);
+      // console.log(failedMessages);
+
+      if (errorResp.error) {
+        toast.error(errorResp.error, {
+          style: { color: "#EF4444" },
+          position: "top-right",
+        });
+      }
+      console.log(errorResp);
       const successful = successMessages.length;
       const failed = failedMessages.length;
 
-      if (failed === 0) {
+      if (successful) {
+        const failureCount = contacts.length - successful;
         setSuccess(`${successful} message(s) envoyé(s) avec succès`);
+        toast.success(`${successful} message(s) envoyé(s) avec succès`, {
+          style: { color: "#67B142" },
+        });
         setShowStatusModal(true);
+        await fetch(`/api/campaigns/${campagneID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "sent",
+            successCount: successful,
+            failureCount: failureCount,
+          }),
+        });
       } else {
-        console.log(failedMessages);
-        await autoSaveCampaign("failed");
-        const failureDetails = failedMessages
-          .map((msg) => `${msg.contact.telephone}: ${msg.errorMessage}`)
-          .join("\n");
-        setError(
-          `${successful} message(s) envoyé(s), ${failed} échec(s)\n\nDétails des erreurs:\n${failureDetails}`
-        );
+        const failureCount = contacts.length - successful;
+        // console.log(failedMessages);
+        // const failureDetails = failedMessages
+        //   .map((msg) => `${msg.contact.telephone}: ${msg.errorMessage}`)
+        //   .join("\n");
+        toast.error(`${successful} message(s) envoyé(s), ${failed} échec(s)`, {
+          style: { color: "#EF4444" },
+        });
+        setError(`${successful} message(s) envoyé(s), ${failed} échec(s)`);
+        await fetch(`/api/campaigns/${campagneID}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            status: "failed",
+            successCount: successful,
+            failureCount: failureCount,
+          }),
+        });
       }
     } catch (error) {
       setError("Une erreur est survenue lors de l'envoi de la campagne");
       console.error("Campaign error:", error);
     } finally {
       setLoading(false);
+
+      const response = await fetch(
+        `/api/user/${session?.user?.id}/getSmsCredit`
+      );
+      const data = await response.json();
+      if (data) {
+        addSolde(data.smsCredits);
+      }
     }
   };
 

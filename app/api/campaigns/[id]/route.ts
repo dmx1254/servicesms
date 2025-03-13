@@ -160,3 +160,34 @@ export async function DELETE(
     );
   }
 }
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  try {
+    const session = await getServerSession(options);
+    if (!session?.user?.id) {
+      return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
+    }
+
+    const campaignId = await params;
+    const { status, successCount, failureCount } = await req.json();
+
+    await CampaignModel.updateOne(
+      { id: campaignId.id },
+      { status, successCount, failureCount }
+    );
+
+    return NextResponse.json(
+      { error: "Campagne mis à jour avec succès" },
+      { status: 404 }
+    );
+  } catch (error) {
+    console.error("Error deleting campaign:", error);
+    return NextResponse.json(
+      { error: "Erreur lors de la suppression de la campagne" },
+      { status: 500 }
+    );
+  }
+}

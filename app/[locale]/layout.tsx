@@ -14,11 +14,11 @@ const rubik = Rubik({
 });
 
 export const metadata: Metadata = {
-  title: "servicesms",
+  title: "AxiomTEXT",
   description:
-    "Servicesms.sn est un service en ligne de premier plan au Sénégal",
+    "AxiomTEXT est un service en ligne de premier plan au Sénégal",
   icons: {
-    icon: "/icons/logo.png",
+    icon: "/images/axiomlogo.png",
   },
 };
 

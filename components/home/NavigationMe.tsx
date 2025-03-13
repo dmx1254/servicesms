@@ -151,7 +151,7 @@ export function NavigationMe() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/api" legacyBehavior passHref>
+          <Link href="/docs" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               Api
             </NavigationMenuLink>

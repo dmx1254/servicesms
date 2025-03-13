@@ -1,11 +1,9 @@
-import { clsx, type ClassValue } from "clsx"
-import { twMerge } from "tailwind-merge"
+import { clsx, type ClassValue } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 export function cn(...inputs: ClassValue[]) {
-  return twMerge(clsx(inputs))
+  return twMerge(clsx(inputs));
 }
-
-
 
 /**
  * Delay function for animations
@@ -17,7 +15,7 @@ export function delay(ms: number): Promise<void> {
 /**
  * Checks if the current environment is the browser
  */
-export const isBrowser = typeof window !== 'undefined';
+export const isBrowser = typeof window !== "undefined";
 
 /**
  * Creates a debounced function that delays invoking the provided function
@@ -28,23 +26,28 @@ export function debounce<T extends (...args: any[]) => any>(
   wait: number
 ): (...args: Parameters<T>) => void {
   let timeout: ReturnType<typeof setTimeout> | null = null;
-  
-  return function(...args: Parameters<T>) {
+
+  return function (...args: Parameters<T>) {
     const later = () => {
       timeout = null;
       func(...args);
     };
-    
+
     if (timeout) clearTimeout(timeout);
     timeout = setTimeout(later, wait);
   };
 }
 
-
+export const checkAmountOfSms = async (contact: string): Promise<number> => {
+  if (contact.startsWith("+221")) {
+    return 1;
+  } else {
+    return 3;
+  }
+};
 
 // Language
 
-
-export const defaultLocale = 'fr';
-export const locales = ['fr', 'en'] as const;
-export type ValidLocale = typeof locales[number];
+export const defaultLocale = "fr";
+export const locales = ["fr", "en"] as const;
+export type ValidLocale = (typeof locales)[number];

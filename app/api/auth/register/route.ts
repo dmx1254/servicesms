@@ -6,6 +6,9 @@ import UserModel from "@/app/lib/models/user.model";
 
 import { Resend } from "resend";
 import { connectDB } from "@/app/lib/db";
+import { RegisterTemplate } from "@/components/template/register-template";
+import { SignupSuccessTemplate } from "@/components/template/signup-success-template";
+import { AdminNotificationTemplate } from "@/components/template/admin-notification-template";
 
 const resend = new Resend(process.env.RESEND_SERVICESMS_API_KEY);
 
@@ -41,10 +44,17 @@ export async function POST(req: Request) {
       );
     }
 
+    const newUser = {
+      ...rest,
+      pendingCompanyName: rest.companyName,
+      companyNameStatus: "pending",
+      smsCredits: 5,
+    };
+
     // Hash du mot de passe
     const hashedPassword = await bcrypt.hash(password, 10);
     const userData = {
-      ...rest,
+      ...newUser,
       password: hashedPassword,
     };
 
@@ -62,20 +72,10 @@ export async function POST(req: Request) {
 
     // Envoyer l'email avec Resend
     await resend.emails.send({
-      from: "servicesms <noreply@ibendouma.com>",
+      from: "axiomtext <noreply@axiomtext.com>",
       to: data.email,
-      subject: "Vérifiez votre adresse email",
-      html: `
-        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-          <h2 style="color: #67B142;">Bienvenue sur servicesms</h2>
-          <p>Merci de vous être inscrit ! Pour finaliser votre inscription, veuillez utiliser le code suivant :</p>
-          <div style="background-color: #F3F4F6; padding: 20px; text-align: center; margin: 20px 0;">
-            <h1 style="font-size: 32px; letter-spacing: 5px; margin: 0; color: #1F2937;">${verificationCode}</h1>
-          </div>
-          <p>Ce code expirera dans une 30 minutes.</p>
-          <p>Si vous n'avez pas demandé ce code, vous pouvez ignorer cet email.</p>
-        </div>
-      `,
+      subject: "Code de verification AxiomTEXT",
+      react: RegisterTemplate({ verificationCode }),
     });
 
     return NextResponse.json(
@@ -110,10 +110,37 @@ export async function PUT(req: Request) {
     }
 
     // Créer l'utilisateur avec les données stockées
-    await UserModel.create(verification.userData);
+    const user = await UserModel.create(verification.userData);
 
     // Supprimer le code de vérification
     await VerificationModel.deleteOne({ _id: verification._id });
+
+    // Envoyer l'email de succès à l'utilisateur
+    await resend.emails.send({
+      from: "axiomtext <noreply@axiomtext.com>",
+      to: email,
+      subject: "Inscription réussie - AxiomTEXT",
+      react: SignupSuccessTemplate({
+        firstName: verification.userData.firstName,
+        lastName: verification.userData.lastName,
+        companyName: verification.userData.companyName,
+      }),
+    });
+
+    // Envoyer la notification à l'admin
+    await resend.emails.send({
+      from: "axiomtext <noreply@axiomtext.com>",
+      to: process.env.ADMIN_EMAIL || "mamadousy1254@gmail.com",
+      subject: "Nouvelle inscription - AxiomTEXT",
+      react: AdminNotificationTemplate({
+        firstName: verification.userData.firstName,
+        lastName: verification.userData.lastName,
+        email: verification.userData.email,
+        phone: verification.userData.phone,
+        companyName: verification.userData.companyName,
+        accountType: verification.userData.accountType,
+      }),
+    });
 
     return NextResponse.json(
       { message: "Inscription validée avec succès" },
