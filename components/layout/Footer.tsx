@@ -125,7 +125,7 @@ export default function Footer() {
           <motion.div variants={itemVariants}>
             <h3 className="text-[#67B142] text-xl font-medium mb-4">Informations</h3>
             <ul className="space-y-2">
-              <li><Link href="/about" className="text-white hover:text-[#67B142] transition-colors">Qui sommes nous?</Link></li>
+              <li><Link href="/about-us" className="text-white hover:text-[#67B142] transition-colors">Qui sommes nous?</Link></li>
               <li><Link href="/how-it-works" className="text-white hover:text-[#67B142] transition-colors">Comment ça marche</Link></li>
               <li><Link href="/careers" className="text-white hover:text-[#67B142] transition-colors">Nous recrutons</Link></li>
               <li><Link href="/faq" className="text-white hover:text-[#67B142] transition-colors">FAQ</Link></li>
