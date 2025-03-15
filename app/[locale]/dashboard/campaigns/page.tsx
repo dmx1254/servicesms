@@ -80,6 +80,7 @@ export default function CampaignsPage() {
   const [searchTerm, setSearchTerm] = useState("");
   const [filterType, setFilterType] = useState<string>("all");
   const [filterStatus, setFilterStatus] = useState<string>("all");
+  const [filteredCampaigns, setFilteredCampaigns] = useState<Campaign[]>([]);
 
   // Fetch campaigns
   useEffect(() => {
@@ -107,15 +108,19 @@ export default function CampaignsPage() {
   }, [session]);
 
   // Filter and search campaigns
-  const filteredCampaigns = campaigns.filter((campaign) => {
-    const matchesSearch = campaign.name
-      .toLowerCase()
-      .includes(searchTerm.toLowerCase());
-    const matchesType = filterType === "all" || campaign.type === filterType;
-    const matchesStatus =
-      filterStatus === "all" || campaign.status === filterStatus;
-    return matchesSearch && matchesType && matchesStatus;
-  });
+
+  useEffect(() => {
+    const filteredCampaigns = campaigns.filter((campaign) => {
+      const matchesSearch = campaign.name
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesType = filterType === "all" || campaign.type === filterType;
+      const matchesStatus =
+        filterStatus === "all" || campaign.status === filterStatus;
+      return matchesSearch && matchesType && matchesStatus;
+    });
+    setFilteredCampaigns(filteredCampaigns);
+  }, [campaigns, searchTerm, filterType, filterStatus]);
 
   // Campaign stats
   const stats = {
@@ -139,36 +144,15 @@ export default function CampaignsPage() {
         throw new Error("Erreur lors de la suppression");
       }
 
-      setCampaigns((prev) => prev.filter((c) => c.id !== id));
-      toast.success("Campagne supprimée avec succès");
+      setCampaigns((prev) => prev.filter((c) => c._id !== id));
+      toast.success("Campagne supprimée avec succès", {
+        style: {
+          color: "#67B142",
+        },
+        position: "top-right",
+      });
     } catch (error) {
       console.error("Error deleting campaign:", error);
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue"
-      );
-    }
-  };
-
-  // Handle campaign duplication
-  const handleDuplicate = async (campaign: Campaign) => {
-    try {
-      const response = await fetch("/api/campaigns/" + campaign.id, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ action: "duplicate" }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Erreur lors de la duplication");
-      }
-
-      const newCampaign = await response.json();
-      setCampaigns((prev) => [...prev, newCampaign]);
-      toast.success("Campagne dupliquée avec succès");
-    } catch (error) {
-      console.error("Error duplicating campaign:", error);
       toast.error(
         error instanceof Error ? error.message : "Une erreur est survenue"
       );
@@ -279,338 +263,385 @@ export default function CampaignsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden rounded-3xl bg-gradient-to-r from-[#67B142] via-[#4CAF50] to-[#67B142] p-8 shadow-lg"
+    <div className="p-8 space-y-8 bg-gray-50 min-h-screen">
+      {/* En-tête */}
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
+        <div>
+          <h1 className="text-3xl font-bold bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
+            Campagnes SMS
+          </h1>
+          <p className="text-gray-500 mt-2">
+            Gérez et suivez vos campagnes de communication
+          </p>
+        </div>
+        <Button
+          onClick={() => router.push("/dashboard/campaigns/new")}
+          className="bg-[#67B142] rounded hover:bg-[#67B142]/90 shadow-lg shadow-[#67B142]/20 transition-all duration-300 transform hover:scale-105"
         >
-          <div className="relative z-10">
-            <div className="flex items-center justify-between">
-              <div>
-                <motion.h1
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.2 }}
-                  className="text-3xl font-bold text-white mb-2"
-                >
-                  Campagnes SMS
-                </motion.h1>
-                <motion.p
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: 0.3 }}
-                  className="text-white/90"
-                >
-                  Gérez vos campagnes SMS en toute simplicité
-                </motion.p>
-              </div>
-              <Button
-                size="lg"
-                onClick={() => router.push("/dashboard/campaigns/new")}
-                className="bg-white text-[#67B142] hover:bg-white/90 shadow-md transition-all duration-200 hover:scale-105"
-              >
-                <Plus className="w-5 h-5 mr-2" />
-                Nouvelle Campagne
-              </Button>
+          <Plus className="w-4 h-4 mr-2" />
+          Nouvelle Campagne
+        </Button>
+      </div>
+
+      {/* Statistiques */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-br from-white to-emerald-50/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Total Campagnes
+            </CardTitle>
+            <div className="p-3 bg-emerald-100 rounded-xl">
+              <MessageSquare className="w-5 h-5 text-emerald-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-800">
+              {stats.total}
+            </div>
+            <div className="mt-3 bg-emerald-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 transition-all duration-500 rounded-full"
+                style={{ width: `${(stats.total / 100) * 100}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
+              <span className="text-emerald-500">●</span>
+              {stats.sent} campagnes envoyées
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-br from-white to-blue-50/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Envoyées
+            </CardTitle>
+            <div className="p-3 bg-blue-100 rounded-xl">
+              <Send className="w-5 h-5 text-blue-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-800">{stats.sent}</div>
+            <div className="mt-3 bg-blue-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full bg-blue-500 transition-all duration-500 rounded-full"
+                style={{ width: `${(stats.sent / stats.total) * 100}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
+              <span className="text-blue-500">●</span>
+              {Math.round((stats.sent / stats.total) * 100)}% du total
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-br from-white to-purple-50/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Programmées
+            </CardTitle>
+            <div className="p-3 bg-purple-100 rounded-xl">
+              <Calendar className="w-5 h-5 text-purple-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-800">
+              {stats.scheduled}
+            </div>
+            <div className="mt-3 bg-purple-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full bg-purple-500 transition-all duration-500 rounded-full"
+                style={{ width: `${(stats.scheduled / stats.total) * 100}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
+              <span className="text-purple-500">●</span>
+              {Math.round((stats.scheduled / stats.total) * 100)}% du total
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card className="hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] bg-gradient-to-br from-white to-amber-50/30">
+          <CardHeader className="flex flex-row items-center justify-between pb-2 space-y-0">
+            <CardTitle className="text-sm font-medium text-gray-600">
+              Brouillons
+            </CardTitle>
+            <div className="p-3 bg-amber-100 rounded-xl">
+              <Clock className="w-5 h-5 text-amber-600" />
+            </div>
+          </CardHeader>
+          <CardContent>
+            <div className="text-3xl font-bold text-gray-800">
+              {stats.draft}
+            </div>
+            <div className="mt-3 bg-amber-100 rounded-full h-2.5 overflow-hidden">
+              <div
+                className="h-full bg-amber-500 transition-all duration-500 rounded-full"
+                style={{ width: `${(stats.draft / stats.total) * 100}%` }}
+              />
+            </div>
+            <p className="text-sm text-gray-500 mt-3 flex items-center gap-1">
+              <span className="text-amber-500">●</span>
+              {Math.round((stats.draft / stats.total) * 100)}% du total
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filtres et Recherche */}
+      <Card className="bg-white shadow-lg rounded-2xl border border-gray-100">
+        <CardContent className="p-6">
+          <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-center">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Rechercher une campagne..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 bg-gray-50/50 border-gray-200 rounded focus:ring-[#67B142] focus:border-[#67B142]"
+              />
+            </div>
+            <div className="flex gap-4">
+              <Select value={filterType} onValueChange={setFilterType}>
+                <SelectTrigger className="w-[180px] bg-gray-50/50 rounded border-gray-200">
+                  <Filter className="w-4 h-4 mr-2 text-gray-500" />
+                  <SelectValue placeholder="Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les types</SelectItem>
+                  <SelectItem value="academic">Académique</SelectItem>
+                  <SelectItem value="marketing">Marketing</SelectItem>
+                  <SelectItem value="transactional">Transactionnel</SelectItem>
+                </SelectContent>
+              </Select>
+              <Select value={filterStatus} onValueChange={setFilterStatus}>
+                <SelectTrigger className="w-[180px] bg-gray-50/50 rounded border-gray-200">
+                  <Filter className="w-4 h-4 mr-2 text-gray-500" />
+                  <SelectValue placeholder="Statut" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Tous les statuts</SelectItem>
+                  <SelectItem value="draft">Brouillon</SelectItem>
+                  <SelectItem value="scheduled">Programmée</SelectItem>
+                  <SelectItem value="sent">Envoyée</SelectItem>
+                  <SelectItem value="failed">Échouée</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
-          <div className="absolute right-0 top-0 w-96 h-full opacity-10 transform rotate-12">
-            <MessageSquare className="w-full h-full" />
-          </div>
-        </motion.div>
+        </CardContent>
+      </Card>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-          <AnimatePresence>
-            {[
-              {
-                title: "Total",
-                value: stats.total,
-                icon: MessageSquare,
-                color: "bg-purple-100 text-purple-800",
-                gradient: "from-purple-500/10 to-purple-500/5",
-              },
-              {
-                title: "Envoyées",
-                value: stats.sent,
-                icon: CheckCircle2,
-                color: "bg-green-100 text-green-800",
-                gradient: "from-green-500/10 to-green-500/5",
-              },
-              {
-                title: "Programmées",
-                value: stats.scheduled,
-                icon: Calendar,
-                color: "bg-blue-100 text-blue-800",
-                gradient: "from-blue-500/10 to-blue-500/5",
-              },
-              {
-                title: "Brouillons",
-                value: stats.draft,
-                icon: Clock,
-                color: "bg-gray-100 text-gray-800",
-                gradient: "from-gray-500/10 to-gray-500/5",
-              },
-            ].map((stat, index) => (
-              <motion.div
-                key={stat.title}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 * index }}
-                className="group"
-              >
-                <Card className="border-none shadow-md hover:shadow-lg transition-all duration-200 bg-gradient-to-br ${stat.gradient}">
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {stat.title}
-                    </CardTitle>
-                    <div
-                      className={`p-2 rounded-full ${stat.color} group-hover:scale-110 transition-transform duration-200`}
-                    >
-                      <stat.icon className="w-4 h-4" />
-                    </div>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p className="text-xs text-muted-foreground">
-                      {stat.value === 1 ? "campagne" : "campagnes"}
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </AnimatePresence>
-        </div>
-
-        {/* Filters */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col sm:flex-row gap-4 bg-white p-4 rounded-xl shadow-sm"
-        >
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Rechercher une campagne..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-200"
-            />
-          </div>
-          <div className="flex gap-4">
-            <Select value={filterType} onValueChange={setFilterType}>
-              <SelectTrigger className="w-[180px] rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
-                <Filter className="w-4 h-4 mr-2 text-gray-500" />
-                <SelectValue placeholder="Type" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les types</SelectItem>
-                <SelectItem value="academic">Académique</SelectItem>
-                <SelectItem value="marketing">Marketing</SelectItem>
-                <SelectItem value="transactional">Transactionnel</SelectItem>
-              </SelectContent>
-            </Select>
-            <Select value={filterStatus} onValueChange={setFilterStatus}>
-              <SelectTrigger className="w-[180px] rounded bg-white border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]">
-                <Filter className="w-4 h-4 mr-2 text-gray-500" />
-                <SelectValue placeholder="Statut" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">Tous les statuts</SelectItem>
-                <SelectItem value="draft">Brouillon</SelectItem>
-                <SelectItem value="scheduled">Programmée</SelectItem>
-                <SelectItem value="sent">Envoyée</SelectItem>
-                <SelectItem value="failed">Échouée</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </motion.div>
-
-        {/* Campaigns Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <Card className="border-none shadow-lg overflow-hidden">
-            <CardHeader className="bg-gray-50/50">
-              <CardTitle>Vos Campagnes</CardTitle>
-              <CardDescription>
-                Liste de toutes vos campagnes SMS et leur statut
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="p-0">
+      {/* Liste des Campagnes */}
+      <Card className="bg-white shadow-lg rounded-2xl border border-gray-100">
+        <CardHeader className="p-6">
+          <CardTitle className="text-xl font-semibold text-gray-800">
+            Liste des Campagnes
+          </CardTitle>
+          <CardDescription>
+            {filteredCampaigns.length} campagne
+            {filteredCampaigns.length > 1 ? "s" : ""} trouvée
+            {filteredCampaigns.length > 1 ? "s" : ""}
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="flex items-center justify-center p-8">
+              <Loader2 className="w-8 h-8 animate-spin text-[#67B142]" />
+            </div>
+          ) : filteredCampaigns.length === 0 ? (
+            <div className="flex flex-col items-center justify-center p-8 text-center">
+              <AlertCircle className="w-12 h-12 text-gray-400 mb-3" />
+              <p className="text-gray-600 font-medium">
+                Aucune campagne trouvée
+              </p>
+              <p className="text-gray-400 text-sm mt-1">
+                Essayez de modifier vos filtres ou créez une nouvelle campagne
+              </p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
-                  <TableRow className="bg-gray-50/50 hover:bg-gray-50/50">
-                    <TableHead className="font-semibold">Nom</TableHead>
-                    <TableHead className="font-semibold">Type</TableHead>
-                    <TableHead className="font-semibold">Statut</TableHead>
-                    <TableHead className="font-semibold">
+                  <TableRow className="bg-gray-50/50 border-b border-gray-100">
+                    <TableHead className="w-[300px] py-4 text-gray-600 font-semibold">
+                      Nom
+                    </TableHead>
+                    <TableHead className="py-4 text-gray-600 font-semibold">
+                      Type
+                    </TableHead>
+                    <TableHead className="py-4 text-gray-600 font-semibold">
+                      Statut
+                    </TableHead>
+                    <TableHead className="py-4 text-gray-600 font-semibold">
                       Destinataires
                     </TableHead>
-                    <TableHead className="font-semibold">Créée le</TableHead>
-                    <TableHead className="font-semibold text-right">
+                    <TableHead className="py-4 text-gray-600 font-semibold">
+                      Date de création
+                    </TableHead>
+                    <TableHead className="py-4 text-gray-600 font-semibold text-right">
                       Actions
                     </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {loading ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-8">
-                        <div className="flex items-center justify-center gap-2">
-                          <Loader2 className="h-6 w-6 animate-spin text-[#67B142]" />
-                          <span className="text-gray-500">
-                            Chargement des campagnes...
-                          </span>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : filteredCampaigns.length === 0 ? (
-                    <TableRow>
-                      <TableCell colSpan={6} className="text-center py-12">
-                        <div className="flex flex-col items-center gap-3 text-gray-500">
-                          <AlertCircle className="w-12 h-12 text-gray-400" />
-                          <p className="text-lg font-medium">
-                            Aucune campagne trouvée
-                          </p>
-                          <p className="text-sm text-gray-400">
-                            Commencez par créer une nouvelle campagne
-                          </p>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ) : (
-                    filteredCampaigns.map((campaign) => (
-                      <TableRow
-                        key={campaign._id}
-                        className="hover:bg-gray-50/50 cursor-pointer transition-colors"
-                        onClick={(e) => {
-                          e.preventDefault();
-                          handleViewDetails(campaign._id);
-                        }}
+                  <AnimatePresence>
+                    {filteredCampaigns.map((campaign, index) => (
+                      <motion.tr
+                        key={campaign.id}
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.3, delay: index * 0.05 }}
+                        className="group hover:bg-gray-50/80 cursor-pointer border-b border-gray-100 transition-colors duration-200"
+                        onClick={() => handleViewDetails(campaign._id)}
                       >
-                        <TableCell className="font-medium">
-                          {campaign.name}
-                        </TableCell>
-                        <TableCell>
-                          <TypeBadge type={campaign.type} />
-                        </TableCell>
-                        <TableCell>
-                          <StatusBadge status={campaign.status} />
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex items-center gap-2">
-                            <Users className="w-4 h-4 text-gray-400" />
-                            <span>{campaign.recipientCount}</span>
-                            {campaign.status === "sent" && (
-                              <span className="text-sm text-gray-500">
-                                ({campaign.recipientCount} réussis,{" "}
-                                {campaign.failureCount} échoués)
-                              </span>
-                            )}
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`p-2 rounded-lg ${
+                                campaign.type === "academic"
+                                  ? "bg-[#67B142]/10 text-[#67B142]"
+                                  : campaign.type === "marketing"
+                                  ? "bg-blue-100 text-blue-600"
+                                  : "bg-purple-100 text-purple-600"
+                              }`}
+                            >
+                              <MessageSquare className="w-4 h-4" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-900 group-hover:text-[#67B142] transition-colors duration-200">
+                                {campaign.name}
+                              </p>
+                              <p className="text-sm text-gray-500">
+                                {campaign.message.length > 50
+                                  ? campaign.message.substring(0, 50) + "..."
+                                  : campaign.message}
+                              </p>
+                            </div>
                           </div>
                         </TableCell>
-                        <TableCell>
-                          {format(new Date(campaign.createdAt), "Pp", {
-                            locale: fr,
-                          })}
+                        <TableCell className="py-4">
+                          <TypeBadge type={campaign.type} />
                         </TableCell>
-                        <TableCell className="text-right">
+                        <TableCell className="py-4">
+                          <StatusBadge status={campaign.status} />
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-violet-100 rounded">
+                              <Users className="w-4 h-4 text-violet-900" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-700">
+                                {campaign.recipientCount}
+                              </p>
+                              {campaign.status === "sent" && (
+                                <div className="flex items-center gap-1 text-xs">
+                                  <span className="text-green-600">
+                                    ✓ {campaign.successCount}
+                                  </span>
+                                  {campaign.failureCount > 0 && (
+                                    <span className="text-red-600">
+                                      • {campaign.failureCount}
+                                    </span>
+                                  )}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="p-1.5 bg-fuchsia-100 rounded">
+                              <Calendar className="w-4 h-4 text-fuchsia-900" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-gray-700">
+                                {format(
+                                  new Date(campaign.createdAt),
+                                  "dd MMM yyyy",
+                                  {
+                                    locale: fr,
+                                  }
+                                )}
+                              </p>
+                              {campaign.scheduledDate && (
+                                <p className="text-xs text-gray-500">
+                                  Programmée:{" "}
+                                  {format(
+                                    new Date(campaign.scheduledDate),
+                                    "HH:mm",
+                                    {
+                                      locale: fr,
+                                    }
+                                  )}
+                                </p>
+                              )}
+                            </div>
+                          </div>
+                        </TableCell>
+                        <TableCell className="py-4 text-right">
                           <DropdownMenu>
-                            <DropdownMenuTrigger
-                              asChild
-                              onClick={(e) => {
-                                e.preventDefault();
-                                e.stopPropagation();
-                              }}
-                            >
+                            <DropdownMenuTrigger asChild>
                               <Button
                                 variant="ghost"
-                                className="h-8 w-8 p-0 hover:bg-gray-100 rounded"
-                                style={{
-                                  boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
-                                }}
+                                className="h-8 w-8 p-0 hover:bg-gray-100 rounded-lg transition-colors duration-200"
+                                onClick={(e) => e.stopPropagation()}
                               >
                                 <MoreVertical className="h-4 w-4" />
                               </Button>
                             </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
+                            <DropdownMenuContent
+                              align="end"
+                              className="w-[160px] bg-white shadow-lg rounded-xl border border-gray-100"
+                            >
                               <DropdownMenuItem
                                 onClick={(e) => {
-                                  e.preventDefault();
                                   e.stopPropagation();
-                                  handleViewDetails(campaign._id);
+                                  handleViewDetails(campaign.id);
                                 }}
-                                className="cursor-pointer"
+                                className="cursor-pointer hover:bg-gray-50 transition-colors duration-200"
                               >
                                 <Eye className="mr-2 h-4 w-4" />
-                                Voir les détails
+                                Voir détails
                               </DropdownMenuItem>
+
+                              {campaign.status === "draft" && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleSend(campaign);
+                                  }}
+                                  className="cursor-pointer hover:bg-gray-50 transition-colors duration-200"
+                                >
+                                  <Send className="mr-2 h-4 w-4" />
+                                  Envoyer
+                                </DropdownMenuItem>
+                              )}
+                              <DropdownMenuSeparator className="bg-gray-100" />
                               <DropdownMenuItem
                                 onClick={(e) => {
-                                  e.preventDefault();
                                   e.stopPropagation();
                                   handleDelete(campaign._id);
                                 }}
-                                className="cursor-pointer text-red-600 focus:text-red-600"
+                                className="cursor-pointer text-red-600 hover:bg-red-50 hover:text-red-700 transition-colors duration-200"
                               >
                                 <Trash2 className="mr-2 h-4 w-4" />
                                 Supprimer
                               </DropdownMenuItem>
-                              {/* <DropdownMenuItem
-                                onClick={(e) => {
-                                  e.preventDefault();
-                                  e.stopPropagation();
-                                  handleDuplicate(campaign);
-                                }}
-                                className="cursor-pointer"
-                              >
-                                <Copy className="mr-2 h-4 w-4" />
-                                Dupliquer
-                              </DropdownMenuItem> */}
-                              {campaign.status === "draft" && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleSend(campaign);
-                                    }}
-                                    className="cursor-pointer"
-                                  >
-                                    <Send className="mr-2 h-4 w-4" />
-                                    Envoyer maintenant
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      e.stopPropagation();
-                                      handleDelete(campaign._id);
-                                    }}
-                                    className="cursor-pointer text-red-600 focus:text-red-600"
-                                  >
-                                    <Trash2 className="mr-2 h-4 w-4" />
-                                    Supprimer
-                                  </DropdownMenuItem>
-                                </>
-                              )}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </TableCell>
-                      </TableRow>
-                    ))
-                  )}
+                      </motion.tr>
+                    ))}
+                  </AnimatePresence>
                 </TableBody>
               </Table>
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }

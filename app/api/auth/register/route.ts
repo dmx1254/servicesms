@@ -75,7 +75,7 @@ export async function POST(req: Request) {
       from: "axiomtext <noreply@axiomtext.com>",
       to: data.email,
       subject: "Code de verification AxiomTEXT",
-      react: RegisterTemplate({ verificationCode }),
+      react: RegisterTemplate({ verificationCode }) as React.ReactElement,
     });
 
     return NextResponse.json(
@@ -110,7 +110,7 @@ export async function PUT(req: Request) {
     }
 
     // Créer l'utilisateur avec les données stockées
-    const user = await UserModel.create(verification.userData);
+    await UserModel.create(verification.userData);
 
     // Supprimer le code de vérification
     await VerificationModel.deleteOne({ _id: verification._id });
@@ -124,7 +124,7 @@ export async function PUT(req: Request) {
         firstName: verification.userData.firstName,
         lastName: verification.userData.lastName,
         companyName: verification.userData.companyName,
-      }),
+      }) as React.ReactElement,
     });
 
     // Envoyer la notification à l'admin
@@ -139,7 +139,7 @@ export async function PUT(req: Request) {
         phone: verification.userData.phone,
         companyName: verification.userData.companyName,
         accountType: verification.userData.accountType,
-      }),
+      }) as React.ReactElement,
     });
 
     return NextResponse.json(

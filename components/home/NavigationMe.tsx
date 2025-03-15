@@ -24,64 +24,66 @@ import {
   Ticket,
 } from "lucide-react";
 
-const components: {
+export interface Solution {
   title: string;
   href: string;
   description: string;
   icon: React.ReactNode;
-}[] = [
+}
+
+export const components: Solution[] = [
   {
     title: "SMS PRO",
-    href: "/sms-pro",
+    href: "/solutions/sms-pro",
     description:
       "Solution professionnelle pour l'envoi de SMS en masse avec suivi en temps réel et analyses détaillées.",
     icon: <MessageSquare className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "SMS VOCAL",
-    href: "/sms-vocal",
+    href: "/solutions/sms-vocal",
     description:
       "Convertissez vos messages texte en messages vocaux pour une communication plus personnelle et accessible.",
     icon: <Mic className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "SMS ENRICHI",
-    href: "/sms-enrichi",
+    href: "/solutions/sms-enrichi",
     description:
       "Enrichissez vos SMS avec des contenus multimédias et des liens interactifs pour plus d'engagement.",
     icon: <ImagePlus className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "LOCATION BDD",
-    href: "/location-bdd",
+    href: "/solutions/location-bdd",
     description:
       "Accédez à notre base de données qualifiée pour cibler efficacement vos campagnes SMS.",
     icon: <Database className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "MAIL TO SMS",
-    href: "/mail-to-sms",
+    href: "/solutions/mail-to-sms",
     description:
       "Convertissez automatiquement vos emails en SMS pour une communication multicanale efficace.",
     icon: <Mail className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "SONDAGES SMS",
-    href: "/sondages-sms",
+    href: "/solutions/sondages-sms",
     description:
       "Créez et gérez des sondages par SMS pour collecter facilement les retours de vos clients.",
     icon: <BarChart3 className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "VOTE SMS",
-    href: "/vote-sms",
+    href: "/solutions/vote-sms",
     description:
       "Système de vote par SMS sécurisé pour vos événements et consultations.",
     icon: <Vote className="h-6 w-6 text-[#67B142] shrink-0" />,
   },
   {
     title: "MOBILE TICKETING",
-    href: "/mobile-ticketing",
+    href: "/solutions/mobile-ticketing",
     description:
       "Solution de billetterie mobile par SMS pour gérer vos événements et contrôler les accès.",
     icon: <Ticket className="h-6 w-6 text-[#67B142] shrink-0" />,
@@ -100,7 +102,9 @@ export function NavigationMe() {
     <NavigationMenu>
       <NavigationMenuList>
         <NavigationMenuItem>
-          <NavigationMenuTrigger>Solutions</NavigationMenuTrigger>
+          <NavigationMenuTrigger>
+            <Link href="/solutions">Solutions</Link>
+          </NavigationMenuTrigger>
           <NavigationMenuContent>
             <ul className="grid w-[400px] gap-4 p-6 md:w-[500px] md:grid-cols-2 lg:w-[600px]">
               {components.map((component) => (
@@ -151,11 +155,12 @@ export function NavigationMe() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/docs" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Api
-            </NavigationMenuLink>
-          </Link>
+          <button
+            onClick={() => scrollToSection("api")}
+            className={navigationMenuTriggerStyle()}
+          >
+            API
+          </button>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/blog" legacyBehavior passHref>

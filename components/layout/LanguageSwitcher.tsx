@@ -1,14 +1,14 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, GlobeIcon } from "lucide-react";
+import { ChevronDown } from "lucide-react";
 import { locales, type ValidLocale } from "@/app/lib/utils/utils";
 import Image from "next/image";
 import { useState } from "react";
@@ -37,7 +37,7 @@ export default function LanguageSwitcher() {
       <DropdownMenuTrigger asChild>
         <button
           className="group flex items-center gap-2 border-none shadow-none cursor-pointer hover:bg-transparent bg-transparent outline-none focus:border-none focus:outline-none hover:border-none hover:outline-none"
-          onMouseEnter={() => setIsOpen(true)}
+          // onMouseEnter={() => setIsOpen(true)}
         >
           <Image
             src={currentLocale === "fr" ? "/flags/frr.png" : "/flags/enn.png"}
@@ -57,7 +57,7 @@ export default function LanguageSwitcher() {
       </DropdownMenuTrigger>
       <DropdownMenuContent
         align="center"
-        onMouseLeave={() => setIsOpen(false)}
+        // onMouseLeave={() => setIsOpen(false)}
         className="min-w-[5rem] hover:bg-none z-[99999]"
       >
         <DropdownMenuItem
@@ -65,9 +65,11 @@ export default function LanguageSwitcher() {
           className="cursor-pointer"
         >
           {/* {locale === "fr" ? "🇫🇷 Français" : "🇬🇧 English"} */}
-          <img
+          <Image
             src={currentLocale === "fr" ? "/flags/enn.png" : "/flags/frr.png"}
             alt={currentLocale}
+            width={20}
+            height={20}
             className="w-5 h-5 rounded-full"
           />
           <span className="text-base uppercase text-[#646464] outline-none focus:border-none focus:outline-none">

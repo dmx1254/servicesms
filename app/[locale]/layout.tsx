@@ -3,6 +3,8 @@ import { Rubik } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "sonner";
 import { Providers } from "../../components/providers";
+import Header from "@/components/layout/Header";
+import Footer from "@/components/layout/Footer";
 // import Footer from "@/components/layout/Footer";
 
 const rubik = Rubik({
@@ -15,10 +17,9 @@ const rubik = Rubik({
 
 export const metadata: Metadata = {
   title: "AxiomTEXT",
-  description:
-    "AxiomTEXT est un service en ligne de premier plan au Sénégal",
+  description: "AxiomTEXT est une plateforme de marketing par SMS",
   icons: {
-    icon: "/images/axiomlogo.png",
+    icon: "/images/favicon.png",
   },
 };
 
@@ -34,12 +35,13 @@ export default async function RootLayout({
     <html lang={locale} suppressHydrationWarning>
       <body className={rubik.className}>
         <Providers locale={locale}>
+          <Header />
           <div className={`${rubik.variable} min-h-screen antialiased`}>
             <Toaster />
             {children}
           </div>
-          {/* <Footer /> */}
-        </Providers>
+          <Footer />
+        </Providers>  
       </body>
     </html>
   );

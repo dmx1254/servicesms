@@ -16,6 +16,7 @@ import {
   ChevronRight,
   Loader,
   LogOut,
+  Megaphone,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/app/lib/utils/utils";
@@ -29,7 +30,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Breadcrumb } from "@/components/ui/breadcrumb";
 import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 import DashTopBar from "@/components/DashTopBar";
 
@@ -55,12 +55,34 @@ export default function DashboardLayout({
       title: t("campaigns"),
       icon: <MessageSquare className="w-5 h-5" />,
       href: `/${locale}/dashboard/campaigns`,
+      subItems: [
+        {
+          title: "Nouvelle campagne",
+          href: `/${locale}/dashboard/campaigns/new`,
+          icon: <Megaphone className="w-6 h-6" />,
+        },
+        {
+          title: "Envoi rapide",
+          href: `/${locale}/dashboard/campaigns/quick-send`,
+          icon: <Send className="w-5 h-5" />,
+        },
+        // {
+        //   title: "Programmées",
+        //   href: `/${locale}/dashboard/campaigns/scheduled`,
+        //   icon: <FileText className="w-4 h-4" />,
+        // },
+        {
+          title: "Historique",
+          href: `/${locale}/dashboard/campaigns`,
+          icon: <BarChart2 className="w54 h-5" />,
+        },
+      ],
     },
-    {
-      title: t("quickSend"),
-      icon: <Send className="w-5 h-5" />,
-      href: `/${locale}/dashboard/quick-send`,
-    },
+    // {
+    //   title: t("quickSend"),
+    //   icon: <Send className="w-5 h-5" />,
+    //   href: `/${locale}/dashboard/quick-send`,
+    // },
     {
       title: t("contacts"),
       icon: <Users className="w-5 h-5" />,
@@ -123,9 +145,17 @@ export default function DashboardLayout({
           {/* Logo */}
           <div className="h-16 flex items-center justify-between px-4 border-b border-gray-200">
             <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-28 h-28 rounded-lg overflow-hidden">
+              <div
+                className={`relative ${
+                  isSidebarOpen ? "w-28 h-28" : "w-8 h-8"
+                }  rounded-lg overflow-hidden`}
+              >
                 <Image
-                  src="/images/axiomlogo.png"
+                  src={
+                    isSidebarOpen
+                      ? "/images/axiomlogo.png"
+                      : "/images/favicon.png"
+                  }
                   alt="AxiomTEXT"
                   fill
                   className="object-contain"
@@ -166,8 +196,8 @@ export default function DashboardLayout({
                   <Link
                     href={item.href}
                     className={cn(
-                      "flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-200",
-                      pathname === `/${locale}${item.href.split(locale)[1]}`
+                      "flex items-center gap-3 px-3 py-2.5 rounded transition-all duration-200",
+                      pathname === item.href
                         ? "bg-[#67B142] text-white shadow-md shadow-[#67B142]/20 relative before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:w-1 before:h-8 before:bg-[#67B142] before:rounded-r-full before:-ml-4"
                         : "text-gray-700 hover:bg-gray-100",
                       !isSidebarOpen && "justify-center"
@@ -176,24 +206,50 @@ export default function DashboardLayout({
                     <div
                       className={cn(
                         "transition-transform duration-200",
-                        pathname ===
-                          `/${locale}${item.href.split(locale)[1]}` &&
-                          "scale-110"
+                        pathname === item.href && "scale-110"
                       )}
                     >
                       {item.icon}
                     </div>
                     <motion.span
                       variants={textVariants}
-                      className={cn(
-                        pathname ===
-                          `/${locale}${item.href.split(locale)[1]}` &&
-                          "font-medium"
-                      )}
+                      className={cn(pathname === item.href && "font-medium")}
                     >
                       {item.title}
                     </motion.span>
                   </Link>
+                  {item.subItems && isSidebarOpen && (
+                    <motion.ul
+                      initial={{ opacity: 0, height: 0 }}
+                      animate={{ 
+                        opacity: 1, 
+                        height: "auto",
+                        transition: { duration: 0.3 }
+                      }}
+                      className="ml-6 mt-2 space-y-1"
+                    >
+                      {item.subItems.map((subItem) => (
+                        <motion.li
+                          key={subItem.href}
+                          whileHover={{ scale: 1.02 }}
+                          whileTap={{ scale: 0.98 }}
+                        >
+                          <Link
+                            href={subItem.href}
+                            className={cn(
+                              "flex items-center gap-2 px-3 py-2 rounded text-sm transition-all duration-200",
+                              pathname === subItem.href
+                                ? "bg-[#67B142]/10 text-[#67B142] font-medium"
+                                : "text-gray-600 hover:bg-gray-50 hover:text-[#67B142]"
+                            )}
+                          >
+                            {subItem.icon}
+                            <span>{subItem.title}</span>
+                          </Link>
+                        </motion.li>
+                      ))}
+                    </motion.ul>
+                  )}
                 </motion.li>
               ))}
             </ul>

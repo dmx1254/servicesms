@@ -1,13 +1,17 @@
 import HeroSection from "@/components/home/HeroSection";
-import Header from "@/components/layout/Header";
-import PricingSection from "@/components/home/PricingSection";
+import ServicesGrid from "@/components/home/ServicesGrid";
+import FeaturesSection from "@/components/home/FeaturesSection";
+import IntegrationSection from "@/components/home/IntegrationSection";
+import TrustedBy from "@/components/TrustedBy";
 
 export default function Home() {
   return (
-    <div className="font-poppins">
-      <Header />
+    <main className="min-h-screen font-rubik">
       <HeroSection />
-      <PricingSection />
-    </div>
+      <ServicesGrid />
+      <FeaturesSection />
+      <TrustedBy />
+      <IntegrationSection />
+    </main>
   );
 }

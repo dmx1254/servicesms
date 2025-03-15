@@ -25,6 +25,7 @@ import { cn } from "@/app/lib/utils/utils";
 import * as THREE from "three";
 import React from "react";
 import { useScopedI18n } from "@/locales/client";
+import Link from "next/link";
 
 // Add JSX namespace
 /// <reference types="react" />
@@ -220,19 +221,26 @@ export default function HeroSection() {
   }, [isInView, controls]);
 
   // Memoize particles first
-  const particles = React.useMemo(() => Array.from({ length: 20 }).map((_, i) => (
-    <Particle3D
-      key={i}
-      delay={i * 0.3}
-      duration={2 + Math.random() * 4}
-      size={3 + Math.random() * 5}
-      x={(Math.random() - 0.5) * 600}
-      y={(Math.random() - 0.5) * 600}
-      color={i % 3 === 0 ? "#67B142" : i % 3 === 1 ? "#4285F4" : "#ffffff"}
-    />
-  )), []);
+  const particles = React.useMemo(
+    () =>
+      Array.from({ length: 20 }).map((_, i) => (
+        <Particle3D
+          key={i}
+          delay={i * 0.3}
+          duration={2 + Math.random() * 4}
+          size={3 + Math.random() * 5}
+          x={(Math.random() - 0.5) * 600}
+          y={(Math.random() - 0.5) * 600}
+          color={i % 3 === 0 ? "#67B142" : i % 3 === 1 ? "#4285F4" : "#ffffff"}
+        />
+      )),
+    []
+  );
 
-  const renderedParticles = React.useMemo(() => mounted ? particles : null, [mounted, particles]);
+  const renderedParticles = React.useMemo(
+    () => (mounted ? particles : null),
+    [mounted, particles]
+  );
 
   // Three.js setup and animation
   useEffect(() => {
@@ -241,7 +249,12 @@ export default function HeroSection() {
 
     const canvas = canvasRef.current;
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(85, window.innerWidth / window.innerHeight, 0.1, 1000);
+    const camera = new THREE.PerspectiveCamera(
+      85,
+      window.innerWidth / window.innerHeight,
+      0.1,
+      1000
+    );
     const renderer = new THREE.WebGLRenderer({
       canvas,
       alpha: true,
@@ -606,14 +619,14 @@ export default function HeroSection() {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
       }
-      
+
       // Dispose resources
       renderer.dispose();
       scene.traverse((object) => {
         if (object instanceof THREE.Mesh) {
           object.geometry.dispose();
           if (Array.isArray(object.material)) {
-            object.material.forEach(material => material.dispose());
+            object.material.forEach((material) => material.dispose());
           } else {
             object.material.dispose();
           }
@@ -731,53 +744,61 @@ export default function HeroSection() {
   };
 
   // Memoize features array to prevent unnecessary re-renders
-  const features = React.useMemo<FeatureProps[]>(() => [
-    {
-      icon: <MessageSquare className="h-6 w-6" />,
-      title: "SMS PRO",
-      description: "Messages texte simples et efficaces avec un taux de lecture de 98%.",
-      color: "bg-[#67B142]/10 text-[#67B142]",
-      iconBg: "bg-[#67B142]/10",
-      type: "sms",
-      bgColor: "from-[#67B142] to-[#34A853]",
-    },
-    {
-      icon: <Globe className="h-6 w-6" />,
-      title: "RCS Enrichi",
-      description: "Messages enrichis avec images, carousels et boutons interactifs.",
-      color: "bg-blue-500/10 text-blue-500",
-      iconBg: "bg-blue-500/10",
-      type: "rcs",
-      bgColor: "from-blue-500 to-blue-700",
-    },
-    {
-      icon: <Users className="h-6 w-6" />,
-      title: "Campagnes",
-      description: "Diffusez vos promotions à grande échelle avec des modèles personnalisés.",
-      color: "bg-purple-500/10 text-purple-500",
-      iconBg: "bg-purple-500/10",
-      type: "campaign",
-      bgColor: "from-purple-500 to-indigo-600",
-    },
-    {
-      icon: <CheckCircle2 className="h-6 w-6" />,
-      title: "Transactionnels",
-      description: "Confirmations, avis de livraison et autres messages automatisés.",
-      color: "bg-amber-500/10 text-amber-500",
-      iconBg: "bg-amber-500/10",
-      type: "transactional",
-      bgColor: "from-amber-500 to-orange-600",
-    },
-    {
-      icon: <BarChart3 className="h-6 w-6" />,
-      title: "Rappels",
-      description: "Rappels de rendez-vous et échéances pour diminuer les absences.",
-      color: "bg-red-500/10 text-red-500",
-      iconBg: "bg-red-500/10",
-      type: "reminder",
-      bgColor: "from-red-500 to-rose-600",
-    },
-  ], []);
+  const features = React.useMemo<FeatureProps[]>(
+    () => [
+      {
+        icon: <MessageSquare className="h-6 w-6" />,
+        title: "SMS PRO",
+        description:
+          "Messages texte simples et efficaces avec un taux de lecture de 98%.",
+        color: "bg-[#67B142]/10 text-[#67B142]",
+        iconBg: "bg-[#67B142]/10",
+        type: "sms",
+        bgColor: "from-[#67B142] to-[#34A853]",
+      },
+      {
+        icon: <Globe className="h-6 w-6" />,
+        title: "RCS Enrichi",
+        description:
+          "Messages enrichis avec images, carousels et boutons interactifs.",
+        color: "bg-blue-500/10 text-blue-500",
+        iconBg: "bg-blue-500/10",
+        type: "rcs",
+        bgColor: "from-blue-500 to-blue-700",
+      },
+      {
+        icon: <Users className="h-6 w-6" />,
+        title: "Campagnes",
+        description:
+          "Diffusez vos promotions à grande échelle avec des modèles personnalisés.",
+        color: "bg-purple-500/10 text-purple-500",
+        iconBg: "bg-purple-500/10",
+        type: "campaign",
+        bgColor: "from-purple-500 to-indigo-600",
+      },
+      {
+        icon: <CheckCircle2 className="h-6 w-6" />,
+        title: "Transactionnels",
+        description:
+          "Confirmations, avis de livraison et autres messages automatisés.",
+        color: "bg-amber-500/10 text-amber-500",
+        iconBg: "bg-amber-500/10",
+        type: "transactional",
+        bgColor: "from-amber-500 to-orange-600",
+      },
+      {
+        icon: <BarChart3 className="h-6 w-6" />,
+        title: "Rappels",
+        description:
+          "Rappels de rendez-vous et échéances pour diminuer les absences.",
+        color: "bg-red-500/10 text-red-500",
+        iconBg: "bg-red-500/10",
+        type: "reminder",
+        bgColor: "from-red-500 to-rose-600",
+      },
+    ],
+    []
+  );
 
   // Memoize active messages to prevent unnecessary re-renders
   const messagesByType: Record<MessageType, Message[]> = {
@@ -908,8 +929,14 @@ export default function HeroSection() {
   };
 
   // Memoize active messages to prevent unnecessary re-renders
-  const activeMessages = React.useMemo(() => messagesByType[activeMessageType], [activeMessageType]);
-  const activeFeaturesInfo = React.useMemo(() => features.find((f) => f.type === activeMessageType) || features[0], [features, activeMessageType]);
+  const activeMessages = React.useMemo(
+    () => messagesByType[activeMessageType],
+    [activeMessageType]
+  );
+  const activeFeaturesInfo = React.useMemo(
+    () => features.find((f) => f.type === activeMessageType) || features[0],
+    [features, activeMessageType]
+  );
 
   // Memoize message type change handler
   const handleMessageTypeChange = React.useCallback((type: MessageType) => {
@@ -970,9 +997,12 @@ export default function HeroSection() {
                 <Button
                   size="lg"
                   className="gap-2 bg-gradient-to-r text-base from-[#67B142] to-[#34A853] rounded-[15px] hover:from-[#67B142]/90 hover:to-[#34A853]/90 shadow-md hover:shadow-lg transition-all"
+                  asChild
                 >
-                  {tScope("cta") || "Démarrer gratuitement"}
-                  <ChevronRight className="h-4 w-4" />
+                  <Link href="/signup">
+                    {tScope("cta") || "Démarrer gratuitement"}
+                    <ChevronRight className="h-4 w-4" />
+                  </Link>
                 </Button>
               </motion.div>
               <motion.div variants={buttonVariants}>
@@ -981,7 +1011,9 @@ export default function HeroSection() {
                   size="lg"
                   className="border-2 rounded-[15px] border-[#67B142]/30 hover:border-[#67B142]/50 hover:bg-[#67B142]/5"
                 >
-                  {tScope("secondaryCta") || "Voir les tarifs"}
+                  <Link href="/solutions">
+                    {tScope("secondaryCta") || "Voir les tarifs"}
+                  </Link>
                 </Button>
               </motion.div>
             </motion.div>

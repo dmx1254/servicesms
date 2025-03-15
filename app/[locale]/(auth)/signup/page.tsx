@@ -29,7 +29,6 @@ import {
   CheckCircle2,
   KeyRound,
   Loader,
-  X,
 } from "lucide-react";
 import Link from "next/link";
 import { z } from "zod";
@@ -327,7 +326,7 @@ export default function SignUp() {
       </div>
 
       {/* Left side - Progress */}
-      <div className="hidden lg:flex w-1/2 items-center justify-center relative p-12">
+      <div className="hidden lg:flex w-1/2 bg-[#67B142]/5  items-center justify-center relative p-12">
         {/* Back to home */}
         <Link
           href="/"
@@ -338,8 +337,14 @@ export default function SignUp() {
         </Link>
 
         <div className="relative w-full max-w-lg">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.8 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
+            className="absolute -bottom-8 right-20 w-72 h-72 bg-[#34A853]/30 rounded-full mix-blend-multiply filter blur-xl"
+          />
           {/* Progress steps */}
-          <div className="relative backdrop-blur-sm bg-white/80 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8 border border-white/20">
+          <div className="relative backdrop-blur-sm bg-white/50 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] p-8 border border-white/20">
             <div className="space-y-8">
               <div className="flex items-center">
                 <div
@@ -407,7 +412,7 @@ export default function SignUp() {
       </div>
 
       {/* Right side - Form */}
-      <div className="w-full lg:w-1/2 px-6 py-12 lg:px-12 xl:px-24 flex items-center">
+      <div className="w-full lg:w-1/2 px-6 py-12 bg-white lg:px-12 xl:px-24 flex items-center">
         <div className="w-full max-w-md mx-auto">
           <motion.div
             initial={{ opacity: 0, y: 20 }}

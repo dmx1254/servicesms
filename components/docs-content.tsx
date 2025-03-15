@@ -193,27 +193,27 @@ export function DocsContent() {
         <div className="w-[280px] shrink-0">
           <div className="fixed w-[280px] p-4 rounded-lg border bg-card">
             <div className="font-medium text-lg mb-4">Guide</div>
-            <nav className="space-y-2">
-              {[
-                { id: "quickstart", icon: Zap, label: "Démarrage Rapide" },
-                { id: "authentication", icon: KeyRound, label: "Authentication" },
-                { id: "messages", icon: MessageSquare, label: "Messages" },
-                { id: "errors", icon: AlertTriangle, label: "Erreurs" },
-                { id: "rate-limits", icon: Clock, label: "Limites" },
-              ].map(({ id, icon: Icon, label }) => (
-                <button
-                  key={id}
-                  onClick={() => scrollToSection(id)}
-                  className={classNames(
+          <nav className="space-y-2">
+            {[
+              { id: "quickstart", icon: Zap, label: "Démarrage Rapide" },
+              { id: "authentication", icon: KeyRound, label: "Authentication" },
+              { id: "messages", icon: MessageSquare, label: "Messages" },
+              { id: "errors", icon: AlertTriangle, label: "Erreurs" },
+              { id: "rate-limits", icon: Clock, label: "Limites" },
+            ].map(({ id, icon: Icon, label }) => (
+              <button
+                key={id}
+                onClick={() => scrollToSection(id)}
+                className={classNames(
                     "flex items-center gap-3 text-base p-3 rounded-lg w-full hover:bg-secondary transition-colors",
                     activeSection === id ? "bg-secondary text-primary font-medium" : "text-muted-foreground"
-                  )}
-                >
+                )}
+              >
                   <Icon className="h-5 w-5" />
-                  {label}
-                </button>
-              ))}
-            </nav>
+                {label}
+              </button>
+            ))}
+          </nav>
           </div>
         </div>
 

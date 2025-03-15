@@ -31,17 +31,20 @@ export default function SignIn() {
 
       if (result?.error) {
         toast.error(result.error, {
-          style: { backgroundColor: '#EF4444', color: 'white' }
+          style: { backgroundColor: '#EF4444', color: 'white' },
+          position: "top-right",
         });
       } else {
         toast.success("Connexion réussie", {
-          style: { backgroundColor: '#22C55E', color: 'white' }
+          style: { backgroundColor: '#22C55E', color: 'white' },
+          position: "top-right",
         });
         router.push("/dashboard");
       }
     } catch {
       toast.error("Une erreur est survenue", {
-        style: { backgroundColor: '#EF4444', color: 'white' }
+        style: { backgroundColor: '#EF4444', color: 'white' },
+        position: "top-right",
       });
     } finally {
       setIsLoading(false);

@@ -18,7 +18,6 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
 import {
   ArrowLeft,
@@ -28,18 +27,7 @@ import {
   Users,
   MessageSquare,
   Calendar,
-  CheckCircle2,
-  Clock,
-  XCircle,
 } from "lucide-react";
-
-interface Contact {
-  prenom: string;
-  nom: string;
-  telephone: string;
-  classe?: string;
-  moyenne?: number;
-}
 
 interface Campaign {
   _id: string;
@@ -225,7 +213,7 @@ export default function CampaignDetails() {
             Campagne non trouvée
           </h2>
           <p className="text-gray-500">
-            La campagne que vous recherchez n'existe pas ou a été supprimée.
+            La campagne que vous recherchez n&apos;existe pas ou a été supprimée.
           </p>
         </div>
       </div>
@@ -237,267 +225,267 @@ export default function CampaignDetails() {
       ? Math.round((campaign.contacts.length / campaign.recipientCount) * 100)
       : 0;
 
-      
-
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
       <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="flex items-center justify-between">
+        {/* En-tête avec animation */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-white p-6 rounded-2xl shadow-sm border border-gray-100"
+        >
           <div className="flex items-center gap-4">
             <Button
               variant="ghost"
               size="icon"
               onClick={() => router.push("/dashboard/campaigns")}
-              className="rounded-full hover:bg-gray-100"
+              className="h-10 w-10 rounded-xl hover:bg-gray-100 transition-colors duration-200"
             >
-              <ArrowLeft className="h-5 w-5" />
+              <ArrowLeft className="h-5 w-5 text-gray-600" />
             </Button>
             <div>
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-3xl font-bold"
-              >
+              <h1 className="text-2xl font-bold bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
                 {campaign.name}
-              </motion.h1>
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="flex items-center gap-3 mt-2"
-              >
-                <Badge
-                  variant="outline"
-                  className={
-                    campaign.type === "academic"
-                      ? "border-purple-200 text-purple-800 bg-purple-50"
-                      : campaign.type === "marketing"
-                      ? "border-blue-200 text-blue-800 bg-blue-50"
-                      : "border-green-200 text-green-800 bg-green-50"
-                  }
-                >
-                  {campaign.type === "academic"
-                    ? "Académique"
-                    : campaign.type === "marketing"
-                    ? "Marketing"
-                    : "Transactionnel"}
-                </Badge>
-                <Badge
-                  className={
-                    campaign.status === "draft"
-                      ? "bg-gray-100 text-gray-800 flex items-center gap-1"
-                      : campaign.status === "scheduled"
-                      ? "bg-blue-100 text-blue-800 flex items-center gap-1"
-                      : campaign.status === "sent"
-                      ? "bg-green-100 text-green-800 flex items-center gap-1"
-                      : "bg-red-100 text-red-800 flex items-center gap-1"
-                  }
-                >
-                  {campaign.status === "draft" ? (
-                    <Clock className="w-3.5 h-3.5" />
-                  ) : campaign.status === "scheduled" ? (
-                    <Calendar className="w-3.5 h-3.5" />
-                  ) : campaign.status === "sent" ? (
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                  ) : (
-                    <XCircle className="w-3.5 h-3.5" />
-                  )}
-                  {campaign.status === "draft"
-                    ? "Brouillon"
-                    : campaign.status === "scheduled"
-                    ? "Planifiée"
-                    : campaign.status === "sent"
-                    ? "Envoyée"
-                    : "Échouée"}
-                </Badge>
-              </motion.div>
+              </h1>
+              <p className="text-gray-500 mt-1">Détails de la campagne</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
             {campaign.status === "draft" && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={handleDuplicate}
-                  className="gap-2"
-                >
-                  <Copy className="h-4 w-4" />
-                  Dupliquer
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={handleDelete}
-                  className="gap-2 text-red-600 hover:text-red-700 hover:bg-red-50"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  Supprimer
-                </Button>
-                <Button
-                  onClick={handleSend}
-                  className="gap-2 bg-[#67B142] hover:bg-[#67B142]/90"
-                >
-                  <Send className="h-4 w-4" />
-                  Envoyer
-                </Button>
-              </>
+              <Button
+                onClick={handleSend}
+                className="bg-[#67B142] hover:bg-[#67B142]/90 text-white shadow-lg shadow-[#67B142]/20 transition-all duration-300 transform hover:scale-105"
+              >
+                <Send className="w-4 h-4 mr-2" />
+                Envoyer
+              </Button>
             )}
+            {/* <Button
+              onClick={handleDuplicate}
+              variant="outline"
+              disabled
+              className="border-gray-200 opacity-0 rounded hover:bg-gray-50 transition-all duration-300"
+            >
+              <Copy className="w-4 h-4 mr-2" />
+              Dupliquer
+            </Button> */}
+            <Button
+              onClick={handleDelete}
+              variant="destructive"
+              className="bg-red-500 rounded hover:bg-red-600 text-white shadow-lg shadow-red-500/20 transition-all duration-300"
+            >
+              <Trash2 className="w-4 h-4 mr-2" />
+              Supprimer
+            </Button>
           </div>
-        </div>
+        </motion.div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {/* Informations principales */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Statistiques */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.1 }}
           >
-            <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
+            <Card className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-[#67B142]/5 to-transparent p-6">
+                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Users className="w-5 h-5 text-[#67B142]" />
                   Destinataires
                 </CardTitle>
-                <Users className="h-4 w-4 text-gray-400" />
               </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {campaign.recipientCount}
+              <CardContent className="p-6 pt-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Total</span>
+                    <span className="text-2xl font-bold text-gray-900">
+                      {campaign.recipientCount}
+                    </span>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Succès</span>
+                      <span className="text-green-600 font-medium">
+                        {campaign.successCount}
+                      </span>
+                    </div>
+                    <Progress value={successRate} className="h-2 bg-gray-100" />
+                  </div>
+                  {campaign.failureCount > 0 && (
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Échecs</span>
+                      <span className="text-red-600 font-medium">
+                        {campaign.failureCount}
+                      </span>
+                    </div>
+                  )}
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
-                  {campaign.recipientCount === 1 ? "contact" : "contacts"}
-                </p>
               </CardContent>
             </Card>
           </motion.div>
 
+          {/* Type et Statut */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
           >
-            <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  Taux de succès
+            <Card className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-blue-50 to-transparent p-6">
+                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5 text-blue-600" />
+                  Informations
                 </CardTitle>
-                <CheckCircle2 className="h-4 w-4 text-gray-400" />
               </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  <div className="text-2xl font-bold">{successRate}%</div>
-                  <Progress value={successRate} className="h-2" />
-                  <div className="flex items-center justify-between text-sm text-gray-500">
-                    <span>{campaign.recipientCount} réussis</span>
-                    <span>{campaign.failureCount} échoués</span>
+              <CardContent className="p-6 pt-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Type</span>
+                    <Badge
+                      variant="outline"
+                      className="capitalize font-medium px-3 py-1 rounded-lg"
+                    >
+                      {campaign.type}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Statut</span>
+                    <Badge
+                      className={`capitalize font-medium px-3 py-1 rounded-lg ${
+                        campaign.status === "sent"
+                          ? "bg-green-100 text-green-800"
+                          : campaign.status === "scheduled"
+                          ? "bg-blue-100 text-blue-800"
+                          : campaign.status === "draft"
+                          ? "bg-gray-100 text-gray-800"
+                          : "bg-red-100 text-red-800"
+                      }`}
+                    >
+                      {campaign.status}
+                    </Badge>
                   </div>
                 </div>
               </CardContent>
             </Card>
           </motion.div>
 
+          {/* Dates */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
+            transition={{ duration: 0.5, delay: 0.3 }}
           >
-            <Card className="border-none shadow-lg hover:shadow-xl transition-all duration-200">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <CardTitle className="text-sm font-medium text-gray-500">
-                  Informations
+            <Card className="bg-white shadow-lg rounded-2xl border border-gray-100 overflow-hidden">
+              <CardHeader className="bg-gradient-to-r from-purple-50 to-transparent p-6">
+                <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                  <Calendar className="w-5 h-5 text-purple-600" />
+                  Dates
                 </CardTitle>
-                <Calendar className="h-4 w-4 text-gray-400" />
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-gray-500">Créée le</span>
-                  <span className="font-medium">
-                    {format(new Date(campaign.createdAt), "Pp", { locale: fr })}
-                  </span>
-                </div>
-                {campaign.scheduledDate && (
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-gray-500">Programmée pour</span>
-                    <span className="font-medium">
-                      {format(new Date(campaign.scheduledDate), "Pp", {
+              <CardContent className="p-6 pt-2">
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <span className="text-gray-600">Création</span>
+                    <span className="font-medium text-gray-900">
+                      {format(new Date(campaign.createdAt), "dd MMM yyyy", {
                         locale: fr,
                       })}
                     </span>
                   </div>
-                )}
+                  {campaign.scheduledDate && (
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Programmée pour</span>
+                      <span className="font-medium text-gray-900">
+                        {format(
+                          new Date(campaign.scheduledDate),
+                          "dd MMM yyyy HH:mm",
+                          { locale: fr }
+                        )}
+                      </span>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           </motion.div>
         </div>
 
-        {/* Message Preview */}
+        {/* Message de la campagne */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
+          transition={{ duration: 0.5, delay: 0.4 }}
         >
-          <Card className="border-none shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Message</CardTitle>
-                  <CardDescription>
-                    Aperçu du message qui sera envoyé
-                  </CardDescription>
-                </div>
-                <MessageSquare className="h-5 w-5 text-gray-400" />
-              </div>
+          <Card className="bg-white shadow-lg rounded-2xl border border-gray-100">
+            <CardHeader className="border-b border-gray-100 p-6">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <MessageSquare className="w-5 h-5 text-[#67B142]" />
+                Message
+              </CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="bg-gray-50 p-6 rounded-xl border border-gray-100">
-                <p className="text-gray-700 whitespace-pre-wrap">
-                  {campaign.message}
-                </p>
-              </div>
+            <CardContent className="p-6">
+              <p className="text-gray-700 whitespace-pre-wrap rounded-xl bg-gray-50/50 p-4 border border-gray-100">
+                {campaign.message}
+              </p>
             </CardContent>
           </Card>
         </motion.div>
 
-        {/* Contacts List */}
+        {/* Liste des contacts */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
         >
-          <Card className="border-none shadow-lg">
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <CardTitle>Destinataires</CardTitle>
-                  <CardDescription>
-                    Liste des contacts qui recevront le message
-                  </CardDescription>
-                </div>
-                <Users className="h-5 w-5 text-gray-400" />
-              </div>
+          <Card className="bg-white shadow-lg rounded-2xl border border-gray-100">
+            <CardHeader className="border-b border-gray-100 p-6">
+              <CardTitle className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+                <Users className="w-5 h-5 text-[#67B142]" />
+                Liste des contacts
+              </CardTitle>
+              <CardDescription>
+                {campaign.contacts.length} contact
+                {campaign.contacts.length > 1 ? "s" : ""}
+              </CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="divide-y divide-gray-100">
+            <CardContent className="p-6">
+              <div className="space-y-4">
                 {campaign.contacts.map((contact, index) => (
                   <motion.div
                     key={contact.telephone}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.1 * index }}
-                    className="py-4 first:pt-0 last:pb-0"
+                    transition={{ duration: 0.3, delay: index * 0.05 }}
+                    className="flex items-center justify-between p-4 rounded-xl bg-gray-50/50 border border-gray-100"
                   >
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-medium">{contact.telephone}</p>
-                        <p className="text-sm text-gray-500">
-                          {contact.status}
-                        </p>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 rounded-full bg-gray-200 flex items-center justify-center">
+                        <Users className="w-5 h-5 text-gray-600" />
                       </div>
-                      {contact.classe && (
-                        <Badge variant="outline" className="text-gray-600">
-                          {contact.classe}
-                        </Badge>
-                      )}
+                      <div>
+                        <p className="font-medium text-gray-900">
+                          {contact.telephone}
+                        </p>
+                        {contact.classe && (
+                          <p className="text-sm text-gray-500">
+                            Classe: {contact.classe}
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    <Badge
+                      className={`capitalize ${
+                        contact.status === "sent"
+                          ? "bg-green-100 text-green-800"
+                          : contact.status === "failed"
+                          ? "bg-red-100 text-red-800"
+                          : "bg-gray-100 text-gray-800"
+                      }`}
+                    >
+                      {contact.status}
+                    </Badge>
                   </motion.div>
                 ))}
               </div>
