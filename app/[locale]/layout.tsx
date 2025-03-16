@@ -15,13 +15,15 @@ const rubik = Rubik({
   variable: "--font-rubik",
 });
 
-
 export const metadata: Metadata = {
-  title: {
-    template: "%s | AxiomText",
-    default: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
+  title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
+  description:
+    "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
+
+  icons: {
+    icon: "/images/favicon.ico",
   },
-  description: "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
+  metadataBase: new URL('https://www.axiomtext.com'),
   keywords: [
     "SMS Sénégal",
     "Envoi SMS masse",
@@ -34,7 +36,7 @@ export const metadata: Metadata = {
     "SMS marketing Dakar",
     "Solutions SMS",
     "AxiomText",
-    "SMS Gateway Sénégal"
+    "SMS Gateway Sénégal",
   ],
   authors: [{ name: "AxiomText" }],
   creator: "AxiomText",
@@ -53,7 +55,8 @@ export const metadata: Metadata = {
     url: "https://axiomtext.com",
     siteName: "AxiomText",
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
-    description: "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+    description:
+      "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
     images: [
       {
         url: "/images/axiomlogo.png",
@@ -66,16 +69,13 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
-    description: "Plateforme leader d&apos;envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+    description:
+      "Plateforme leader d&apos;envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
     images: ["/images/axiomlogo.png"],
     creator: "@axiomtext",
     site: "@axiomtext",
   },
-  viewport: {
-    width: "device-width",
-    initialScale: 1,
-    maximumScale: 1,
-  },
+
   verification: {
     google: "votre-code-google-verification",
   },
@@ -100,7 +100,7 @@ export default async function RootLayout({
             {children}
           </div>
           <Footer />
-        </Providers>  
+        </Providers>
       </body>
     </html>
   );

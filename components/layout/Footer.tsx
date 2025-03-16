@@ -138,9 +138,9 @@ export default function Footer() {
             <h3 className="text-[#67B142] text-xl font-medium mb-4">Légales</h3>
             <ul className="space-y-2">
               <li><Link href="/legal" className="text-white hover:text-[#67B142] transition-colors">Mentions légales</Link></li>
-              <li><Link href="/terms" className="text-white hover:text-[#67B142] transition-colors">CGU</Link></li>
-              <li><Link href="/conditions" className="text-white hover:text-[#67B142] transition-colors">CGV</Link></li>
-              <li><Link href="/privacy" className="text-white hover:text-[#67B142] transition-colors">Confidentialité</Link></li>
+              <li><Link href="/cgu" className="text-white hover:text-[#67B142] transition-colors">CGU</Link></li>
+              <li><Link href="/cgv" className="text-white hover:text-[#67B142] transition-colors">CGV</Link></li>
+              <li><Link href="/privacy-policy" className="text-white hover:text-[#67B142] transition-colors">Confidentialité</Link></li>
               <li><Link href="/cookies" className="text-white hover:text-[#67B142] transition-colors">Nos cookies</Link></li>
             </ul>
           </motion.div>
