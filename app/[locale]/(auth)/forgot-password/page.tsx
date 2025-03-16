@@ -175,7 +175,8 @@ export default function ForgotPasswordPage() {
               <Button
                 type="submit"
                 className="w-full bg-[#67B142] hover:bg-[#67B142]/90"
-                disabled={isLoading}
+                // disabled={isLoading}
+                disabled
               >
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />

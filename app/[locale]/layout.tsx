@@ -15,12 +15,71 @@ const rubik = Rubik({
   variable: "--font-rubik",
 });
 
+
 export const metadata: Metadata = {
-  title: "AxiomTEXT",
-  description: "AxiomTEXT est une plateforme de marketing par SMS",
-  icons: {
-    icon: "/images/favicon.png",
+  title: {
+    template: "%s | AxiomText",
+    default: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
   },
+  description: "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
+  keywords: [
+    "SMS Sénégal",
+    "Envoi SMS masse",
+    "Marketing SMS",
+    "API SMS",
+    "Plateforme SMS",
+    "SMS professionnel",
+    "SMS entreprise",
+    "Bulk SMS Sénégal",
+    "SMS marketing Dakar",
+    "Solutions SMS",
+    "AxiomText",
+    "SMS Gateway Sénégal"
+  ],
+  authors: [{ name: "AxiomText" }],
+  creator: "AxiomText",
+  publisher: "AxiomText",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+    },
+  },
+  openGraph: {
+    type: "website",
+    locale: "fr_SN",
+    url: "https://axiomtext.com",
+    siteName: "AxiomText",
+    title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
+    description: "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+    images: [
+      {
+        url: "/images/axiomlogo.png",
+        width: 1200,
+        height: 630,
+        alt: "AxiomText - Solutions SMS Professionnelles",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
+    description: "Plateforme leader d&apos;envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+    images: ["/images/axiomlogo.png"],
+    creator: "@axiomtext",
+    site: "@axiomtext",
+  },
+  viewport: {
+    width: "device-width",
+    initialScale: 1,
+    maximumScale: 1,
+  },
+  verification: {
+    google: "votre-code-google-verification",
+  },
+  category: "technology",
 };
 
 export default async function RootLayout({

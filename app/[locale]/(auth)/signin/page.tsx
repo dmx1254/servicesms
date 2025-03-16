@@ -31,19 +31,19 @@ export default function SignIn() {
 
       if (result?.error) {
         toast.error(result.error, {
-          style: { backgroundColor: '#EF4444', color: 'white' },
+          style: { backgroundColor: "#EF4444", color: "white" },
           position: "top-right",
         });
       } else {
         toast.success("Connexion réussie", {
-          style: { backgroundColor: '#22C55E', color: 'white' },
+          style: { backgroundColor: "#22C55E", color: "white" },
           position: "top-right",
         });
         router.push("/dashboard");
       }
     } catch {
       toast.error("Une erreur est survenue", {
-        style: { backgroundColor: '#EF4444', color: 'white' },
+        style: { backgroundColor: "#EF4444", color: "white" },
         position: "top-right",
       });
     } finally {
@@ -203,7 +203,8 @@ export default function SignIn() {
             >
               <Button
                 type="submit"
-                disabled={isLoading}
+                // disabled={isLoading}
+                disabled
                 className="w-full bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-opacity"
               >
                 {isLoading ? "Connexion..." : "Se connecter"}
@@ -259,7 +260,7 @@ export default function SignIn() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="text-center text-sm text-muted-foreground mt-6"
             >
-              Pas encore de compte ?{" "}
+              Vous n&apos;avez pas encore de compte ?{" "}
               <Link
                 href="/signup"
                 className="text-[#67B142] font-medium hover:text-[#34A853] transition-colors"

@@ -807,6 +807,7 @@ export default function SignUp() {
                       <Button
                         type="submit"
                         className="flex-1 h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
+                        disabled
                       >
                         S&apos;inscrire
                       </Button>
@@ -821,7 +822,7 @@ export default function SignUp() {
                 transition={{ duration: 0.5, delay: 0.6 }}
                 className="text-center text-sm text-gray-600 mt-6"
               >
-                Déjà inscrit ?{" "}
+                Vous avez déjà un compte ?{" "}
                 <Link
                   href="/signin"
                   className="font-medium text-[#67B142] hover:text-[#34A853] transition-colors"
