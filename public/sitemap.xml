@@ -63,6 +63,18 @@
     <priority>0.8</priority>
     <changefreq>daily</changefreq>
   </url>
+  <url>
+    <loc>https://www.axiomtext.com/dashboard/campaigns</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>daily</changefreq>
+  </url>
+  <url>
+    <loc>https://www.axiomtext.com/dashboard/campaigns/new</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>daily</changefreq>
+  </url>
 
   <!-- Pages légales -->
   <url>

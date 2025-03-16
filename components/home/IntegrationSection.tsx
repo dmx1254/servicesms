@@ -16,7 +16,7 @@ const technologies = [
 
 export default function IntegrationSection() {
   return (
-    <section className="py-16" id="api">
+    <section className="py-16 md:px-12 px-6" id="api">
       <div className="container mx-auto px-4">
         <div className="flex flex-col md:flex-row items-center gap-12">
           {/* Left side - API Preview */}

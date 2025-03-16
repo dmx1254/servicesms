@@ -38,7 +38,7 @@ const additionalServices = [
 
 export default function ServicesGrid() {
   return (
-    <section className="py-12 px-4">
+    <section className="py-12 md:px-12 px-6">
       <div className="container mx-auto">
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           {services.map((service) => (

@@ -946,7 +946,7 @@ export default function HeroSection() {
   return (
     <section
       ref={heroRef}
-      className="relative min-h-screen py-20 overflow-hidden perspective-1000"
+      className="relative min-h-screen py-20 md:px-12 px-6 overflow-hidden perspective-1000"
       style={{ perspective: 1000 }}
     >
       {/* Canvas Three.js pour les animations 3D */}

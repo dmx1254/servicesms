@@ -53,7 +53,7 @@ const itemVariants = {
 
 export default function FeaturesSection() {
   return (
-    <section className="py-24 relative overflow-hidden bg-[#67B142]/5">
+    <section className="py-24 md:px-12 px-6 relative overflow-hidden bg-[#67B142]/5">
       {/* Fond avec motif subtil */}
       <div className="absolute inset-0 bg-[linear-gradient(30deg,#67B14210_1px,transparent_1px),linear-gradient(150deg,#67B14210_1px,transparent_1px)] bg-[size:24px_24px]"></div>
       
