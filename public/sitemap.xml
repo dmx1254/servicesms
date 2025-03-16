@@ -1,0 +1,176 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
+        http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- Page d'accueil -->
+  <url>
+    <loc>https://www.axiomtext.com/</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>1.0</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Pages principales -->
+  <url>
+    <loc>https://www.axiomtext.com/how-it-works</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/contact</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/careers</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+  <!-- Pages d'authentification -->
+  <url>
+    <loc>https://www.axiomtext.com/signin</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/signup</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/forgot-password</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.6</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Pages de profil -->
+  <url>
+    <loc>https://www.axiomtext.com/dashboard</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>daily</changefreq>
+  </url>
+
+  <!-- Pages légales -->
+  <url>
+    <loc>https://www.axiomtext.com/privacy-policy</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.5</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/legal</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.5</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/cookies</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.5</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/cgu</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.5</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/cgv</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.5</priority>
+    <changefreq>yearly</changefreq>
+  </url>
+
+
+  <!-- Pages de support -->
+
+  <url>
+    <loc>https://www.axiomtext.com/faq</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.7</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <!-- Pages de blog -->
+  <url>
+    <loc>https://www.axiomtext.com/blog</loc>
+    <changefreq>daily</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- Pages de solutions -->
+  <url>
+    <loc>https://www.axiomtext.com/solutions</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.9</priority>
+    <changefreq>weekly</changefreq>
+  </url>
+
+   <url>
+    <loc>https://www.axiomtext.com/solutions/sms-pro</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/solutions/mail-to-sms</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.axiomtext.com/solutions/sms-enrichi</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+
+  <url>
+    <loc>https://www.axiomtext.com/solutions/sondages-sms</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+  <url>
+    <loc>https://www.axiomtext.com/solutions/vote-sms</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/solutions/location-bdd</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+  <url>
+    <loc>https://www.axiomtext.com/solutions/sms-vocal</loc>
+    <lastmod>2024-03-16</lastmod>
+    <priority>0.8</priority>
+    <changefreq>monthly</changefreq>
+  </url>
+
+</urlset>
