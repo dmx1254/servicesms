@@ -20,35 +20,36 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
 
-    try {
-      const result = await signIn("credentials", {
-        email: email,
-        password: password,
-        redirect: false,
-      });
+    // try {
+    //   const result = await signIn("credentials", {
+    //     email: email,
+    //     password: password,
+    //     redirect: false,
+    //   });
 
-      if (result?.error) {
-        toast.error(result.error, {
-          style: { backgroundColor: "#EF4444", color: "white" },
-          position: "top-right",
-        });
-      } else {
-        toast.success("Connexion réussie", {
-          style: { backgroundColor: "#22C55E", color: "white" },
-          position: "top-right",
-        });
-        router.push("/dashboard");
-      }
-    } catch {
-      toast.error("Une erreur est survenue", {
-        style: { backgroundColor: "#EF4444", color: "white" },
-        position: "top-right",
-      });
-    } finally {
-      setIsLoading(false);
-    }
+    //   if (result?.error) {
+    //     toast.error(result.error, {
+    //       style: { backgroundColor: "#EF4444", color: "white" },
+    //       position: "top-right",
+    //     });
+    //   } else {
+    //     toast.success("Connexion réussie", {
+    //       style: { backgroundColor: "#22C55E", color: "white" },
+    //       position: "top-right",
+    //     });
+    //     router.push("/dashboard");
+    //   }
+    // } catch {
+    //   toast.error("Une erreur est survenue", {
+    //     style: { backgroundColor: "#EF4444", color: "white" },
+    //     position: "top-right",
+    //   });
+    // } finally {
+    //   setIsLoading(false);
+    // }
+    alert("test");
   };
 
   return (
@@ -203,8 +204,7 @@ export default function SignIn() {
             >
               <Button
                 type="submit"
-                // disabled={isLoading}
-                disabled
+                disabled={isLoading}
                 className="w-full bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-opacity"
               >
                 {isLoading ? "Connexion..." : "Se connecter"}

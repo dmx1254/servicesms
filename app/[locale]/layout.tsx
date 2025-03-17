@@ -22,8 +22,10 @@ export const metadata: Metadata = {
 
   icons: {
     icon: "/images/favicon.png",
+    shortcut: "/images/favicon.png",
+    apple: "/images/favicon.png",
   },
-  metadataBase: new URL('https://www.axiomtext.com'),
+  metadataBase: new URL("https://www.axiomtext.com"),
   keywords: [
     "SMS Sénégal",
     "Envoi SMS masse",
@@ -70,7 +72,6 @@ export const metadata: Metadata = {
     "API vérification OTP",
     "API SMS Afrique",
     "Envoi SMS international Sénégal",
-    
   ],
   authors: [{ name: "AxiomText" }],
   creator: "AxiomText",
@@ -93,7 +94,7 @@ export const metadata: Metadata = {
       "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
     images: [
       {
-        url: "/images/axiomlogo.png",
+        url: "/images/favicon.png",
         width: 1200,
         height: 630,
         alt: "AxiomText - Solutions SMS Professionnelles",
@@ -104,15 +105,12 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
     description:
-      "Plateforme leader d&apos;envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
-    images: ["/images/axiomlogo.png"],
+      "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+    images: ["/images/favicon.png"],
     creator: "@axiomtext",
     site: "@axiomtext",
   },
 
-  verification: {
-    google: "votre-code-google-verification",
-  },
   category: "technology",
 };
 
