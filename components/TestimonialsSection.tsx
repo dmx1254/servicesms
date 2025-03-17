@@ -5,6 +5,7 @@ import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
+
 const testimonials = [
   {
     id: 1,
@@ -71,25 +72,25 @@ const TestimonialCard = ({
   content,
   rating,
 }: (typeof testimonials)[0]) => (
-  <div className="bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden h-[250px] w-full flex flex-col">
-    <div className="absolute top-8 right-8 text-[#67B142] opacity-20">
-      <Quote size={30} />
+  <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden h-[250px] w-full flex flex-col">
+    <div className="absolute top-6 right-6 sm:top-8 sm:right-8 text-[#67B142] opacity-20">
+      <Quote size={24} className="sm:w-[30px] sm:h-[30px]" />
     </div>
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-12 h-12 rounded-full bg-[#67B142] flex items-center justify-center text-white text-lg font-bold">
+      <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-[#67B142] flex items-center justify-center text-white text-base sm:text-lg font-bold">
         {getInitials(name)}
       </div>
       <div>
-        <h4 className="font-bold text-base text-gray-900">{name}</h4>
-        <p className="text-[#67B142] text-sm font-medium">{role}</p>
+        <h4 className="font-bold text-sm sm:text-base text-gray-900">{name}</h4>
+        <p className="text-[#67B142] text-xs sm:text-sm font-medium">{role}</p>
       </div>
     </div>
-    <div className="flex mb-4">
+    <div className="flex mb-3 sm:mb-4">
       {[...Array(rating)].map((_, i) => (
-        <Star key={i} className="w-5 h-5 text-yellow-400 fill-current" />
+        <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
       ))}
     </div>
-    <p className="text-gray-600 leading-relaxed text-base italic flex-grow">
+    <p className="text-gray-600 leading-relaxed text-sm sm:text-base italic flex-grow">
       &ldquo;{content}&rdquo;
     </p>
   </div>
@@ -97,40 +98,50 @@ const TestimonialCard = ({
 
 export default function TestimonialsSection() {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex + 3 >= testimonials.length ? 0 : prevIndex + 3
+      prevIndex + (isMobile ? 1 : 3) >= testimonials.length ? 0 : prevIndex + (isMobile ? 1 : 3)
     );
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex - 3 < 0 ? Math.max(0, testimonials.length - 3) : prevIndex - 3
+      prevIndex - (isMobile ? 1 : 3) < 0 ? Math.max(0, testimonials.length - (isMobile ? 1 : 3)) : prevIndex - (isMobile ? 1 : 3)
     );
   };
 
   useEffect(() => {
     const interval = setInterval(nextSlide, 5000);
     return () => clearInterval(interval);
-  }, []);
+  }, [isMobile]);
 
   return (
     <section
       id="testimonials"
-      className="py-12 bg-gradient-to-b from-white to-gray-50"
+      className="py-8 sm:py-12 bg-gradient-to-b from-white to-gray-50"
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mb-16"
+          className="text-center mb-8 sm:mb-16"
         >
-          <h2 className="text-3xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
             Ce que nos clients disent
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
             Découvrez les retours d&apos;expérience de nos clients qui utilisent
             notre plateforme au quotidien
           </p>
@@ -140,12 +151,12 @@ export default function TestimonialsSection() {
         <div className="relative">
           <div className="overflow-hidden">
             <motion.div
-              className="flex gap-8"
-              animate={{ x: `-${currentIndex * 33.333}%` }}
+              className="flex gap-4 sm:gap-8"
+              animate={{ x: `-${currentIndex * (isMobile ? 100 : 33.333)}%` }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className="w-1/3 flex-shrink-0">
+                <div key={testimonial.id} className={`${isMobile ? 'w-full' : 'w-1/3'} flex-shrink-0`}>
                   <TestimonialCard {...testimonial} />
                 </div>
               ))}
@@ -155,26 +166,26 @@ export default function TestimonialsSection() {
           {/* Navigation Buttons */}
           <button
             onClick={prevSlide}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-[#67B142] transition-colors"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-2 sm:-translate-x-4 w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-[#67B142] transition-colors"
           >
-            <ChevronLeft size={24} />
+            <ChevronLeft size={20} className="sm:w-6 sm:h-6" />
           </button>
           <button
             onClick={nextSlide}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 w-12 h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-[#67B142] transition-colors"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-2 sm:translate-x-4 w-8 h-8 sm:w-12 sm:h-12 rounded-full bg-white shadow-lg flex items-center justify-center text-gray-600 hover:text-[#67B142] transition-colors"
           >
-            <ChevronRight size={24} />
+            <ChevronRight size={20} className="sm:w-6 sm:h-6" />
           </button>
 
           {/* Navigation Dots */}
-          <div className="flex justify-center gap-2 mt-8">
-            {Array.from({ length: Math.ceil(testimonials.length / 3) }).map(
+          <div className="flex justify-center gap-2 mt-6 sm:mt-8">
+            {Array.from({ length: Math.ceil(testimonials.length / (isMobile ? 1 : 3)) }).map(
               (_, index) => (
                 <button
                   key={index}
-                  onClick={() => setCurrentIndex(index * 3)}
-                  className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                    index === Math.floor(currentIndex / 3)
+                  onClick={() => setCurrentIndex(index * (isMobile ? 1 : 3))}
+                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                    index === Math.floor(currentIndex / (isMobile ? 1 : 3))
                       ? "bg-[#67B142] scale-125"
                       : "bg-gray-300 hover:bg-gray-400"
                   }`}
@@ -190,13 +201,13 @@ export default function TestimonialsSection() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="text-center mt-16"
+          className="text-center mt-8 sm:mt-16"
         >
-          <p className="text-lg text-gray-600 mb-8">
+          <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
             Rejoignez plus de 100 entreprises qui nous font confiance
           </p>
           <Button
-            className="px-8 py-6 bg-[#67B142] text-white rounded-[6px] hover:bg-[#4e8a2f] transition-colors font-medium"
+            className="px-6 sm:px-8 py-4 sm:py-6 bg-[#67B142] text-white rounded-[6px] hover:bg-[#4e8a2f] transition-colors font-medium text-sm sm:text-base"
             asChild
           >
             <Link href="/signup">Commencer maintenant</Link>

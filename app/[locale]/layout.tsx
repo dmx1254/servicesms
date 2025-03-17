@@ -6,6 +6,7 @@ import { Providers } from "../../components/providers";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 // import Footer from "@/components/layout/Footer";
+import { Analytics } from '@vercel/analytics/next';
 
 const rubik = Rubik({
   subsets: ["latin"],
@@ -16,16 +17,15 @@ const rubik = Rubik({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || "https://axiomtext.com"),
   title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
   description:
     "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
-
   icons: {
-    icon: "/images/favicon.png",
-    shortcut: "/images/favicon.png",
-    apple: "/images/favicon.png",
+    icon: "/favicon.png",
+    shortcut: "/favicon.png",
+    apple: "/favicon.png",
   },
-  metadataBase: new URL("https://www.axiomtext.com"),
   keywords: [
     "SMS Sénégal",
     "Envoi SMS masse",
@@ -73,45 +73,59 @@ export const metadata: Metadata = {
     "API SMS Afrique",
     "Envoi SMS international Sénégal",
   ],
-  authors: [{ name: "AxiomText" }],
-  creator: "AxiomText",
-  publisher: "AxiomText",
   robots: {
     index: true,
     follow: true,
+    "max-snippet": -1,
+    "max-image-preview": "large",
+    "max-video-preview": -1,
     googleBot: {
       index: true,
       follow: true,
+      "max-snippet": -1,
+      "max-image-preview": "large",
+      "max-video-preview": -1,
     },
   },
   openGraph: {
     type: "website",
-    locale: "fr_SN",
+    locale: "fr_FR",
     url: "https://axiomtext.com",
     siteName: "AxiomText",
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
     description:
-      "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
+      "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
     images: [
       {
-        url: "/images/favicon.png",
+        url: "/favicon.png",
         width: 1200,
         height: 630,
-        alt: "AxiomText - Solutions SMS Professionnelles",
+        alt: "Plateforme AxiomText - Votre Plateforme SMS 100% Sénégalaise",
       },
     ],
   },
+  // Twitter Card
   twitter: {
     card: "summary_large_image",
+    site: "@axiomtext",
+    creator: "@axiomtext",
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
     description:
-      "Plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles SMS pour entreprises et particuliers.",
-    images: ["/images/favicon.png"],
-    creator: "@axiomtext",
-    site: "@axiomtext",
+      "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
+    images: ["/favicon.png", "/images/favicon.png", "/images/axiomlogo.png"],
   },
-
+  alternates: {
+    canonical: "https://axiomtext.com",
+    languages: {
+      "en-US": "https://axiomtext.com/en",
+      "fr-FR": "https://axiomtext.com/fr",
+    },
+  },
   category: "technology",
+  referrer: "origin-when-cross-origin",
+  authors: [{ name: "AxiomText" }],
+  creator: "AxiomText",
+  publisher: "AxiomText",
 };
 
 export default async function RootLayout({
@@ -130,6 +144,7 @@ export default async function RootLayout({
           <div className={`${rubik.variable} min-h-screen antialiased`}>
             <Toaster />
             {children}
+            <Analytics />
           </div>
           <Footer />
         </Providers>
