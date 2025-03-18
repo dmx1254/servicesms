@@ -97,7 +97,7 @@ export const metadata: Metadata = {
       "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
     images: [
       {
-        url: "/favicon.png",
+        url: "/aaxiom.png",
         width: 1200,
         height: 630,
         alt: "Plateforme AxiomText - Votre Plateforme SMS 100% Sénégalaise",
@@ -112,7 +112,7 @@ export const metadata: Metadata = {
     title: "AxiomText - Votre Plateforme SMS 100% Sénégalaise",
     description:
       "AxiomText est la plateforme leader d'envoi de SMS en masse au Sénégal. Solutions professionnelles pour entreprises, associations et particuliers. SMS marketing, API SMS, et plus encore.",
-    images: ["/favicon.png", "/images/favicon.png", "/images/axiomlogo.png"],
+    images: ["/aaxiom.png", "/logoaxiom.png"],
   },
   alternates: {
     canonical: "https://axiomtext.com",
