@@ -99,10 +99,16 @@ const ContactsPage = () => {
       }
     } catch (error) {
       console.error('Erreur:', error);
-      toast.error('Impossible de charger les groupes');
+      toast.error("Impossible de charger les groupes", {
+        style: {
+          backgroundColor: "#f87171",
+          color: "white",
+        },
+        position: "top-right",
+      });
       // En cas d'erreur, on utilise le groupe par défaut
-      setGroups([{ name: 'Tous les contacts', count: 0 }]);
-      setSelectedGroup('Tous les contacts');
+      setGroups([{ name: "Tous les contacts", count: 0 }]);
+      setSelectedGroup("Tous les contacts");
     } finally {
       setIsLoadingGroups(false);
     }

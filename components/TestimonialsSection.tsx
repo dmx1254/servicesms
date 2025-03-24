@@ -5,57 +5,14 @@ import { Star, Quote, ChevronLeft, ChevronRight } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "./ui/button";
 import Link from "next/link";
-
-const testimonials = [
-  {
-    id: 1,
-    name: "Moussa Diop",
-    role: "Directeur Marketing, TechSenegal",
-    content:
-      "La plateforme nous a permis d'augmenter notre taux d'engagement client de 150%. Le support est réactif et l'interface est très intuitive.",
-    rating: 5,
-  },
-  {
-    id: 2,
-    name: "Fatou Sow",
-    role: "CEO, Digital Africa",
-    content:
-      "Nous utilisons cette solution depuis 6 mois et les résultats sont impressionnants. La fiabilité du service et la qualité du support sont exceptionnelles.",
-    rating: 5,
-  },
-  {
-    id: 3,
-    name: "Amadou Kane",
-    role: "Responsable Commercial, SendExpress",
-    content:
-      "L'intégration a été simple et rapide. Nos campagnes SMS sont maintenant plus efficaces et nous avons un meilleur suivi de nos actions marketing.",
-    rating: 5,
-  },
-  {
-    id: 4,
-    name: "Mouhamed Ndiaye",
-    role: "Directeur Marketing, TechSenegal",
-    content:
-      "Nous utilisons cette solution depuis 6 mois et les résultats sont impressionnants. La fiabilité du service et la qualité du support sont exceptionnelles.",
-    rating: 5,
-  },
-  {
-    id: 5,
-    name: "Issa Sarr",
-    role: "Adjoint Directeur, Système D",
-    content:
-      "Nous utilisons cette solution depuis 6 mois et les résultats sont impressionnants. La fiabilité du service et la qualité du support sont exceptionnelles.",
-    rating: 5,
-  },
-  {
-    id: 6,
-    name: "Moustapha Ndiaye",
-    role: "Directeur, Système D",
-    content:
-      "Nous utilisons cette solution depuis 6 mois et les résultats sont impressionnants. La fiabilité du service et la qualité du support sont exceptionnelles.",
-    rating: 5,
-  },
-];
+import { useScopedI18n } from "@/locales/client";
+interface Testimonials {
+  id: number;
+  name: string;
+  role: string;
+  content: string;
+  rating: number;
+}
 
 const getInitials = (name: string) => {
   return name
@@ -66,12 +23,7 @@ const getInitials = (name: string) => {
     .slice(0, 2);
 };
 
-const TestimonialCard = ({
-  name,
-  role,
-  content,
-  rating,
-}: (typeof testimonials)[0]) => (
+const TestimonialCard = ({ name, role, content, rating }: Testimonials) => (
   <div className="bg-white rounded-2xl p-6 sm:p-8 shadow-lg hover:shadow-xl transition-all duration-300 relative overflow-hidden h-[250px] w-full flex flex-col">
     <div className="absolute top-6 right-6 sm:top-8 sm:right-8 text-[#67B142] opacity-20">
       <Quote size={24} className="sm:w-[30px] sm:h-[30px]" />
@@ -87,7 +39,10 @@ const TestimonialCard = ({
     </div>
     <div className="flex mb-3 sm:mb-4">
       {[...Array(rating)].map((_, i) => (
-        <Star key={i} className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current" />
+        <Star
+          key={i}
+          className="w-4 h-4 sm:w-5 sm:h-5 text-yellow-400 fill-current"
+        />
       ))}
     </div>
     <p className="text-gray-600 leading-relaxed text-sm sm:text-base italic flex-grow">
@@ -97,27 +52,98 @@ const TestimonialCard = ({
 );
 
 export default function TestimonialsSection() {
+  const tScope = useScopedI18n("testimonials");
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isMobile, setIsMobile] = useState(false);
+
+  const testimonials = [
+    {
+      id: 1,
+      name: "Bassirou Hamedine SY",
+      role: tScope("role1"),
+      content: tScope("descrole1"),
+      rating: 5,
+    },
+    {
+      id: 2,
+      name: "Fatou Ndiaye",
+      role: tScope("role2"),
+      content: tScope("descrole2"),
+      rating: 5,
+    },
+    {
+      id: 3,
+      name: "Mamadou Diallo",
+      role: tScope("role3"),
+      content: tScope("descrole3"),
+      rating: 5,
+    },
+    {
+      id: 4,
+      name: "Aïssatou Ba",
+      role: tScope("role4"),
+      content: tScope("descrole4"),
+      rating: 5,
+    },
+    {
+      id: 5,
+      name: "Ousmane Faye",
+      role: tScope("role5"),
+      content: tScope("descrole5"),
+      rating: 5,
+    },
+    {
+      id: 6,
+      name: "Khady Sow",
+      role: tScope("role6"),
+      content: tScope("descrole6"),
+      rating: 5,
+    },
+    {
+      id: 7,
+      name: "Babacar Sène",
+      role: tScope("role7"),
+      content: tScope("descrole7"),
+      rating: 5,
+    },
+    {
+      id: 8,
+      name: "Cheikh Ndiaye",
+      role: tScope("role8"),
+      content: tScope("descrole8"),
+      rating: 5,
+    },
+    {
+      id: 9,
+      name: "Seydou Kane",
+      role: tScope("role9"),
+      content: tScope("descrole9"),
+      rating: 5,
+    },
+  ];
 
   useEffect(() => {
     const checkMobile = () => {
       setIsMobile(window.innerWidth < 768);
     };
     checkMobile();
-    window.addEventListener('resize', checkMobile);
-    return () => window.removeEventListener('resize', checkMobile);
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
   }, []);
 
   const nextSlide = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex + (isMobile ? 1 : 3) >= testimonials.length ? 0 : prevIndex + (isMobile ? 1 : 3)
+      prevIndex + (isMobile ? 1 : 3) >= testimonials.length
+        ? 0
+        : prevIndex + (isMobile ? 1 : 3)
     );
   };
 
   const prevSlide = () => {
     setCurrentIndex((prevIndex) =>
-      prevIndex - (isMobile ? 1 : 3) < 0 ? Math.max(0, testimonials.length - (isMobile ? 1 : 3)) : prevIndex - (isMobile ? 1 : 3)
+      prevIndex - (isMobile ? 1 : 3) < 0
+        ? Math.max(0, testimonials.length - (isMobile ? 1 : 3))
+        : prevIndex - (isMobile ? 1 : 3)
     );
   };
 
@@ -138,12 +164,11 @@ export default function TestimonialsSection() {
           viewport={{ once: true }}
           className="text-center mb-8 sm:mb-16"
         >
-          <h2 className="text-2xl sm:text-3xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">
-            Ce que nos clients disent
+          <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">
+            {tScope("title")}
           </h2>
           <p className="text-base sm:text-xl text-gray-600 max-w-2xl mx-auto">
-            Découvrez les retours d&apos;expérience de nos clients qui utilisent
-            notre plateforme au quotidien
+            {tScope("desc")}
           </p>
         </motion.div>
 
@@ -156,7 +181,10 @@ export default function TestimonialsSection() {
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               {testimonials.map((testimonial) => (
-                <div key={testimonial.id} className={`${isMobile ? 'w-full' : 'w-1/3'} flex-shrink-0`}>
+                <div
+                  key={testimonial.id}
+                  className={`${isMobile ? "w-full" : "w-1/3"} flex-shrink-0`}
+                >
                   <TestimonialCard {...testimonial} />
                 </div>
               ))}
@@ -179,20 +207,20 @@ export default function TestimonialsSection() {
 
           {/* Navigation Dots */}
           <div className="flex justify-center gap-2 mt-6 sm:mt-8">
-            {Array.from({ length: Math.ceil(testimonials.length / (isMobile ? 1 : 3)) }).map(
-              (_, index) => (
-                <button
-                  key={index}
-                  onClick={() => setCurrentIndex(index * (isMobile ? 1 : 3))}
-                  className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
-                    index === Math.floor(currentIndex / (isMobile ? 1 : 3))
-                      ? "bg-[#67B142] scale-125"
-                      : "bg-gray-300 hover:bg-gray-400"
-                  }`}
-                  aria-label={`Aller au groupe de témoignages ${index + 1}`}
-                />
-              )
-            )}
+            {Array.from({
+              length: Math.ceil(testimonials.length / (isMobile ? 1 : 3)),
+            }).map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentIndex(index * (isMobile ? 1 : 3))}
+                className={`w-2 h-2 sm:w-3 sm:h-3 rounded-full transition-all duration-300 ${
+                  index === Math.floor(currentIndex / (isMobile ? 1 : 3))
+                    ? "bg-[#67B142] scale-125"
+                    : "bg-gray-300 hover:bg-gray-400"
+                }`}
+                aria-label={`Aller au groupe de témoignages ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
 
@@ -204,13 +232,13 @@ export default function TestimonialsSection() {
           className="text-center mt-8 sm:mt-16"
         >
           <p className="text-base sm:text-lg text-gray-600 mb-6 sm:mb-8">
-            Rejoignez plus de 100 entreprises qui nous font confiance
+            {tScope("join")}
           </p>
           <Button
             className="px-6 sm:px-8 py-4 sm:py-6 bg-[#67B142] text-white rounded-[6px] hover:bg-[#4e8a2f] transition-colors font-medium text-sm sm:text-base"
             asChild
           >
-            <Link href="/signup">Commencer maintenant</Link>
+            <Link href="/signup">{tScope("start")}</Link>
           </Button>
         </motion.div>
       </div>

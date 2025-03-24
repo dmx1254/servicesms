@@ -101,7 +101,7 @@ interface SecurityPreferences {
 }
 
 export default function SettingsPage() {
-  const { solde } = useStore();
+    const { solde } = useStore();
   const { data: session, update } = useSession();
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -223,7 +223,7 @@ export default function SettingsPage() {
 
       toast.success("Profil mis à jour avec succès");
       await update();
-
+      
       setFormData((prev) => ({
         ...prev,
         currentPassword: "",
@@ -387,9 +387,9 @@ export default function SettingsPage() {
             <div className="flex items-center gap-6">
               <div className="relative">
                 <div className="w-24 h-24 rounded-full bg-[#67B142]/10 flex items-center justify-center text-[#67B142] text-3xl font-medium ring-8 ring-white">
-                  {session?.user?.firstName?.[0]}
-                  {session?.user?.lastName?.[0]}
-                </div>
+              {session?.user?.firstName?.[0]}
+              {session?.user?.lastName?.[0]}
+            </div>
                 {companyNameStatus.status === "approved" && (
                   <div
                     style={{
@@ -404,11 +404,11 @@ export default function SettingsPage() {
               </div>
               <div className="space-y-1">
                 <h1 className="text-3xl font-bold">
-                  {session?.user?.firstName} {session?.user?.lastName}
+                {session?.user?.firstName} {session?.user?.lastName}
                 </h1>
                 <div className="flex items-center gap-2 text-muted-foreground">
-                  <Mail className="w-4 h-4" />
-                  {session?.user?.email}
+                <Mail className="w-4 h-4" />
+                {session?.user?.email}
                 </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Building2 className="w-4 h-4" />
@@ -431,9 +431,9 @@ export default function SettingsPage() {
                   ) : (
                     <CountUp end={solde} duration={3} />
                   )}
-                </div>
-              </CardHeader>
-            </Card>
+              </div>
+            </CardHeader>
+          </Card>
           </div>
         </div>
       </div>
@@ -500,29 +500,29 @@ export default function SettingsPage() {
                       <Label htmlFor="firstName" className="text-base">
                         Prénom
                       </Label>
-                      <Input
-                        id="firstName"
-                        name="firstName"
-                        value={formData.firstName}
-                        onChange={handleInputChange}
+                        <Input
+                          id="firstName"
+                          name="firstName"
+                          value={formData.firstName}
+                          onChange={handleInputChange}
                         placeholder="Prénom"
                         className="text-base rounded-[6px]"
-                      />
+                        />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="lastName" className="text-base">
                         Nom
                       </Label>
-                      <Input
-                        id="lastName"
-                        name="lastName"
-                        value={formData.lastName}
-                        onChange={handleInputChange}
+                        <Input
+                          id="lastName"
+                          name="lastName"
+                          value={formData.lastName}
+                          onChange={handleInputChange}
                         placeholder="Nom"
                         className="text-base rounded-[6px]"
-                      />
+                        />
                     </div>
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                       <Label htmlFor="email" className="text-base">
                         Email
                       </Label>
@@ -536,7 +536,7 @@ export default function SettingsPage() {
                         placeholder="Email"
                       />
                     </div>
-                    <div className="space-y-2">
+                  <div className="space-y-2">
                       <Label htmlFor="phone" className="text-base">
                         Téléphone
                       </Label>
@@ -573,19 +573,19 @@ export default function SettingsPage() {
                             </div>
                           </HoverCardContent>
                         </HoverCard>
-                      </div>
-                      <div className="relative">
-                        <Input
-                          id="companyName"
-                          name="companyName"
-                          value={formData.companyName}
-                          onChange={handleInputChange}
+                  </div>
+                    <div className="relative">
+                      <Input
+                        id="companyName"
+                        name="companyName"
+                        value={formData.companyName}
+                        onChange={handleInputChange}
                           className="rounded-[6px] pl-10"
                           placeholder="Nom de l'entreprise"
                           maxLength={11}
                           disabled={companyNameStatus.status === "pending"}
-                        />
-                        <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
+                      />
+                      <Building2 className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                       </div>
                       {companyNameStatus.lastChange && (
                         <p className="text-xs text-muted-foreground">
@@ -895,21 +895,21 @@ export default function SettingsPage() {
                                 </span>
                                 {/* <HoverCard>
                                   <HoverCardTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon"
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
                                       className="rounded-lg h-8 w-8"
                                       disabled
                                       onClick={() =>
                                         copyToClipboard(token.token)
                                       }
-                                    >
-                                      {copiedToken === token.token ? (
+                                >
+                                  {copiedToken === token.token ? (
                                         <CheckCircle2 className="h-4 w-4" />
-                                      ) : (
-                                        <Copy className="h-4 w-4" />
-                                      )}
-                                    </Button>
+                                  ) : (
+                                    <Copy className="h-4 w-4" />
+                                  )}
+                                </Button>
                                   </HoverCardTrigger>
                                   <HoverCardContent className="w-auto p-2">
                                     <span className="text-sm">
@@ -921,7 +921,7 @@ export default function SettingsPage() {
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center gap-2">
-                                <Badge
+                                <Badge 
                                   variant={
                                     token.isActive ? "default" : "secondary"
                                   }
@@ -945,7 +945,7 @@ export default function SettingsPage() {
                                     new Date(token.lastUsed),
                                     "dd/MM/yyyy HH:mm",
                                     {
-                                      locale: fr,
+                                    locale: fr,
                                     }
                                   )}
                                 </div>
@@ -983,4 +983,4 @@ export default function SettingsPage() {
       />
     </div>
   );
-}
+} 

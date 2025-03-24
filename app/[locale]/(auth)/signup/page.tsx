@@ -807,7 +807,6 @@ export default function SignUp() {
                       <Button
                         type="submit"
                         className="flex-1 h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
-                        disabled
                       >
                         S&apos;inscrire
                       </Button>

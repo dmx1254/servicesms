@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { Facebook, Twitter, Linkedin, Instagram, Youtube } from "lucide-react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { useCurrentLocale } from "@/locales/client";
+import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 
 const footerVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -30,6 +30,7 @@ const itemVariants = {
 export default function Footer() {
   const pathname = usePathname();
   const locale = useCurrentLocale();
+  const t = useScopedI18n("footer"); // Utilisation du hook de traduction
 
   return (
     pathname !== `/${locale}/signin` &&
@@ -54,9 +55,9 @@ export default function Footer() {
                 <Image
                   src="/images/favicon.png"
                   alt="AxiomText"
-                  width={40}
-                  height={40}
-                  className="w-10 h-10"
+                  width={56}
+                  height={56}
+                  className="w-14 h-14"
                 />
                 <span className="text-white text-2xl ml-3 font-semibold">
                   AxiomTEXT
@@ -64,9 +65,9 @@ export default function Footer() {
               </div>
 
               <div className="text-gray-400">
-                <p>Immeuble Rivonia, 3ème étage</p>
-                <p>Route de Ngor, Almadies</p>
-                <p>Dakar, Sénégal</p>
+                <p>{t("address.line1")}</p>
+                <p>{t("address.line2")}</p>
+                <p>{t("address.line3")}</p>
               </div>
 
               <div className="text-gray-400">
@@ -90,14 +91,6 @@ export default function Footer() {
                 >
                   <Facebook className="w-5 h-5" />
                 </Link>
-                {/* <Link
-                href="https://twitter.com"
-                className="text-gray-400 hover:text-[#67B142] transition-colors"
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <Twitter className="w-5 h-5" />
-              </Link> */}
                 <Link
                   href="https://www.instagram.com/servicesms.contact/"
                   className="text-gray-400 hover:text-[#67B142] transition-colors"
@@ -120,7 +113,7 @@ export default function Footer() {
             {/* Nos Canaux */}
             <motion.div variants={itemVariants}>
               <h3 className="text-[#67B142] text-xl font-medium mb-4">
-                Nos Canaux
+                {t("channels")}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -128,7 +121,7 @@ export default function Footer() {
                     href="/solutions/sms-pro"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    SMS PRO
+                    {t("smsPro")}
                   </Link>
                 </li>
                 <li>
@@ -136,7 +129,7 @@ export default function Footer() {
                     href="/solutions/sms-vocal"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    SMS VOCAL
+                    {t("smsVocal")}
                   </Link>
                 </li>
                 <li>
@@ -144,7 +137,7 @@ export default function Footer() {
                     href="/solutions/location-bdd"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    LOCATION BDD
+                    {t("locationBdd")}
                   </Link>
                 </li>
                 <li>
@@ -152,7 +145,7 @@ export default function Footer() {
                     href="/solutions/sms-enrichi"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    SMS ENRICHI
+                    {t("smsEnrichi")}
                   </Link>
                 </li>
                 <li>
@@ -160,7 +153,7 @@ export default function Footer() {
                     href="/solutions/mail-to-sms"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    MAIL TO SMS
+                    {t("mailToSms")}
                   </Link>
                 </li>
                 <li>
@@ -168,7 +161,7 @@ export default function Footer() {
                     href="/solutions/sondages-sms"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    SONDAGES SMS
+                    {t("sondagesSms")}
                   </Link>
                 </li>
                 <li>
@@ -176,7 +169,7 @@ export default function Footer() {
                     href="/solutions/vote-sms"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    VOTE SMS
+                    {t("voteSms")}
                   </Link>
                 </li>
                 <li>
@@ -184,7 +177,7 @@ export default function Footer() {
                     href="/solutions/mobile-ticketing"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    MOBILE TICKETING
+                    {t("mobileTicketing")}
                   </Link>
                 </li>
               </ul>
@@ -193,7 +186,7 @@ export default function Footer() {
             {/* Informations */}
             <motion.div variants={itemVariants}>
               <h3 className="text-[#67B142] text-xl font-medium mb-4">
-                Informations
+                {t("information")}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -201,7 +194,7 @@ export default function Footer() {
                     href="/about-us"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Qui sommes nous?
+                    {t("who")}
                   </Link>
                 </li>
                 <li>
@@ -209,7 +202,7 @@ export default function Footer() {
                     href="/how-it-works"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Comment ça marche
+                    {t("how")}
                   </Link>
                 </li>
                 <li>
@@ -217,7 +210,7 @@ export default function Footer() {
                     href="/careers"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Nous recrutons
+                    {t("careers")}
                   </Link>
                 </li>
                 <li>
@@ -233,17 +226,16 @@ export default function Footer() {
                     href="/legal"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Mentions légales
+                    {t("legalmention")}
                   </Link>
                 </li>
-                {/* <li><Link href="/testimonials" className="text-white hover:text-[#67B142] transition-colors">Témoignages clients</Link></li> */}
               </ul>
             </motion.div>
 
             {/* Légales */}
             <motion.div variants={itemVariants}>
               <h3 className="text-[#67B142] text-xl font-medium mb-4">
-                Légales
+                {t("legal")}
               </h3>
               <ul className="space-y-2">
                 <li>
@@ -251,7 +243,7 @@ export default function Footer() {
                     href="/cgu"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    CGU
+                    {t("legal.terms")}
                   </Link>
                 </li>
                 <li>
@@ -259,7 +251,7 @@ export default function Footer() {
                     href="/cgv"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    CGV
+                    {t("legal.sales")}
                   </Link>
                 </li>
                 <li>
@@ -267,7 +259,7 @@ export default function Footer() {
                     href="/privacy-policy"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Confidentialité
+                    {t("legal.privacy")}
                   </Link>
                 </li>
                 <li>
@@ -275,7 +267,15 @@ export default function Footer() {
                     href="/cookies"
                     className="text-white hover:text-[#67B142] transition-colors"
                   >
-                    Nos cookies
+                    {t("legal.cookies")}
+                  </Link>
+                </li>
+                <li>
+                  <Link
+                    href="/contact"
+                    className="text-white hover:text-[#67B142] transition-colors"
+                  >
+                    {t("legal.contact")}
                   </Link>
                 </li>
               </ul>
@@ -288,8 +288,7 @@ export default function Footer() {
             className="mt-12 pt-8 border-t border-[#67B142]/5"
           >
             <p className="text-center text-sm text-gray-400">
-              © 2025 Copyright Designed and Powered by AxiomText - Tous droits
-              réservés.
+              {t("copyright")}
             </p>
           </motion.div>
         </div>

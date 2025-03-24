@@ -12,7 +12,7 @@ export async function GET() {
       return NextResponse.json({ error: "Non autorisé" }, { status: 401 });
     }
 
-    console.log("Recherche des groupes pour l'utilisateur:", session.user.id);
+    // console.log("Recherche des groupes pour l'utilisateur:", session.user.id);
 
     // Récupérer les noms de groupes uniques (non vides)
     const distinctGroups = await Contact.distinct("groupName", {
@@ -49,7 +49,7 @@ export async function GET() {
       ...groups,
     ];
 
-    console.log("Liste finale des groupes:", allGroups);
+    // console.log("Liste finale des groupes:", allGroups);
 
     return NextResponse.json(allGroups);
   } catch (error) {

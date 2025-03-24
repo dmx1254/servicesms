@@ -38,6 +38,15 @@ export function debounce<T extends (...args: any[]) => any>(
   };
 }
 
+export const formatDate = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
 export const checkAmountOfSms = async (contact: string): Promise<number> => {
   if (contact.startsWith("+221")) {
     return 1;
@@ -45,6 +54,34 @@ export const checkAmountOfSms = async (contact: string): Promise<number> => {
     return 3;
   }
 };
+export interface ContactMy {
+  _id: string;
+  nom: string;
+  prenom: string;
+  telephone: string;
+}
+
+export interface UserLocationDB {
+  _id: string;
+  name: string;
+  category: string;
+  qualityScore: number;
+  phones: ContactMy[];
+  isAvailable: boolean;
+  lastUpdated: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface UserLocation {
+  _id: string;
+  userId: string;
+  userDblocation: UserLocationDB;
+  isActive: boolean;
+  duration: number;
+  createdAt: string;
+  expiresAt: string;
+}
 
 // Language
 

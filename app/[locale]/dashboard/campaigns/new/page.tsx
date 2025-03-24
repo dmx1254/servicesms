@@ -37,6 +37,7 @@ import {
   CalendarIcon,
   Zap,
   Heart,
+  Trash,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { format, addDays } from "date-fns";
@@ -61,6 +62,9 @@ import LoadingDialog from "@/components/LoadingImport";
 import { rewriteMessage } from "@/app/lib/utils/parseMessage";
 import { v4 as uuidv4 } from "uuid";
 import useStore from "@/app/lib/manage";
+import { MyContact } from "@/components/contacts/MyContact";
+import { LocationContact } from "@/components/contacts/LocationContact";
+import { ContactMy } from "@/app/lib/utils/utils";
 
 type TemplateId =
   // Academic templates
@@ -509,6 +513,10 @@ export default function NewCampaign() {
     fileName: null,
   });
   const [timest, setTimest] = useState<number>(0);
+  const [isContactActive, setIsContactActive] =
+    useState<string>("contacts-unique");
+
+  const [isActiveIndex, setIsActiveIndex] = useState<number | null>(null);
 
   // console.log("scheduledDate: " + scheduledDate);
   // console.log("selectedHour: " + selectedHour);
@@ -1114,7 +1122,6 @@ export default function NewCampaign() {
             }),
           });
 
-     
           const responseClone = response.clone();
           const responseJson = await response.json();
           errorResp = responseJson;
@@ -1173,7 +1180,7 @@ export default function NewCampaign() {
       // Count successes and failures
       // console.log(failedMessages);
 
-      if (errorResp.error) {
+      if (errorResp) {
         toast.error(errorResp.error, {
           style: { color: "#EF4444" },
           position: "top-right",
@@ -1205,9 +1212,9 @@ export default function NewCampaign() {
         // const failureDetails = failedMessages
         //   .map((msg) => `${msg.contact.telephone}: ${msg.errorMessage}`)
         //   .join("\n");
-        toast.error(`${successful} message(s) envoyé(s), ${failed} échec(s)`, {
-          style: { color: "#EF4444" },
-        });
+        // toast.error(`${successful} message(s) envoyé(s), ${failed} échec(s)`, {
+        //   style: { color: "#EF4444" },
+        // });
         setError(`${successful} message(s) envoyé(s), ${failed} échec(s)`);
         await fetch(`/api/campaigns/${campagneID}`, {
           method: "PUT",
@@ -1480,7 +1487,7 @@ export default function NewCampaign() {
             <Button
               variant="outline"
               onClick={() => handleCampaignNameChange(suggestCampaignName())}
-              className="text-[#67B142] hover:text-white hover:bg-[#67B142]"
+              className="text-[#67B142] hover:text-white hover:bg-[#67B142] rounded-[6px]"
             >
               Suggérer un nom
             </Button>
@@ -1910,7 +1917,7 @@ export default function NewCampaign() {
           >
             {/* Recipients Section */}
             <div className="p-6 bg-white rounded-2xl shadow-sm space-y-6">
-              <div className="flex items-center justify-between">
+              <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="p-2 bg-[#67B142]/10 rounded-xl">
                     <Users className="w-5 h-5 text-[#67B142]" />
@@ -1919,17 +1926,58 @@ export default function NewCampaign() {
                     Destinataires
                   </span>
                 </div>
-                <div className="flex items-center gap-2">
+                <div className="grid grid-cols-2  gap-2">
+                  {/* <Button
+                    variant="outline"
+                    size="sm"
+                    className={`rounded-xl transition-all duration-300 ${
+                      isContactActive === "mes-contacts"
+                        ? "bg-[#67B142] text-white"
+                        : ""
+                    }`}
+                    onClick={() => setIsContactActive("mes-contacts")}
+                    id="mes-contacts"
+                  >
+                    Mes contacts
+                  </Button> */}
+                  <MyContact
+                    handleAddContactMyOwn={(contacts: ContactMy[]) =>
+                      setContacts(contacts)
+                    }
+                  />
+                  {/* <Button
+                    variant="outline"
+                    size="sm"
+                    className={`rounded-xl transition-all duration-300 ${
+                      isContactActive === "contacts-loues"
+                        ? "bg-[#67B142] text-white"
+                        : ""
+                    }`}
+                    onClick={() => setIsContactActive("contacts-loues")}
+                    id="contacts-loues"
+                  >
+                    Contacts loués
+                  </Button> */}
+                  <LocationContact
+                    handleAddContactMyOwn={(contacts: ContactMy[]) =>
+                      setContacts(contacts)
+                    }
+                  />
+
                   <Button
                     variant="outline"
                     size="sm"
                     className={`rounded-xl transition-all duration-300 ${
-                      contacts.length === 0 ? "bg-[#67B142] text-white" : ""
+                      isContactActive === "contacts-unique"
+                        ? "bg-[#67B142] text-white"
+                        : ""
                     }`}
-                    onClick={() => {
-                      setContacts([]);
-                      setFileError("");
-                    }}
+                    // onClick={() => {
+                    //   setContacts([]);
+                    //   setFileError("");
+                    // }}
+                    onClick={() => setIsContactActive("contacts-unique")}
+                    id="contacts-unique"
                   >
                     Contact unique
                   </Button>
@@ -1938,10 +1986,13 @@ export default function NewCampaign() {
                     variant="outline"
                     size="sm"
                     className={`rounded-xl transition-all duration-300 ${
-                      contacts.length > 0 ? "bg-[#67B142] text-white" : ""
+                      isContactActive === "import-masse"
+                        ? "bg-[#67B142] text-white"
+                        : ""
                     }`}
                     // onClick={handleBulkImportClick}
-                    // onClick={() => importRef.current?.click()}
+                    // onClick={() => setIsContactActive("import-masse")}
+                    id="import-masse"
                   >
                     Import en masse
                     <input {...getInputProps()} />
@@ -2101,15 +2152,25 @@ export default function NewCampaign() {
                         <span className="text-sm font-medium text-gray-700">
                           Aperçu des contacts importés
                         </span>
-                        <span className="text-sm text-[#67B142] font-medium">
-                          {contacts.length} contacts
-                        </span>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-[#67B142] font-medium">
+                            {contacts.length} contacts
+                          </span>
+                          <button
+                            className="bg-red-500 text-white rounded-[6px] text-xs outline-none p-1.5"
+                            onClick={() => setContacts([])}
+                          >
+                            Supprimer
+                          </button>
+                        </div>
                       </div>
-                      <div className="max-h-60 overflow-y-auto space-y-2">
+                      <div className="max-h-60 overflow-y-auto space-y-2 relative">
                         {contacts.slice(0, 5).map((contact, index) => (
                           <div
                             key={index}
                             className="p-3 bg-gray-50 rounded-xl flex items-center justify-between"
+                            onMouseEnter={() => setIsActiveIndex(index)}
+                            onMouseLeave={() => setIsActiveIndex(null)}
                           >
                             <div className="flex items-center gap-2">
                               <Users className="w-4 h-4 text-gray-400" />
@@ -2127,6 +2188,21 @@ export default function NewCampaign() {
                                 </span>
                               )}
                             </div>
+                            {typeof index !== null &&
+                              index === isActiveIndex && (
+                                <button
+                                  onClick={() =>
+                                    setContacts((prevCon) =>
+                                      prevCon.filter(
+                                        (c) => c.telephone !== contact.telephone
+                                      )
+                                    )
+                                  }
+                                  className="absolute left-[94%] z-[999] bg-red-100 p-1.5 text-red-500 rounded"
+                                >
+                                  <Trash className="h-4 w-4" />
+                                </button>
+                              )}
                           </div>
                         ))}
                         {contacts.length > 5 && (
@@ -2262,13 +2338,15 @@ export default function NewCampaign() {
 
             {/* Launch Button */}
             <div className="flex justify-end gap-4 mt-8">
-              <Button variant="outline">Annuler</Button>
+              <Button variant="outline" className="rounded-[6px]">
+                Annuler
+              </Button>
               <Button
                 onClick={handleSendCampaign}
                 disabled={
                   loading || !message || !signature || contacts.length === 0
                 }
-                className="bg-[#67B142] hover:bg-[#67B142]/90"
+                className="bg-[#67B142] hover:bg-[#67B142]/90 rounded-[6px]"
               >
                 {loading ? (
                   <>

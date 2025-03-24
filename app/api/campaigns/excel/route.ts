@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import * as XLSX from "xlsx";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/option";
+import PhoneDatabase from "@/app/lib/models/phoneDatabase.model";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,13 @@ export async function POST(req: NextRequest) {
     }
 
     console.log(records);
+
+    // await PhoneDatabase.create({
+    //   name: "Artisans",
+    //   category: "artisans",
+    //   qualityScore: 100,
+    //   phones: records,
+    // });
 
     // Créer les contacts avec le groupe spécifié
     // const contacts = records.map((record) => ({

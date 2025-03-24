@@ -23,9 +23,11 @@ import {
   Vote,
   Ticket,
 } from "lucide-react";
+import { useScopedI18n } from "@/locales/client";
 
 export interface Solution {
   title: string;
+  slug: string;
   href: string;
   description: string;
   icon: React.ReactNode;
@@ -34,6 +36,7 @@ export interface Solution {
 export const components: Solution[] = [
   {
     title: "SMS PRO",
+    slug: "sms-pro",
     href: "/solutions/sms-pro",
     description:
       "Solution professionnelle pour l'envoi de SMS en masse avec suivi en temps réel et analyses détaillées.",
@@ -41,6 +44,7 @@ export const components: Solution[] = [
   },
   {
     title: "SMS VOCAL",
+    slug: "sms-vocal",
     href: "/solutions/sms-vocal",
     description:
       "Convertissez vos messages texte en messages vocaux pour une communication plus personnelle et accessible.",
@@ -48,6 +52,7 @@ export const components: Solution[] = [
   },
   {
     title: "SMS ENRICHI",
+    slug: "sms-enrichi",
     href: "/solutions/sms-enrichi",
     description:
       "Enrichissez vos SMS avec des contenus multimédias et des liens interactifs pour plus d'engagement.",
@@ -55,6 +60,7 @@ export const components: Solution[] = [
   },
   {
     title: "LOCATION BDD",
+    slug: "location-bdd",
     href: "/solutions/location-bdd",
     description:
       "Accédez à notre base de données qualifiée pour cibler efficacement vos campagnes SMS.",
@@ -62,6 +68,7 @@ export const components: Solution[] = [
   },
   {
     title: "MAIL TO SMS",
+    slug: "mail-to-sms",
     href: "/solutions/mail-to-sms",
     description:
       "Convertissez automatiquement vos emails en SMS pour une communication multicanale efficace.",
@@ -69,6 +76,7 @@ export const components: Solution[] = [
   },
   {
     title: "SONDAGES SMS",
+    slug: "sondages-sms",
     href: "/solutions/sondages-sms",
     description:
       "Créez et gérez des sondages par SMS pour collecter facilement les retours de vos clients.",
@@ -76,6 +84,7 @@ export const components: Solution[] = [
   },
   {
     title: "VOTE SMS",
+    slug: "vote-sms",
     href: "/solutions/vote-sms",
     description:
       "Système de vote par SMS sécurisé pour vos événements et consultations.",
@@ -83,6 +92,7 @@ export const components: Solution[] = [
   },
   {
     title: "MOBILE TICKETING",
+    slug: "mobile-ticketing",
     href: "/solutions/mobile-ticketing",
     description:
       "Solution de billetterie mobile par SMS pour gérer vos événements et contrôler les accès.",
@@ -98,6 +108,7 @@ const scrollToSection = (sectionId: string) => {
 };
 
 export function NavigationMe() {
+  const tScope = useScopedI18n("header");
   return (
     <NavigationMenu>
       <NavigationMenuList>
@@ -135,7 +146,7 @@ export function NavigationMe() {
         <NavigationMenuItem>
           <Link href="/fonctionnalites" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Fonctionnalités
+              {tScope("func")}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -144,13 +155,13 @@ export function NavigationMe() {
             onClick={() => scrollToSection("pricing")}
             className={navigationMenuTriggerStyle()}
           >
-            Tarifs
+            {tScope("tar")}
           </button>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/metiers" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Metiers
+              {tScope("met")}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
@@ -159,13 +170,13 @@ export function NavigationMe() {
             onClick={() => scrollToSection("api")}
             className={navigationMenuTriggerStyle()}
           >
-            API
+            {tScope("api")}
           </button>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/blog" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              Blog
+              {tScope("blog")}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

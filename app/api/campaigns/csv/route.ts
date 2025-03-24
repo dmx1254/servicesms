@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { parse } from "csv-parse/sync";
 import { getServerSession } from "next-auth";
 import { options } from "../../auth/[...nextauth]/option";
+// import PhoneDatabase from "@/app/lib/models/phoneDatabase.model";
 
 export async function POST(req: NextRequest) {
   try {
@@ -36,6 +37,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la conversion" });
     }
     console.log(records);
+
+    // const newRecords = records.map((record) => ({
+    //   prenom: record.prenom.toString().trim(),
+    //   nom: record.nom.toString().trim(),
+    //   telephone: record.telephone.toString().trim(),
+    //   region: record.region.trim(),
+    // }));
+    
+    
+    
+    // await PhoneDatabase.create({
+    //   name: "Artisans",
+    //   category: "artisans",
+    //   qualityScore: 100,
+    //   phones: newRecords,
+    // });
+
+
     // Créer les contacts avec le groupe spécifié
     // const contacts = records.map((record) => ({
     //   userId: session.user.id,

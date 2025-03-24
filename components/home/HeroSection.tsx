@@ -60,6 +60,7 @@ type Message = {
 type FeatureProps = {
   icon: React.ReactNode;
   title: string;
+  slug: string;
   description: string;
   color: string;
   iconBg: string;
@@ -187,6 +188,7 @@ const Particle3D: React.FC<{
 
 export default function HeroSection() {
   const tScope = useScopedI18n("hero");
+  const tScope2 = useScopedI18n("messages");
   const [mounted, setMounted] = useState<boolean>(false);
   const [activeMessageType, setActiveMessageType] =
     useState<MessageType>("sms");
@@ -749,6 +751,7 @@ export default function HeroSection() {
       {
         icon: <MessageSquare className="h-6 w-6" />,
         title: "SMS PRO",
+        slug: "sms-pro",
         description:
           "Messages texte simples et efficaces avec un taux de lecture de 98%.",
         color: "bg-[#67B142]/10 text-[#67B142]",
@@ -759,6 +762,7 @@ export default function HeroSection() {
       {
         icon: <Globe className="h-6 w-6" />,
         title: "RCS Enrichi",
+        slug: "rcs-enrichi",
         description:
           "Messages enrichis avec images, carousels et boutons interactifs.",
         color: "bg-blue-500/10 text-blue-500",
@@ -769,6 +773,7 @@ export default function HeroSection() {
       {
         icon: <Users className="h-6 w-6" />,
         title: "Campagnes",
+        slug: "campagnes",
         description:
           "Diffusez vos promotions à grande échelle avec des modèles personnalisés.",
         color: "bg-purple-500/10 text-purple-500",
@@ -779,6 +784,7 @@ export default function HeroSection() {
       {
         icon: <CheckCircle2 className="h-6 w-6" />,
         title: "Transactionnels",
+        slug: "transactionnels",
         description:
           "Confirmations, avis de livraison et autres messages automatisés.",
         color: "bg-amber-500/10 text-amber-500",
@@ -789,6 +795,7 @@ export default function HeroSection() {
       {
         icon: <BarChart3 className="h-6 w-6" />,
         title: "Rappels",
+        slug: "rappels",
         description:
           "Rappels de rendez-vous et échéances pour diminuer les absences.",
         color: "bg-red-500/10 text-red-500",
@@ -1080,19 +1087,37 @@ export default function HeroSection() {
                         />
                       </div>
                       <h3 className="font-semibold text-lg">
-                        {activeFeaturesInfo.title}
+                        {tScope(
+                          `${
+                            activeFeaturesInfo.slug as
+                              | "sms-pro"
+                              | "rcs-enrichi"
+                              | "campagnes"
+                              | "transactionnels"
+                              | "rappels"
+                          }.title`
+                        )}
                       </h3>
 
                       {/* Badge nouveau */}
                       {activeMessageType === "rcs" && (
                         <span className="bg-blue-500 text-white text-xs font-bold py-1 px-2 rounded-full flex items-center">
                           <Sparkle className="h-3 w-3 mr-1" />
-                          NOUVEAU
+                          {tScope("new")}
                         </span>
                       )}
                     </div>
                     <p className="text-muted-foreground">
-                      {activeFeaturesInfo.description}
+                      {tScope(
+                        `${
+                          activeFeaturesInfo.slug as
+                            | "sms-pro"
+                            | "rcs-enrichi"
+                            | "campagnes"
+                            | "transactionnels"
+                            | "rappels"
+                        }.description`
+                      )}
                     </p>
 
                     {/* Statistiques ou badges en bas de la carte */}
@@ -1100,30 +1125,30 @@ export default function HeroSection() {
                       {activeMessageType === "sms" && (
                         <>
                           <span className="text-xs bg-[#67B142]/10 text-[#67B142] py-1 px-2 rounded-full">
-                            98% taux de lecture
+                            {tScope("converse")}
                           </span>
                           <span className="text-xs bg-gray-100 text-gray-700 py-1 px-2 rounded-full">
-                            160 caractères
+                            {tScope("charact")}
                           </span>
                         </>
                       )}
                       {activeMessageType === "rcs" && (
                         <>
                           <span className="text-xs bg-blue-500/10 text-blue-500 py-1 px-2 rounded-full">
-                            Multimédia
+                            {tScope("media")}
                           </span>
                           <span className="text-xs bg-gray-100 text-gray-700 py-1 px-2 rounded-full">
-                            Interactif
+                            {tScope("interact")}
                           </span>
                         </>
                       )}
                       {activeMessageType === "campaign" && (
                         <>
                           <span className="text-xs bg-purple-500/10 text-purple-500 py-1 px-2 rounded-full">
-                            Segmentation
+                            {tScope("segm")}
                           </span>
                           <span className="text-xs bg-gray-100 text-gray-700 py-1 px-2 rounded-full">
-                            Automatisé
+                            {tScope("automat")}
                           </span>
                         </>
                       )}
@@ -1289,7 +1314,18 @@ export default function HeroSection() {
                                 transition: { duration: 0.2 },
                               }}
                             >
-                              <p className="text-sm">{msg.text}</p>
+                              <p className="text-sm">
+                                {tScope2(
+                                  `${
+                                    activeMessageType as
+                                      | "sms"
+                                      | "rcs"
+                                      | "campaign"
+                                      | "transactional"
+                                      | "reminder"
+                                  }.${msg.id as "1" | "2" | "3" | "4"}.text`
+                                )}
+                              </p>
 
                               {/* Éléments RCS enrichis avec animations */}
                               {msg.type === "rcs" && msg.attachment && (
@@ -1314,6 +1350,18 @@ export default function HeroSection() {
                                       whileTap={{ scale: 0.95 }}
                                     >
                                       {msg.attachment.content}
+                                      {tScope2(
+                                        `${
+                                          activeMessageType as
+                                            | "sms"
+                                            | "rcs"
+                                            | "campaign"
+                                            | "transactional"
+                                            | "reminder"
+                                        }.${
+                                          msg.id as "1" | "2" | "3" | "4"
+                                        }.attachment.content`
+                                      )}
                                     </motion.div>
                                   )}
 
@@ -1339,7 +1387,7 @@ export default function HeroSection() {
                                           }}
                                         >
                                           <span className="text-[10px]">
-                                            Offre {n}
+                                            {tScope("offer")} {n}
                                           </span>
                                         </motion.div>
                                       ))}
@@ -1351,7 +1399,9 @@ export default function HeroSection() {
                                       className="bg-white/10 h-[60px] rounded-md mt-1 flex items-center justify-center"
                                       whileHover={{ scale: 1.03 }}
                                     >
-                                      <span className="text-[10px]">Image</span>
+                                      <span className="text-[10px]">
+                                        {tScope("im")}
+                                      </span>
                                     </motion.div>
                                   )}
                                 </motion.div>
@@ -1470,9 +1520,11 @@ export default function HeroSection() {
                           : "bg-red-500"
                       )}
                     ></div>
-                    <span>Envoi</span>
+                    <span>{tScope("send")}</span>
                   </div>
-                  <div className="text-white/70 text-[10px]">Taux: 98%</div>
+                  <div className="text-white/70 text-[10px]">
+                    {tScope("tau")}
+                  </div>
                 </div>
               </motion.div>
             </motion.div>
@@ -1551,7 +1603,9 @@ export default function HeroSection() {
                       i % 2 === 0 ? "bg-[#67B142]" : "bg-blue-400"
                     )}
                   ></div>
-                  <span>{i % 2 === 0 ? "Message envoyé" : "Livré"}</span>
+                  <span>
+                    {i % 2 === 0 ? tScope("sendUser") : tScope("livre")}
+                  </span>
                 </div>
               </motion.div>
             ))}
@@ -1587,11 +1641,11 @@ export default function HeroSection() {
             >
               <div className="flex items-center gap-2 mb-2">
                 <div className="w-2 h-2 rounded-full bg-green-400"></div>
-                <span>Taux de lecture: 98%</span>
+                <span>{tScope("lect")}</span>
               </div>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-blue-400"></div>
-                <span>Taux de conversion: 25%</span>
+                <span>{tScope("conv")}</span>
               </div>
             </motion.div>
 

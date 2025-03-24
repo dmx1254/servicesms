@@ -6,7 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { cn } from "@/app/lib/utils/utils";
 import LanguageSwitcher from "./LanguageSwitcher";
 import { LogIn, Search } from "lucide-react";
-import { useCurrentLocale } from "@/locales/client";
+import { useCurrentLocale, useScopedI18n } from "@/locales/client";
 import { Separator } from "../ui/separator";
 import Image from "next/image";
 import { NavigationMe, components } from "../home/NavigationMe";
@@ -36,6 +36,7 @@ export default function Header() {
   const router = useRouter();
   const { data: session } = useSession();
   const locale = useCurrentLocale();
+  const tScope = useScopedI18n("header");
 
   useEffect(() => {
     const handleScroll = () => {
@@ -48,11 +49,11 @@ export default function Header() {
 
   const navItems: NavItem[] = [
     { href: "#", label: "Solutions", solutions: true },
-    { href: "/fonctionnalites", label: "Fonctionnalités" },
-    { href: "/pricing", label: "Tarifs" },
-    { href: "/metiers", label: "Métiers" },
-    { href: "/#api", label: "API" },
-    { href: "/blog", label: "Blog" },
+    { href: "/fonctionnalites", label: tScope("func") },
+    { href: "/pricing", label: tScope("tar") },
+    { href: "/metiers", label: tScope("met") },
+    { href: "/#api", label: tScope("api") },
+    { href: "/blog", label: tScope("blog") },
   ];
 
   return (
@@ -121,7 +122,7 @@ export default function Header() {
                         href="/signin"
                         className="text-[#67B142] bg-transparent text-base shadow-none font-semibold"
                       >
-                        Connexion
+                        {tScope("login")}
                       </Link>
                       <Separator
                         orientation="vertical"
@@ -131,7 +132,7 @@ export default function Header() {
                         href="/signup"
                         className="bg-[#67B142] text-white p-2 text-base rounded-2xl font-semibold transition-colors hover:bg-black/80"
                       >
-                        S&apos;inscrire
+                        {tScope("register")}
                       </Link>
                     </div>
                     {/* Mobile Auth Icon */}
@@ -147,33 +148,31 @@ export default function Header() {
                     onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                     className={cn(
                       "relative w-10 h-10 flex items-center justify-center rounded-full transition-all duration-300",
-                      mobileMenuOpen 
-                        ? "bg-[#67B142]/10 hover:bg-[#67B142]/20" 
+                      mobileMenuOpen
+                        ? "bg-[#67B142]/10 hover:bg-[#67B142]/20"
                         : "hover:bg-gray-100"
                     )}
                   >
                     <div className="w-6 h-5 flex flex-col justify-between items-end">
-                      <span 
+                      <span
                         className={cn(
                           "h-[2px] bg-gray-600 transition-all duration-300 ease-out",
-                          mobileMenuOpen 
-                            ? "w-full rotate-45 translate-y-2.5 bg-[#67B142]" 
+                          mobileMenuOpen
+                            ? "w-full rotate-45 translate-y-2.5 bg-[#67B142]"
                             : "w-full"
                         )}
                       />
-                      <span 
+                      <span
                         className={cn(
                           "h-[2px] bg-gray-600 transition-all duration-300 ease-out",
-                          mobileMenuOpen 
-                            ? "w-full opacity-0" 
-                            : "w-3/4"
+                          mobileMenuOpen ? "w-full opacity-0" : "w-3/4"
                         )}
                       />
-                      <span 
+                      <span
                         className={cn(
                           "h-[2px] bg-gray-600 transition-all duration-300 ease-out",
-                          mobileMenuOpen 
-                            ? "w-full -rotate-45 -translate-y-2.5 bg-[#67B142]" 
+                          mobileMenuOpen
+                            ? "w-full -rotate-45 -translate-y-2.5 bg-[#67B142]"
                             : "w-1/2"
                         )}
                       />
@@ -187,7 +186,7 @@ export default function Header() {
 
           {/* Mobile Navigation */}
           {mobileMenuOpen && (
-            <div className="md:hidden fixed inset-0 top-16 bg-white z-50 overflow-y-auto">
+            <div className="md:hidden fixed h-screen left-0 right-0 bottom-0 inset-0 top-16 bg-white z-50 overflow-y-auto">
               <div className="px-4 py-3 space-y-1">
                 {navItems.map((item) => (
                   <div key={item.href}>
@@ -197,7 +196,9 @@ export default function Header() {
                           onClick={() => setShowSolutions(!showSolutions)}
                           className={cn(
                             "w-full flex items-center justify-between px-3 py-2 rounded-md text-base font-medium",
-                            showSolutions ? "text-[#67B142] bg-[#67B142]/10" : "text-gray-600 hover:bg-gray-50"
+                            showSolutions
+                              ? "text-[#67B142] bg-[#67B142]/10"
+                              : "text-gray-600 hover:bg-gray-50"
                           )}
                         >
                           <span>Solutions</span>
@@ -210,10 +211,15 @@ export default function Header() {
                             viewBox="0 0 24 24"
                             stroke="currentColor"
                           >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            <path
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                              strokeWidth={2}
+                              d="M19 9l-7 7-7-7"
+                            />
                           </svg>
                         </button>
-                        
+
                         {showSolutions && (
                           <div className="pl-4 space-y-1 border-l-2 border-[#67B142]/20 ml-3">
                             {components.map((solution) => (
@@ -231,10 +237,34 @@ export default function Header() {
                                 </div>
                                 <div>
                                   <div className="text-sm font-semibold text-gray-900">
-                                    {solution.title}
+                                    {tScope(
+                                      `${
+                                        solution.slug as
+                                          | "sms-pro"
+                                          | "sms-vocal"
+                                          | "sms-enrichi"
+                                          | "location-bdd"
+                                          | "mail-to-sms"
+                                          | "sondages-sms"
+                                          | "vote-sms"
+                                          | "mobile-ticketing"
+                                      }.title`
+                                    )}
                                   </div>
                                   <p className="text-sm text-gray-600 line-clamp-2">
-                                    {solution.description}
+                                    {tScope(
+                                      `${
+                                        solution.slug as
+                                          | "sms-pro"
+                                          | "sms-vocal"
+                                          | "sms-enrichi"
+                                          | "location-bdd"
+                                          | "mail-to-sms"
+                                          | "sondages-sms"
+                                          | "vote-sms"
+                                          | "mobile-ticketing"
+                                      }.description`
+                                    )}
                                   </p>
                                 </div>
                               </Link>
@@ -265,9 +295,9 @@ export default function Header() {
 
         {/* Search Dialog */}
         <CommandDialog open={searchOpen} onOpenChange={setSearchOpen}>
-          <CommandInput placeholder="Rechercher une solution..." />
+          <CommandInput placeholder={tScope("searchSol")} />
           <CommandList>
-            <CommandEmpty>Aucune solution trouvée.</CommandEmpty>
+            <CommandEmpty>{tScope("noSolFound")}</CommandEmpty>
             <CommandGroup heading="Solutions">
               {components.map((component) => (
                 <CommandItem
@@ -280,9 +310,35 @@ export default function Header() {
                   <div className="flex items-center gap-2">
                     {component.icon}
                     <div>
-                      <div className="font-medium">{component.title}</div>
+                      <div className="font-medium">
+                        {tScope(
+                          `${
+                            component.slug as
+                              | "sms-pro"
+                              | "sms-vocal"
+                              | "sms-enrichi"
+                              | "location-bdd"
+                              | "mail-to-sms"
+                              | "sondages-sms"
+                              | "vote-sms"
+                              | "mobile-ticketing"
+                          }.title`
+                        )}
+                      </div>
                       <p className="text-sm text-gray-600 line-clamp-1">
-                        {component.description}
+                        {tScope(
+                          `${
+                            component.slug as
+                              | "sms-pro"
+                              | "sms-vocal"
+                              | "sms-enrichi"
+                              | "location-bdd"
+                              | "mail-to-sms"
+                              | "sondages-sms"
+                              | "vote-sms"
+                              | "mobile-ticketing"
+                          }.description`
+                        )}
                       </p>
                     </div>
                   </div>

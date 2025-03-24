@@ -4,19 +4,20 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import { useState, useEffect } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { useScopedI18n } from "@/locales/client";
 
 const companies = [
-  { name: "Orange", logo: "/images/trust/orange.png" },
-  { name: "FASEG", logo: "/images/trust/faseg.png" },
-  { name: "ABA Voyage", logo: "/images/trust/aba_voyage.png" },
-  { name: "Namibienne", logo: "/images/trust/namibienne.png" },
-  { name: "PMN", logo: "/images/trust/pmn.png" },
-  { name: "AMEERGC", logo: "/images/trust/ameergc.png" },
+  { name: "pmn", logo: "/images/trust/pmn.png" },
+  { name: "Sunuy artisan", logo: "/images/trust/sunuy-artisan.png" },
   { name: "AEEB", logo: "/images/trust/aeeb.png" },
-  { name: "Megalogi", logo: "/images/trust/megalogi.png" },
-  { name: "PSEJ", logo: "/images/trust/psej.png" },
   { name: "ASFO", logo: "/images/trust/asfo.png" },
+  { name: "Namibienne", logo: "/images/trust/namibienne.png" },
   { name: "Podor Vert", logo: "/images/trust/podor_vert.png" },
+  { name: "AMEERGC", logo: "/images/trust/ameergc.png" },
+  { name: "AMEEO", logo: "/images/trust/ameeo.png" },
+  { name: "CPSD", logo: "/images/trust/cpsd.png" },
+  { name: "Phenix", logo: "/images/trust/phenix.png" },
+  { name: "Sokhna Diarra", logo: "/images/trust/sokhna-diarra.png" },
 ];
 
 // Diviser les entreprises en groupes de 6
@@ -24,6 +25,7 @@ const itemsPerPage = 6;
 const totalPages = Math.ceil(companies.length / itemsPerPage);
 
 export default function TrustedBy() {
+  const tScope = useScopedI18n("trustby");
   const [currentPage, setCurrentPage] = useState(0);
   const [autoPlay, setAutoPlay] = useState(true);
 
@@ -63,7 +65,7 @@ export default function TrustedBy() {
     <section className="py-24 md:px-12 px-6 bg-gradient-to-b from-white to-gray-50 relative overflow-hidden">
       {/* Motif de fond */}
       <div className="absolute inset-0 bg-[linear-gradient(30deg,#67B14205_1px,transparent_1px),linear-gradient(150deg,#67B14205_1px,transparent_1px)] bg-[size:24px_24px]" />
-      
+
       {/* Cercles décoratifs */}
       <div className="absolute top-0 right-0 w-96 h-96 bg-[#67B142]/5 rounded-full blur-3xl" />
       <div className="absolute bottom-0 left-0 w-96 h-96 bg-[#34A853]/5 rounded-full blur-3xl" />
@@ -77,16 +79,26 @@ export default function TrustedBy() {
           className="text-center mb-16"
         >
           <span className="inline-flex items-center px-4 py-1.5 rounded-full bg-[#67B142]/10 text-[#67B142] text-sm font-medium mb-4">
-            <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            <svg
+              className="w-4 h-4 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M5 13l4 4L19 7"
+              />
             </svg>
-            Références
+            {tScope("title")}
           </span>
           <h2 className="text-4xl font-bold mb-4 bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
-            Ils nous font confiance
+            {tScope("desc1")}
           </h2>
           <p className="text-gray-600 text-lg max-w-2xl mx-auto">
-            Des entreprises de tous secteurs nous font confiance pour leur communication SMS
+            {tScope("desc2")}
           </p>
         </motion.div>
 
@@ -123,7 +135,7 @@ export default function TrustedBy() {
                 >
                   {/* Effet de survol */}
                   <div className="absolute inset-0 bg-gradient-to-br from-[#67B142]/5 to-[#34A853]/5 rounded-[6px] opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                  
+
                   {/* Logo */}
                   <div className="relative w-full h-full">
                     <Image
@@ -171,10 +183,10 @@ export default function TrustedBy() {
                 : "bg-gray-100 text-gray-600"
             }`}
           >
-            {autoPlay ? "⏸️ Pause" : "▶️ Lecture automatique"}
+            {autoPlay ? tScope("pause") : tScope("auto")}
           </button>
         </div>
       </div>
     </section>
   );
-} 
+}

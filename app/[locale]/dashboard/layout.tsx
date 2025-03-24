@@ -17,6 +17,8 @@ import {
   Loader,
   LogOut,
   Megaphone,
+  Database,
+  CreditCard,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { cn } from "@/app/lib/utils/utils";
@@ -57,12 +59,12 @@ export default function DashboardLayout({
       href: `/${locale}/dashboard/campaigns`,
       subItems: [
         {
-          title: "Nouvelle campagne",
+          title:  t("newCampaign"),
           href: `/${locale}/dashboard/campaigns/new`,
           icon: <Megaphone className="w-6 h-6" />,
         },
         {
-          title: "Envoi rapide",
+          title: t("quickSend"),
           href: `/${locale}/dashboard/campaigns/quick-send`,
           icon: <Send className="w-5 h-5" />,
         },
@@ -72,21 +74,27 @@ export default function DashboardLayout({
         //   icon: <FileText className="w-4 h-4" />,
         // },
         {
-          title: "Historique",
+          title: t("history"),
           href: `/${locale}/dashboard/campaigns`,
           icon: <BarChart2 className="w54 h-5" />,
         },
       ],
     },
-    // {
-    //   title: t("quickSend"),
-    //   icon: <Send className="w-5 h-5" />,
-    //   href: `/${locale}/dashboard/quick-send`,
-    // },
+
+    {
+      title: t("credits"),
+      icon: <CreditCard className="w-5 h-5" />,
+      href: `/${locale}/dashboard/credits`,
+    },
     {
       title: t("contacts"),
       icon: <Users className="w-5 h-5" />,
       href: `/${locale}/dashboard/contacts`,
+    },
+    {
+      title: t("locationBdd"),
+      icon: <Database className="w-5 h-5" />,
+      href: `/${locale}/dashboard/location-bdd`,
     },
     {
       title: t("statistics"),

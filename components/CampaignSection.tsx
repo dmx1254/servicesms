@@ -1,5 +1,6 @@
 "use client";
 
+import { useScopedI18n } from "@/locales/client";
 import { motion } from "framer-motion";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,6 +25,7 @@ const staggerContainer = {
 };
 
 export default function CampaignSection() {
+  const tScope = useScopedI18n("campagn");
   return (
     <section className="py-12 sm:py-16 lg:py-24 bg-gradient-to-br from-gray-50 to-white overflow-hidden">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,36 +40,46 @@ export default function CampaignSection() {
           >
             <motion.div variants={fadeIn}>
               <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-4 sm:mb-6 leading-tight">
-                La plateforme marketing multicanale pour{" "}
-                <span className="block">monétiser vos clients</span>
+                {tScope("title")}{" "}
+                <span className="block">{tScope("title2")}</span>
               </h2>
               <p className="text-2xl sm:text-3xl font-semibold text-[#67B142] mb-6 sm:mb-8">
-                100% made in Senegal
+                {tScope("title3")}
               </p>
             </motion.div>
 
-            <motion.div variants={fadeIn} className="space-y-4 sm:space-y-6 text-base sm:text-lg text-gray-600">
+            <motion.div
+              variants={fadeIn}
+              className="space-y-4 sm:space-y-6 text-base sm:text-lg text-gray-600"
+            >
               <p>
-                Solution de routage <span className="font-semibold">SMS, Emails, RCS</span> pour tous les professionnels.
+                {tScope("title4")}{" "}
+                <span className="font-semibold">{tScope("title5")}</span>{" "}
+                {tScope("title6")}
               </p>
               <p>
-                Envoyez vos <span className="font-semibold">SMS en masse</span>, emails marketing,{" "}
-                <span className="font-semibold">OTP</span> (mots de passe unique), messages{" "}
-                <span className="font-semibold">vocaux</span> de manière simple et sécurisée.
+                {tScope("title7")}{" "}
+                <span className="font-semibold">{tScope("title8")}</span>,
+                {tScope("title9")}{" "}
+                <span className="font-semibold">{tScope("title10")}</span>{" "}
+                {tScope("title11")}{" "}
+                <span className="font-semibold">{tScope("title12")}</span>{" "}
+                {tScope("title13")}
               </p>
-              <p className="font-medium">
-                Testez notre solution sans engagement !
-              </p>
+              <p className="font-medium">{tScope("title14")}</p>
             </motion.div>
 
-            <motion.div variants={fadeIn} className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4">
+            <motion.div
+              variants={fadeIn}
+              className="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-4"
+            >
               <Link href="/signup" className="w-full sm:w-auto">
                 <motion.button
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
                   className="w-full sm:w-auto px-6 py-3 bg-[#67B142] text-white rounded-[6px] hover:bg-[#4e8a2f] transition-colors font-medium text-sm sm:text-base"
                 >
-                  Commencer gratuitement
+                  {tScope("title15")}
                 </motion.button>
               </Link>
               <Link href="/contact" className="w-full sm:w-auto">
@@ -76,7 +88,7 @@ export default function CampaignSection() {
                   whileTap={{ scale: 0.98 }}
                   className="w-full sm:w-auto px-6 py-3 bg-gray-900 text-white rounded-[6px] hover:bg-gray-800 transition-colors font-medium text-sm sm:text-base"
                 >
-                  En savoir plus
+                  {tScope("title16")}
                 </motion.button>
               </Link>
             </motion.div>

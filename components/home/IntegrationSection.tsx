@@ -1,7 +1,10 @@
+"use client";
+
 import React from "react";
 import Image from "next/image";
 import { Button } from "../ui/button";
 import Link from "next/link";
+import { useScopedI18n } from "@/locales/client";
 
 const technologies = [
   { name: "ASP.NET", logo: "/images/tech/aspnet.png", w: 70, h: 70 },
@@ -15,6 +18,7 @@ const technologies = [
 ];
 
 export default function IntegrationSection() {
+  const tScope = useScopedI18n("integration");
   return (
     <section className="py-16 md:px-12 px-6" id="api">
       <div className="container mx-auto px-4">
@@ -31,20 +35,10 @@ export default function IntegrationSection() {
 
           {/* Right side - Content */}
           <div className="flex-1 space-y-6">
-            <h2 className="text-3xl font-bold">Intégrations et API</h2>
-            <p className="text-gray-600">
-              Intégrez notre solution en quelques clics grâce à notre API, qui
-              vous permet de connecter facilement votre application web,
-              e-commerce ou CRM.
-            </p>
-            <p className="text-gray-600">
-              L&apos;automation des envois en masse n&apos;a jamais été aussi
-              simple avec AxiomTEXT.
-            </p>
-            <p className="text-gray-600">
-              Testez aussi notre lab sur votre interface client dès maintenant !
-              Vous l&apos;avez compris, les envois par API nous rendent hAPPi...
-            </p>
+            <h2 className="text-3xl font-bold">{tScope("title1")}</h2>
+            <p className="text-gray-600">{tScope("title2")}</p>
+            <p className="text-gray-600">{tScope("title3")}</p>
+            <p className="text-gray-600">{tScope("title4")}</p>
 
             <div className="flex gap-4">
               <Button
@@ -57,7 +51,7 @@ export default function IntegrationSection() {
                   target="_blank"
                   href="https://api.axiomtext.com"
                 >
-                  En savoir plus
+                  {tScope("title5")}
                 </Link>
               </Button>
               <Button
@@ -70,7 +64,7 @@ export default function IntegrationSection() {
                   target="_blank"
                   href="https://api.axiomtext.com"
                 >
-                  Documentation API
+                  {tScope("title6")}
                 </Link>
               </Button>
             </div>
