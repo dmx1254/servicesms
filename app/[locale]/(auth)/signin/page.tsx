@@ -22,36 +22,36 @@ export default function SignIn() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    // setIsLoading(true);
+    setIsLoading(true);
 
-    // try {
-    //   const result = await signIn("credentials", {
-    //     email: email,
-    //     password: password,
-    //     redirect: false,
-    //   });
+    try {
+      const result = await signIn("credentials", {
+        email: email,
+        password: password,
+        redirect: false,
+      });
 
-    //   if (result?.error) {
-    //     toast.error(result.error, {
-    //       style: { backgroundColor: "#EF4444", color: "white" },
-    //       position: "top-right",
-    //     });
-    //   } else {
-    //     toast.success(t("success"), {
-    //       style: { backgroundColor: "#22C55E", color: "white" },
-    //       position: "top-right",
-    //     });
-    //     router.push("/dashboard");
-    //   }
-    // } catch {
-    //   toast.error(t("error"), {
-    //     style: { backgroundColor: "#EF4444", color: "white" },
-    //     position: "top-right",
-    //   });
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    alert("Nous ne sommes pas encore disponibles");
+      if (result?.error) {
+        toast.error(result.error, {
+          style: { backgroundColor: "#EF4444", color: "white" },
+          position: "top-right",
+        });
+      } else {
+        toast.success(t("success"), {
+          style: { backgroundColor: "#22C55E", color: "white" },
+          position: "top-right",
+        });
+        router.push("/dashboard");
+      }
+    } catch {
+      toast.error(t("error"), {
+        style: { backgroundColor: "#EF4444", color: "white" },
+        position: "top-right",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+    // alert("Nous ne sommes pas emcore disponibles");
   };
 
   return (
