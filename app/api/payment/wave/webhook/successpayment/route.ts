@@ -3,13 +3,13 @@ import UserModel from "@/app/lib/models/user.model";
 import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
-  const headers = new Headers();
-  headers.set("Access-Control-Allow-Origin", "*");
-  headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+//   const headers = new Headers();
+//   headers.set("Access-Control-Allow-Origin", "*");
+//   headers.set(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, OPTIONS"
+//   );
+//   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
   try {
     const authHeader = req.headers.get("authorization");
     if (!authHeader && !authHeader?.startsWith("Bearer ")) {
@@ -75,17 +75,17 @@ export async function POST(req: Request) {
 }
 
 // Gestion des requêtes OPTIONS pour CORS
-export async function OPTIONS() {
-  const headers = new Headers();
-  headers.set("Access-Control-Allow-Origin", "*");
-  headers.set(
-    "Access-Control-Allow-Methods",
-    "GET, POST, PUT, DELETE, OPTIONS"
-  );
-  headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
+// export async function OPTIONS() {
+//   const headers = new Headers();
+//   headers.set("Access-Control-Allow-Origin", "*");
+//   headers.set(
+//     "Access-Control-Allow-Methods",
+//     "GET, POST, PUT, DELETE, OPTIONS"
+//   );
+//   headers.set("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-  return new NextResponse(null, {
-    status: 200,
-    headers,
-  });
-}
+//   return new NextResponse(null, {
+//     status: 200,
+//     headers,
+//   });
+// }
