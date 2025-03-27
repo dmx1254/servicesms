@@ -36,7 +36,7 @@ export default function FeaturesSection() {
       icon: <Trophy className="w-8 h-8 text-[#67B142]" />,
       title: tScope("title2"),
       description: tScope("desc2"),
-      image: "/images/features/campaign-preview.png",
+      image: "/images/features/fonc.webp",
       gradient: "from-[#67B142]/10 to-[#34A853]/5",
     },
     // {
@@ -50,7 +50,7 @@ export default function FeaturesSection() {
       icon: <Rocket className="w-8 h-8 text-[#67B142]" />,
       title: tScope("title3"),
       description: tScope("desc3"),
-      image: "/images/features/stats-preview.png",
+      image: "/images/features/propulser.webp",
       gradient: "from-[#67B142]/10 to-[#EA4335]/5",
     },
   ];

@@ -18,7 +18,10 @@ const LoadingDialog = ({
 }) => {
   return (
     <Dialog open={open}>
-      <DialogContent className="sm:max-w-md bg-transparent border-none">
+      <DialogContent
+        className="sm:max-w-md bg-transparent border-none"
+        isShowIcon={false}
+      >
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
         </DialogHeader>

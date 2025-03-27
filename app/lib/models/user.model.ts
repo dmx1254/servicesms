@@ -7,6 +7,7 @@ export interface IUser extends Document {
   password: string;
   phone: string;
   accountType: string;
+  plan_type: "free" | "basic" | "premium";
   role: string;
   smsCredits: number;
   isActive: boolean;
@@ -51,6 +52,11 @@ const userSchema = new Schema(
       enum: ["personal", "business"],
       default: "personal",
     },
+    plan_type: {
+      type: String,
+      enum: ["free", "basic", "premium"],
+      default: "free",
+    },
     companyName: {
       type: String,
       required: true,
@@ -81,6 +87,7 @@ const userSchema = new Schema(
   { timestamps: true }
 );
 
-const UserModel = mongoose.models.User || mongoose.model<IUser>("User", userSchema);
+const UserModel =
+  mongoose.models.User || mongoose.model<IUser>("User", userSchema);
 
 export default UserModel;

@@ -36,6 +36,7 @@ import PhoneInput from "react-phone-number-input";
 import "react-phone-number-input/style.css";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useScopedI18n } from "@/locales/client";
 
 // Define types
 type FormData = {
@@ -54,34 +55,9 @@ type FormErrors = {
   [K in keyof FormData]?: string;
 };
 
-// Validation schemas
-const stepOneSchema = z.object({
-  firstName: z.string().min(2, "Le prénom doit contenir au moins 2 caractères"),
-  lastName: z.string().min(2, "Le nom doit contenir au moins 2 caractères"),
-  email: z.string().email("Adresse email invalide"),
-  phone: z.string().min(10, "Numéro de téléphone invalide"),
-});
-
-const stepTwoSchema = z
-  .object({
-    accountType: z.enum(["personal", "business"]),
-    companyName: z.string().min(2, "Le nom de l'entreprise est requis"),
-    password: z
-      .string()
-      .min(8, "Le mot de passe doit contenir au moins 8 caractères")
-      .regex(
-        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-        "Le mot de passe doit contenir au moins une majuscule, une minuscule et un chiffre"
-      ),
-    confirmPassword: z.string(),
-  })
-  .refine((data: Partial<FormData>) => data.password === data.confirmPassword, {
-    message: "Les mots de passe ne correspondent pas",
-    path: ["confirmPassword"],
-  });
-
 export default function SignUp() {
   const router = useRouter();
+  const t = useScopedI18n("signup");
   const [currentStep, setCurrentStep] = useState<number>(1);
   const [formData, setFormData] = useState<FormData>({
     firstName: "",
@@ -96,8 +72,36 @@ export default function SignUp() {
   });
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState(false);
+  const [isResetLoading, setIsResetLoading] = useState(false);
   const [step, setStep] = useState<"form" | "verification">("form");
   const [verificationCode, setVerificationCode] = useState("");
+  const [isStepLoading, setIsStepLoading] = useState(false);
+
+  // Validation schemas
+  const stepOneSchema = z.object({
+    firstName: z.string().min(2, t("firstError")),
+    lastName: z.string().min(2, t("lastError")),
+    email: z.string().email(t("mailError")),
+    phone: z.string().min(10, t("phoneError")),
+  });
+
+  const stepTwoSchema = z
+    .object({
+      accountType: z.enum(["personal", "business"]),
+      companyName: z.string().min(2, t("companyNamError")),
+      password: z
+        .string()
+        .min(8, t("passError"))
+        .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, t("pasLenError")),
+      confirmPassword: z.string(),
+    })
+    .refine(
+      (data: Partial<FormData>) => data.password === data.confirmPassword,
+      {
+        message: t("passesError"),
+        path: ["confirmPassword"],
+      }
+    );
 
   const handleChange = (
     e:
@@ -128,6 +132,7 @@ export default function SignUp() {
 
   const validateStepOne = () => {
     try {
+      setIsStepLoading(true);
       stepOneSchema.parse(formData);
       return true;
     } catch (error) {
@@ -141,11 +146,14 @@ export default function SignUp() {
         setErrors(newErrors);
       }
       return false;
+    } finally {
+      setIsStepLoading(false);
     }
   };
 
   const validateStepTwo = () => {
     try {
+      setIsStepLoading(true);
       stepTwoSchema.parse(formData);
       return true;
     } catch (error) {
@@ -159,6 +167,8 @@ export default function SignUp() {
         setErrors(newErrors);
       }
       return false;
+    } finally {
+      setIsStepLoading(false);
     }
   };
 
@@ -168,8 +178,10 @@ export default function SignUp() {
     } else if (currentStep === 2 && validateStepTwo()) {
       // Here you would typically send the verification code to the user's email
       const syntheticEvent = { preventDefault: () => {} } as React.FormEvent;
-      await handleSubmit(syntheticEvent);
-      setCurrentStep(3);
+      const res = await handleSubmit(syntheticEvent);
+      if (res) {
+        setCurrentStep(3);
+      }
     }
   };
 
@@ -194,18 +206,29 @@ export default function SignUp() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Une erreur est survenue");
+        throw new Error(data.error || t("errorWrong"));
       }
 
-      toast.success("Code de vérification envoyé par email", {
+      toast.success(t("emailSuccess"), {
         style: { color: "#22C55E" },
+        position: "top-right",
       });
-      setStep("verification");
+      if (data) {
+        return true;
+      }
+      // setStep("verification");
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue",
+        error instanceof Error
+          ? error.message.includes("Cette adresse email est déjà utilisée")
+            ? t("emailAlreadyUseError")
+            : error.message.includes("Ce numéro de téléphone est déjà utilisé")
+            ? t("phoneAlreadyUseError")
+            : error.message
+          : t("errorWrong"),
         {
           style: { color: "#EF4444" },
+          position: "top-right",
         }
       );
       console.log(error);
@@ -231,28 +254,59 @@ export default function SignUp() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Une erreur est survenue");
+        throw new Error(data.error || t("errorWrong"));
       }
 
-      toast.success("Inscription réussie", {
+      toast.success(t("successSignup"), {
         style: { backgroundColor: "#22C55E", color: "white" },
+        position: "top-right",
       });
       router.push("/signin");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue",
-        {
-          style: { backgroundColor: "#EF4444", color: "white" },
-        }
-      );
+      toast.error(error instanceof Error ? error.message : t("errorWrong"), {
+        style: { backgroundColor: "#EF4444", color: "white" },
+        position: "top-right",
+      });
     } finally {
       setIsLoading(false);
     }
   };
 
-  const resendVerificationCode = () => {
+  const resendVerificationCode = async () => {
     // Here you would implement the logic to resend the verification code
-    console.log("Resending verification code to:", formData.email);
+
+    try {
+      setIsResetLoading(true);
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || t("errorWrong"));
+      }
+
+      toast.success(t("emailSuccess"), {
+        style: { color: "#22C55E" },
+        position: "top-right",
+      });
+      if (data) {
+        return true;
+      }
+      // setStep("verification");
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : t("errorWrong"), {
+        style: { color: "#EF4444" },
+        position: "top-right",
+      });
+      console.log(error);
+    } finally {
+      setIsResetLoading(false);
+    }
+    // console.log("Resending verification code to:", formData.email);
   };
 
   if (step === "verification") {
@@ -261,10 +315,10 @@ export default function SignUp() {
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle className="text-2xl font-bold text-center bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
-              Vérification de l&apos;email
+              {t("emailVerification")}
             </DialogTitle>
             <DialogDescription className="text-center text-gray-600">
-              Nous avons envoyé un code de vérification à
+              {t("sendCode")}
               <span className="block font-medium text-gray-900 mt-1">
                 {formData.email}
               </span>
@@ -273,7 +327,7 @@ export default function SignUp() {
           <form onSubmit={handleVerification} className="space-y-6">
             <div className="space-y-2">
               <Label htmlFor="code" className="text-gray-700">
-                Code de vérification
+                {t("veriCode")}
               </Label>
               <div className="relative group">
                 <Input
@@ -298,7 +352,7 @@ export default function SignUp() {
                 {isLoading ? (
                   <Loader className="h-5 w-5 animate-spin" />
                 ) : (
-                  "Vérifier"
+                  t("verifbtn")
                 )}
               </Button>
               <Button
@@ -307,7 +361,7 @@ export default function SignUp() {
                 onClick={resendVerificationCode}
                 className="w-full h-11 text-[#67B142] hover:bg-[#67B142]/5 hover:text-[#34A853] transition-all duration-300"
               >
-                Renvoyer le code
+                {isResetLoading ? t("resendCodeLoading") : t("resendCode")}
               </Button>
             </div>
           </form>
@@ -333,7 +387,7 @@ export default function SignUp() {
           className="absolute top-8 left-8 text-muted-foreground hover:text-[#67B142] transition-colors flex items-center gap-2 group"
         >
           <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-1" />
-          <span className="font-medium">Retour à l&apos;accueil</span>
+          <span className="font-medium">{t("backHome")}</span>
         </Link>
 
         <div className="relative w-full max-w-lg">
@@ -393,17 +447,17 @@ export default function SignUp() {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
                   {currentStep === 1
-                    ? "Informations personnelles"
+                    ? t("stepperso")
                     : currentStep === 2
-                    ? "Informations professionnelles"
-                    : "Vérification email"}
+                    ? t("stepro")
+                    : t("stepmail")}
                 </h3>
                 <p className="text-sm text-gray-600 leading-relaxed">
                   {currentStep === 1
-                    ? "Commencez par renseigner vos informations de base pour créer votre compte"
+                    ? t("steppersodesc")
                     : currentStep === 2
-                    ? "Configurez votre compte professionnel et choisissez un mot de passe sécurisé"
-                    : "Entrez le code de vérification reçu par email pour finaliser votre inscription"}
+                    ? t("steprodesc")
+                    : t("stepmaildesc")}
                 </p>
               </div>
             </div>
@@ -422,14 +476,14 @@ export default function SignUp() {
           >
             <div className="text-center">
               <h1 className="text-4xl font-bold bg-gradient-to-r from-[#67B142] to-[#34A853] bg-clip-text text-transparent">
-                Créer un compte
+                {t("createAcountTitle")}
               </h1>
               <p className="mt-3 text-gray-600">
                 {currentStep === 1
-                  ? "Étape 1 sur 3 : Vos informations"
+                  ? t("firststep")
                   : currentStep === 2
-                  ? "Étape 2 sur 3 : Configuration du compte"
-                  : "Étape 3 sur 3 : Vérification"}
+                  ? t("secondstep")
+                  : t("thirdstep")}
               </p>
             </div>
 
@@ -447,7 +501,7 @@ export default function SignUp() {
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
                         <Label htmlFor="firstName" className="text-gray-700">
-                          Prénom
+                          {t("fiststeppre")}
                         </Label>
                         <div className="relative group">
                           <Input
@@ -458,7 +512,7 @@ export default function SignUp() {
                             className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                               errors.firstName ? "border-red-500" : ""
                             }`}
-                            placeholder="Prénom"
+                            placeholder={t("fiststeppre")}
                           />
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                         </div>
@@ -475,7 +529,7 @@ export default function SignUp() {
 
                       <div className="space-y-2">
                         <Label htmlFor="lastName" className="text-gray-700">
-                          Nom
+                          {t("thirdstepnom")}
                         </Label>
                         <div className="relative group">
                           <Input
@@ -486,7 +540,7 @@ export default function SignUp() {
                             className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                               errors.lastName ? "border-red-500" : ""
                             }`}
-                            placeholder="Nom"
+                            placeholder={t("thirdstepnom")}
                           />
                           <User className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                         </div>
@@ -504,7 +558,7 @@ export default function SignUp() {
 
                     <div className="space-y-2">
                       <Label htmlFor="email" className="text-gray-700">
-                        Email
+                        {t("thirdstepemail")}
                       </Label>
                       <div className="relative group">
                         <Input
@@ -516,7 +570,7 @@ export default function SignUp() {
                           className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                             errors.email ? "border-red-500" : ""
                           }`}
-                          placeholder="john.doe@example.com"
+                          placeholder={t("thirdstepemail")}
                         />
                         <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                       </div>
@@ -533,7 +587,7 @@ export default function SignUp() {
 
                     <div className="space-y-2">
                       <Label htmlFor="phone" className="text-gray-700">
-                        Téléphone
+                        {t("thirdsteptel")}
                       </Label>
                       <div className="relative group">
                         <PhoneInput
@@ -561,14 +615,14 @@ export default function SignUp() {
                     <Button
                       type="button"
                       onClick={handleNext}
-                      disabled={isLoading}
+                      disabled={isStepLoading}
                       className="w-full h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
                     >
-                      {isLoading ? (
+                      {isStepLoading ? (
                         <Loader className="h-5 w-5 animate-spin" />
                       ) : (
                         <span className="flex items-center justify-center">
-                          Continuer
+                          {t("thirdstepconti")}
                           <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
                         </span>
                       )}
@@ -585,7 +639,7 @@ export default function SignUp() {
                   >
                     <div className="space-y-2">
                       <Label htmlFor="accountType" className="text-gray-700">
-                        Type de compte
+                        {t("secacctype")}
                       </Label>
                       <Select
                         name="accountType"
@@ -597,20 +651,20 @@ export default function SignUp() {
                         }
                       >
                         <SelectTrigger className="h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 hover:border-[#67B142]/50">
-                          <SelectValue placeholder="Sélectionnez le type de compte" />
+                          <SelectValue placeholder={t("secselectactype")} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem
                             value="personal"
                             className="cursor-pointer hover:bg-[#67B142]/10"
                           >
-                            Personnel
+                            {t("secperso")}
                           </SelectItem>
                           <SelectItem
                             value="business"
                             className="cursor-pointer hover:bg-[#67B142]/10"
                           >
-                            Professionnel
+                            {t("secpro")}
                           </SelectItem>
                         </SelectContent>
                       </Select>
@@ -618,10 +672,10 @@ export default function SignUp() {
 
                     <div className="space-y-2">
                       <Label htmlFor="companyName" className="text-gray-700">
-                        Nom de l&apos;entreprise
+                        {t("secbusname")}
                         {formData.accountType === "personal" && (
                           <span className="text-sm text-gray-500 ml-1">
-                            (Optionnel)
+                            {t("secopt")}
                           </span>
                         )}
                       </Label>
@@ -634,7 +688,7 @@ export default function SignUp() {
                           className={`pl-10 h-11 rounded-xl border-gray-200 bg-white/50 backdrop-blur-sm focus:border-[#67B142] focus:ring-[#67B142] transition-all duration-300 group-hover:border-[#67B142]/50 ${
                             errors.companyName ? "border-red-500" : ""
                           }`}
-                          placeholder="Nom de votre entreprise"
+                          placeholder={t("secbusnameplace")}
                         />
                         <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 transition-colors group-hover:text-[#67B142]" />
                       </div>
@@ -651,7 +705,7 @@ export default function SignUp() {
 
                     <div className="space-y-2">
                       <Label htmlFor="password" className="text-gray-700">
-                        Mot de passe
+                        {t("secpass")}
                       </Label>
                       <div className="relative group">
                         <Input
@@ -683,7 +737,7 @@ export default function SignUp() {
                         htmlFor="confirmPassword"
                         className="text-gray-700"
                       >
-                        Confirmer le mot de passe
+                        {t("secpassconf")}
                       </Label>
                       <div className="relative group">
                         <Input
@@ -718,15 +772,22 @@ export default function SignUp() {
                         className="flex-1 h-11 rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300"
                       >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Retour
+                        {t("secback")}
                       </Button>
                       <Button
                         type="button"
                         onClick={handleNext}
+                        disabled={isStepLoading}
                         className="flex-1 h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
                       >
-                        Continuer
-                        <ArrowRight className="ml-2 h-4 w-4" />
+                        {isStepLoading ? (
+                          <Loader className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <span className="flex items-center justify-center">
+                            {t("thirdstepconti")}
+                            <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+                          </span>
+                        )}
                       </Button>
                     </div>
                   </motion.div>
@@ -744,9 +805,7 @@ export default function SignUp() {
                         <KeyRound className="w-full h-full text-white" />
                       </div>
                       <div className="space-y-2">
-                        <p className="text-gray-600">
-                          Nous avons envoyé un code de vérification à
-                        </p>
+                        <p className="text-gray-600">{t("sendCode")}</p>
                         <p className="font-medium text-gray-900">
                           {formData.email}
                         </p>
@@ -758,7 +817,7 @@ export default function SignUp() {
                         htmlFor="verificationCode"
                         className="text-gray-700"
                       >
-                        Code de vérification
+                        {t("veriCode")}
                       </Label>
                       <div className="relative group">
                         <Input
@@ -791,7 +850,9 @@ export default function SignUp() {
                       onClick={resendVerificationCode}
                       className="w-full h-11 text-[#67B142] hover:bg-[#67B142]/5 hover:text-[#34A853] transition-all duration-300"
                     >
-                      Renvoyer le code
+                      {isResetLoading
+                        ? t("resendCodeLoading")
+                        : t("resendCode")}
                     </Button>
 
                     <div className="flex gap-4">
@@ -802,13 +863,13 @@ export default function SignUp() {
                         className="flex-1 h-11 rounded-xl border-gray-200 hover:bg-gray-50 transition-all duration-300"
                       >
                         <ArrowLeft className="mr-2 h-4 w-4" />
-                        Retour
+                        {t("secback")}
                       </Button>
                       <Button
                         type="submit"
                         className="flex-1 h-11 bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-all duration-300 transform hover:scale-[1.02] focus:scale-[0.98] shadow-lg shadow-[#67B142]/20"
                       >
-                        S&apos;inscrire
+                        {t("register")}
                       </Button>
                     </div>
                   </motion.div>
@@ -821,12 +882,12 @@ export default function SignUp() {
                 transition={{ duration: 0.5, delay: 0.6 }}
                 className="text-center text-sm text-gray-600 mt-6"
               >
-                Vous avez déjà un compte ?{" "}
+                {t("haveacount")}{" "}
                 <Link
                   href="/signin"
                   className="font-medium text-[#67B142] hover:text-[#34A853] transition-colors"
                 >
-                  Se connecter
+                  {t("login")}
                 </Link>
               </motion.p>
             </form>

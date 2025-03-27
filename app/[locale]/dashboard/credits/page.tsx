@@ -1,335 +1,215 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Check, CreditCard, Package, Phone } from "lucide-react";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { color } from "framer-motion";
-import { toast } from "sonner";
-// import { toast } from "sonner";
+import { motion } from "framer-motion";
+import PurchaseModal from "@/components/PurchaseModal";
 
-interface SMSPackage {
-  id: string;
-  name: string;
-  credits: number;
-  price: number;
-  description: string;
-  features: string[];
-  isPopular: boolean;
+interface PricingTier {
+  range: string;
+  volumeMin: number;
+  volumeMax: number;
+  pricePerSms: number;
 }
 
-const defaultPackages: SMSPackage[] = [
+const PRICING_TIERS: PricingTier[] = [
+  { range: "1 à 4,999", volumeMin: 1, volumeMax: 4999, pricePerSms: 28.24 },
   {
-    id: "basic",
-    name: "Pack Démarrage",
-    credits: 100,
-    price: 5000,
-    description: "Idéal pour commencer avec les SMS",
-    features: [
-      "100 crédits SMS",
-      "Validité 12 mois",
-      "Support basique",
-      "Statistiques simples",
-    ],
-    isPopular: false,
+    range: "5,000 à 9,999",
+    volumeMin: 5000,
+    volumeMax: 9999,
+    pricePerSms: 27.58,
   },
   {
-    id: "pro",
-    name: "Pack Professionnel",
-    credits: 500,
-    price: 20000,
-    description: "Pour les entreprises en croissance",
-    features: [
-      "500 crédits SMS",
-      "Validité 12 mois",
-      "Support prioritaire",
-      "Statistiques avancées",
-      "API Access",
-    ],
-    isPopular: true,
+    range: "10,000 à 24,999",
+    volumeMin: 10000,
+    volumeMax: 24999,
+    pricePerSms: 26.93,
   },
   {
-    id: "enterprise",
-    name: "Pack Entreprise",
-    credits: 2000,
-    price: 70000,
-    description: "Solution complète pour grandes entreprises",
-    features: [
-      "2000 crédits SMS",
-      "Validité 12 mois",
-      "Support dédié 24/7",
-      "Statistiques détaillées",
-      "API Access",
-      "Personnalisation avancée",
-    ],
-    isPopular: false,
+    range: "25,000 à 49,999",
+    volumeMin: 25000,
+    volumeMax: 49999,
+    pricePerSms: 26.27,
+  },
+  {
+    range: "50,000 à 99,999",
+    volumeMin: 50000,
+    volumeMax: 99999,
+    pricePerSms: 25.58,
+  },
+  {
+    range: "100,000 à 250,000",
+    volumeMin: 100000,
+    volumeMax: 250000,
+    pricePerSms: 24.3,
   },
 ];
 
-export default function CreditsPage() {
-  const [packages] = useState<SMSPackage[]>(defaultPackages);
-  const [selectedPackage, setSelectedPackage] = useState<SMSPackage | null>(
-    null
+const CreditPage: React.FC = () => {
+  const [smsQuantity, setSmsQuantity] = useState<string | number>("1");
+  const [selectedTier, setSelectedTier] = useState<PricingTier>(
+    PRICING_TIERS[0]
   );
-  const [paymentMethod, setPaymentMethod] = useState<"orange" | "wave">(
-    "orange"
-  );
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [isPurchaseModalOpen, setIsPurchaseModalOpen] =
+    useState<boolean>(false);
 
-  const handlePurchase = async (pkg: SMSPackage) => {
-    setSelectedPackage(pkg);
-    setShowPaymentDialog(true);
+  const handleSmsQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const qty = e.target.value;
+
+    const quantity = parseInt(e.target.value);
+    setSmsQuantity(qty);
+
+    const tier =
+      PRICING_TIERS.find(
+        (t) => quantity >= t.volumeMin && quantity <= t.volumeMax
+      ) || PRICING_TIERS[0];
+
+    setSelectedTier(tier);
   };
 
-  const handlePayment = async () => {
-    try {
-      setLoading(true);
+  const calculateTotalPrice = () => {
+    return Math.floor(Number(smsQuantity) * Number(selectedTier.pricePerSms));
+  };
 
-      // Validate phone number
-      if (!phoneNumber.match(/^(70|75|76|77|78)\d{7}$/)) {
-        toast.error("Numéro invalide", {
-          style: {
-            color: "#ef4444",
-          },
-        });
-        return;
-      }
+  const openPurchaseModal = () => {
+    setIsPurchaseModalOpen(true);
+  };
 
-      // Call payment API
-      const response = await fetch("/api/payments", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          packageId: selectedPackage?.id,
-          provider: paymentMethod,
-          phoneNumber: phoneNumber,
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Payment failed");
-      }
-
-      // Redirect to payment URL
-      window.location.href = data.paymentUrl;
-    } catch (error) {
-      console.error("Payment error:", error);
-      toast.error("Une erreur est survenue lors du paiement", {
-        style:{
-          color: "#ef4444"
-        }
-      });
-    } finally {
-      setLoading(false);
-    }
+  const closePurchaseModal = () => {
+    setIsPurchaseModalOpen(false);
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-gray-50/50">
-      <div className="max-w-7xl mx-auto p-6 space-y-8">
-        {/* Header */}
-        <div className="text-center space-y-4">
-          <h1 className="text-4xl font-bold">Achetez des Crédits SMS</h1>
-          <p className="text-gray-600 max-w-2xl mx-auto">
-            Choisissez le forfait qui correspond à vos besoins. Plus vous
-            achetez de crédits, plus le prix unitaire est avantageux.
-          </p>
-        </div>
+    <div className="min-h-screen w-full relative pb-12 flex items-center justify-center mx-auto">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.9 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="w-full"
+      >
+        <Card
+          className="mx-auto z-50 -mt-48 border-none w-full max-w-6xl px-4"
+          style={{ boxShadow: "rgba(0, 0, 0, 0.16) 0px 1px 4px" }}
+        >
+          <CardContent className="p-6 bg-white rounded-b-xl">
+            <CardTitle className="font-bold text-3xl text-center">
+              Tarif/SMS
+            </CardTitle>
+            <CardHeader className="text-center text-gray-500">
+              Découvrez nos tarifs pour l&apos;envoi d&apos;SMS
+            </CardHeader>
 
-        {/* Packages Grid */}
-        <div className="grid md:grid-cols-3 gap-8 mt-8">
-          {packages.map((pkg) => (
-            <Card
-              key={pkg.id}
-              className={`relative ${
-                pkg.isPopular
-                  ? "border-2 border-[#67B142] shadow-lg"
-                  : "border border-gray-200"
-              }`}
-            >
-              {pkg.isPopular && (
-                <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-[#67B142]">
-                  Plus Populaire
-                </Badge>
-              )}
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Package className="w-5 h-5" />
-                  {pkg.name}
-                </CardTitle>
-                <CardDescription>{pkg.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="text-3xl font-bold">
-                  {pkg.price.toLocaleString()} FCFA
-                </div>
-                <div className="text-sm text-gray-500">
-                  {(pkg.price / pkg.credits).toFixed(2)} FCFA par crédit
-                </div>
-                <ul className="space-y-2">
-                  {pkg.features.map((feature, index) => (
-                    <li key={index} className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-[#67B142]" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </CardContent>
-              <CardFooter>
-                <Button
-                  className="w-full bg-[#67B142] hover:bg-[#67B142]/90"
-                  onClick={() => handlePurchase(pkg)}
+            <div className="grid grid-cols-6 text-center items-center gap-4 mb-8 border-b pb-8">
+              {PRICING_TIERS.map((tier, index) => (
+                <motion.div
+                  key={tier.range}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{
+                    delay: 0.1 * index,
+                    type: "spring",
+                    stiffness: 100,
+                  }}
+                  whileHover={{
+                    scale: 1.05,
+                    transition: { duration: 0.2 },
+                  }}
+                  className="text-[#67B142] font-semibold flex flex-col p-2 rounded-lg transition-all duration-300  hover:bg-[#67B142]/10 hover:shadow-md cursor-pointer"
                 >
-                  <CreditCard className="w-4 h-4 mr-2" />
-                  Acheter Maintenant
-                </Button>
-              </CardFooter>
-            </Card>
-          ))}
-        </div>
-
-        {/* Payment Dialog */}
-        <Dialog open={showPaymentDialog} onOpenChange={setShowPaymentDialog}>
-          <DialogContent className="sm:max-w-[425px]">
-            <DialogHeader>
-              <DialogTitle>Choisissez votre méthode de paiement</DialogTitle>
-              <DialogDescription>
-                Sélectionnez Orange Money ou Wave pour effectuer votre paiement
-                de {selectedPackage?.price.toLocaleString()} FCFA
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-6">
-              <RadioGroup
-                value={paymentMethod}
-                onValueChange={(value: "orange" | "wave") =>
-                  setPaymentMethod(value)
-                }
-                className="grid grid-cols-2 gap-4"
-              >
-                <div>
-                  <RadioGroupItem
-                    value="orange"
-                    id="orange"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="orange"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-[#67B142] peer-data-[state=checked]:bg-[#67B142]/10 cursor-pointer"
-                  >
-                    <img
-                      src="/orange-money.png"
-                      alt="Orange Money"
-                      className="h-12 w-auto"
+                  <span className="text-2xl font-bold">
+                    {tier.pricePerSms}
+                    <span className="text-sm ml-1">FCFA</span>
+                  </span>
+                  <span className="text-sm text-gray-500 mt-1 opacity-70 group-hover:opacity-100 transition-opacity">
+                    {tier.range}
+                  </span>
+                  <div className="h-1.5 w-full bg-[#67B142]/20 mt-2 overflow-hidden rounded-full">
+                    <motion.div
+                      initial={{ width: 0 }}
+                      animate={{ width: `${(index + 1) * 15}%` }}
+                      transition={{
+                        delay: 0.1 * index,
+                        type: "spring",
+                        stiffness: 50,
+                      }}
+                      className="h-full bg-[#67B142] rounded-full"
                     />
-                    <span className="mt-2">Orange Money</span>
-                  </Label>
-                </div>
-                <div>
-                  <RadioGroupItem
-                    value="wave"
-                    id="wave"
-                    className="peer sr-only"
-                  />
-                  <Label
-                    htmlFor="wave"
-                    className="flex flex-col items-center justify-between rounded-md border-2 border-muted bg-transparent p-4 hover:bg-accent hover:text-accent-foreground peer-data-[state=checked]:border-[#67B142] peer-data-[state=checked]:bg-[#67B142]/10 cursor-pointer"
-                  >
-                    <img src="/wave.png" alt="Wave" className="h-12 w-auto" />
-                    <span className="mt-2">Wave</span>
-                  </Label>
-                </div>
-              </RadioGroup>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="phone">Numéro de téléphone</Label>
-                <div className="relative">
-                  <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 w-4 h-4" />
-                  <Input
-                    id="phone"
-                    placeholder="7X XXX XX XX"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
-                    className="pl-10"
-                  />
-                </div>
-                <p className="text-sm text-gray-500">
-                  Entrez le numéro{" "}
-                  {paymentMethod === "orange" ? "Orange Money" : "Wave"} qui
-                  effectuera le paiement
+            <div className="grid grid-cols-3 gap-6">
+              <div className="relative">
+                <label
+                  htmlFor="sms-quantity"
+                  className="block mb-2 text-sm font-medium text-gray-700"
+                >
+                  Quantité de SMS
+                </label>
+                <input
+                  type="number"
+                  id="sms-quantity"
+                  min="1"
+                  value={smsQuantity}
+                  onChange={handleSmsQuantityChange}
+                  className="w-full p-3 border-2 rounded-[6px] border-[#67B142]/30 focus:ring-2 focus:ring-[#67B142]/50 transition-all"
+                />
+                <span className="absolute text-xl text-stone-400 top-[50%] left-[82%]">
+                  SMS
+                </span>
+              </div>
+
+              <div className="text-center">
+                <p className="text-lg font-semibold mb-2 text-gray-700">
+                  Tranche tarifaire
+                </p>
+                <p className="text-[#67B142] font-bold text-xl">
+                  {selectedTier.range}
                 </p>
               </div>
 
-              <Button
-                className="w-full bg-[#67B142] hover:bg-[#67B142]/90"
-                onClick={handlePayment}
-                disabled={loading || !phoneNumber}
-              >
-                {loading ? (
-                  "Traitement en cours..."
-                ) : (
-                  <>
-                    <CreditCard className="w-4 h-4 mr-2" />
-                    Payer {selectedPackage?.price.toLocaleString()} FCFA
-                  </>
-                )}
-              </Button>
+              <div className="text-right">
+                <p className="text-lg font-semibold mb-2 text-gray-700">
+                  Montant Total (TTC)
+                </p>
+                <p className="text-3xl font-bold text-[#67B142]">
+                  {calculateTotalPrice()} FCFA
+                </p>
+              </div>
             </div>
-          </DialogContent>
-        </Dialog>
 
-        {/* Information Section */}
-        <div className="mt-12 bg-white p-6 rounded-xl border border-gray-200">
-          <h2 className="text-2xl font-semibold mb-4">
-            Comment fonctionnent les crédits SMS ?
-          </h2>
-          <div className="grid md:grid-cols-3 gap-8">
-            <div>
-              <h3 className="font-semibold mb-2">Validité</h3>
-              <p className="text-gray-600">
-                Vos crédits sont valables 12 mois à partir de la date d'achat.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Utilisation</h3>
-              <p className="text-gray-600">
-                1 crédit = 1 SMS standard (160 caractères). Les messages plus
-                longs utilisent plus de crédits.
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Paiement Sécurisé</h3>
-              <p className="text-gray-600">
-                Nous acceptons les paiements via Orange Money et Wave pour votre
-                sécurité.
-              </p>
-            </div>
-          </div>
-        </div>
-      </div>
+            <motion.div
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+              className="mt-8"
+            >
+              <Button
+                onClick={openPurchaseModal}
+                className="w-full bg-[#67B142] hover:bg-[#67B142]/90 text-white text-lg py-6 rounded-xl shadow-lg hover:shadow-xl transition-all"
+                size="lg"
+                disabled={Number(smsQuantity) < 1}
+              >
+                Commander mes SMS
+              </Button>
+              <PurchaseModal
+                isOpen={isPurchaseModalOpen}
+                onClose={closePurchaseModal}
+                smsQuantity={Number(smsQuantity)}
+                totalPrice={Number(calculateTotalPrice())}
+                selectedTier={{
+                  range: selectedTier.range,
+                  pricePerSms: selectedTier.pricePerSms,
+                }}
+              />
+            </motion.div>
+          </CardContent>
+        </Card>
+      </motion.div>
     </div>
   );
-}
+};
+
+export default CreditPage;

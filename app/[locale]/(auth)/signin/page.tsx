@@ -10,9 +10,11 @@ import Link from "next/link";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useScopedI18n } from "@/locales/client";
 
 export default function SignIn() {
   const router = useRouter();
+  const t = useScopedI18n("signin");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,21 +37,21 @@ export default function SignIn() {
     //       position: "top-right",
     //     });
     //   } else {
-    //     toast.success("Connexion réussie", {
+    //     toast.success(t("success"), {
     //       style: { backgroundColor: "#22C55E", color: "white" },
     //       position: "top-right",
     //     });
     //     router.push("/dashboard");
     //   }
     // } catch {
-    //   toast.error("Une erreur est survenue", {
+    //   toast.error(t("error"), {
     //     style: { backgroundColor: "#EF4444", color: "white" },
     //     position: "top-right",
     //   });
     // } finally {
     //   setIsLoading(false);
     // }
-    alert("Nous ne sommes pas emcore disponibles");
+    alert("Nous ne sommes pas encore disponibles");
   };
 
   return (
@@ -62,7 +64,7 @@ export default function SignIn() {
           className="absolute top-8 left-8 text-muted-foreground hover:text-[#67B142] transition-colors flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" />
-          Retour à l&apos;accueil
+          {t("backhome")}
         </Link>
 
         <div className="relative w-full max-w-lg">
@@ -89,12 +91,9 @@ export default function SignIn() {
           >
             <div className="bg-white rounded-2xl shadow-xl p-8 backdrop-blur-sm bg-opacity-50 border border-white/20">
               <h2 className="text-2xl font-bold text-[#67B142] mb-4">
-                Plateforme SMS Pro
+                {t("title")}
               </h2>
-              <p className="text-gray-600 mb-6">
-                Accédez à votre espace pour gérer vos campagnes SMS et suivre
-                vos performances en temps réel.
-              </p>
+              <p className="text-gray-600 mb-6">{t("desc")}</p>
               <div className="space-y-4">
                 <div className="h-2 bg-[#67B142]/20 rounded w-3/4" />
                 <div className="h-2 bg-[#67B142]/15 rounded w-1/2" />
@@ -115,11 +114,9 @@ export default function SignIn() {
         >
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#67B142] to-[#34A853]">
-              Bienvenue
+              {t("welcome")}
             </h1>
-            <p className="text-muted-foreground mt-2">
-              Connectez-vous à votre compte
-            </p>
+            <p className="text-muted-foreground mt-2">{t("conTtitle")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -129,7 +126,7 @@ export default function SignIn() {
               transition={{ duration: 0.5, delay: 0.1 }}
               className="space-y-2"
             >
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="email">{t("email")}</Label>
               <div className="relative">
                 <Input
                   id="email"
@@ -137,7 +134,7 @@ export default function SignIn() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-10 rounded-xl border-gray-200 focus:border-[#67B142] focus:ring-[#67B142]"
-                  placeholder="exemple@email.com"
+                  placeholder={t("emailPlace")}
                 />
                 <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-muted-foreground" />
               </div>
@@ -149,7 +146,7 @@ export default function SignIn() {
               transition={{ duration: 0.5, delay: 0.2 }}
               className="space-y-2"
             >
-              <Label htmlFor="password">Mot de passe</Label>
+              <Label htmlFor="password">{t("pass")}</Label>
               <div className="relative">
                 <Input
                   id="password"
@@ -183,17 +180,17 @@ export default function SignIn() {
               <label className="flex items-center space-x-2">
                 <input
                   type="checkbox"
-                  className="rounded border-gray-300 text-[#67B142] focus:ring-[#67B142]"
+                  className="rounded border-gray-300 text-white focus:ring-[#67B142] accent-[#67B142]"
                 />
                 <span className="text-sm text-muted-foreground">
-                  Se souvenir de moi
+                  {t("remember")}
                 </span>
               </label>
               <Link
                 href="/forgot-password"
                 className="text-sm text-[#67B142] hover:text-[#34A853] transition-colors"
               >
-                Mot de passe oublié ?
+                {t("forgotpass")}
               </Link>
             </motion.div>
 
@@ -207,7 +204,7 @@ export default function SignIn() {
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-[#67B142] to-[#34A853] text-white rounded-xl hover:opacity-90 transition-opacity"
               >
-                {isLoading ? "Connexion..." : "Se connecter"}
+                {isLoading ? t("connexion") : t("toconn")}
               </Button>
             </motion.div>
 
@@ -260,12 +257,12 @@ export default function SignIn() {
               transition={{ duration: 0.5, delay: 0.6 }}
               className="text-center text-sm text-muted-foreground mt-6"
             >
-              Vous n&apos;avez pas encore de compte ?{" "}
+              {t("noacount")}{" "}
               <Link
                 href="/signup"
                 className="text-[#67B142] font-medium hover:text-[#34A853] transition-colors"
               >
-                S&apos;inscrire
+                {t("register")}
               </Link>
             </motion.p>
           </form>

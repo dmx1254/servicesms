@@ -19,7 +19,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Database, Clock, Users, Star, MapPin, Loader2 } from "lucide-react";
+import { Database, Clock, Users, Star, Loader2 } from "lucide-react";
 import { formatDate, UserLocation } from "@/app/lib/utils/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 
@@ -121,7 +121,9 @@ const LocationPage = () => {
   const fetchDatabases = async () => {
     try {
       setIsDataLoading(true);
-      const response = await fetch("/api/phone-database");
+      const response = await fetch("/api/phone-database", {
+        cache: "force-cache",
+      });
       const data = await response.json();
       // console.log(data);
       if (data.success) {
@@ -431,7 +433,7 @@ const LocationPage = () => {
         </div>
 
         {/* Bases de données louées */}
-        {userLocations.length > 0 && (
+        {userLocations?.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -452,13 +454,13 @@ const LocationPage = () => {
                   <div className="absolute top-0 right-0 w-32 h-32 bg-[#67B142]/5 rounded-full transform translate-x-16 -translate-y-16 group-hover:scale-150 transition-transform duration-500" />
                   <div className="relative">
                     <h3 className="text-xl font-semibold mb-6 text-[#67B142] group-hover:text-[#4A8B2F] transition-colors">
-                      {location.userDblocation.name}
+                      {location?.userDblocation?.name}
                     </h3>
                     <div className="space-y-4 mb-6">
                       <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-xl group-hover:bg-[#67B142]/5 transition-colors">
                         <Users className="w-5 h-5 text-[#67B142]" />
                         <span className="text-gray-600">
-                          {location.userDblocation.phones.length.toLocaleString()}{" "}
+                          {location?.userDblocation?.phones?.length.toLocaleString()}{" "}
                           numéros
                         </span>
                       </div>

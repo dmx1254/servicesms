@@ -9,7 +9,7 @@ export default function MailToSms() {
       title="MAIL TO SMS"
       description="Convertissez automatiquement vos emails en SMS pour une communication multicanale efficace et instantanée."
       icon={<Mail className="h-12 w-12 text-[#67B142]" />}
-      mainImage="/images/sms-pro-dashboard.png"
+      mainImage="/images/mail-to-sms.webp"
       features={[
         "Conversion automatique",
         "Personnalisation des règles",

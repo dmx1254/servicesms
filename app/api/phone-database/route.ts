@@ -46,7 +46,7 @@ export async function GET() {
       .select("numberLimit")
       .lean();
 
-    const limitNumber = limitData[0].numberLimit;
+    const limitNumber = (limitData[0] && limitData[0].numberLimit) ?? 1000;
 
     // console.log(limitNumber);
 
@@ -67,7 +67,10 @@ export async function GET() {
       ...location,
       userDblocation: {
         ...location.userDblocation,
-        phones: location.userDblocation.phones.slice(0, limitNumber),
+        phones:
+          location.userDblocation && location.userDblocation.phones
+            ? location.userDblocation.phones.slice(0, limitNumber)
+            : [],
       },
     }));
 

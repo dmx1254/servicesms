@@ -9,7 +9,7 @@ export default function LocationBdd() {
       title="LOCATION BDD"
       description="Accédez à une base de données qualifiée et segmentée pour cibler précisément votre audience et optimiser vos campagnes SMS."
       icon={<Database className="h-12 w-12 text-[#67B142]" />}
-      mainImage="/images/sms-pro-dashboard.png"
+      mainImage="/images/sms-location.webp"
       features={[
         "Base de données qualifiée",
         "Segmentation avancée",

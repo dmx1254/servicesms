@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Groupe pour l'import:", groupName);
+    // console.log("Groupe pour l'import:", groupName);
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const fileContent = fileBuffer.toString();
@@ -48,7 +48,7 @@ export async function POST(req: NextRequest) {
       trim: true,
     }) as ContactRecord[];
 
-    console.log("Exemple de records parsés:", records.slice(0, 2));
+    // console.log("Exemple de records parsés:", records.slice(0, 2));
 
     // Validation des champs requis
     for (const record of records) {
@@ -81,7 +81,7 @@ export async function POST(req: NextRequest) {
       groupName: groupName.trim(),
     }));
 
-    console.log("Contacts préparés pour l'import:", contacts.slice(0, 2));
+    // console.log("Contacts préparés pour l'import:", contacts.slice(0, 2));
 
     const result = await Contact.insertMany(contacts);
     console.log(

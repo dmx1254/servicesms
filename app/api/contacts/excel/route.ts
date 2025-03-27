@@ -38,14 +38,14 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    console.log("Groupe pour l'import Excel:", groupName);
+    // console.log("Groupe pour l'import Excel:", groupName);
 
     const fileBuffer = Buffer.from(await file.arrayBuffer());
     const workbook = XLSX.read(fileBuffer);
     const worksheet = workbook.Sheets[workbook.SheetNames[0]];
     const records = XLSX.utils.sheet_to_json(worksheet) as ContactRecord[];
 
-    console.log("Exemple de records Excel parsés:", records.slice(0, 2));
+    // console.log("Exemple de records Excel parsés:", records.slice(0, 2));
 
     // Validation et nettoyage des données
     for (const record of records) {
@@ -78,7 +78,7 @@ export async function POST(req: NextRequest) {
       groupName: groupName.trim(),
     }));
 
-    console.log("Contacts préparés pour l'import:", contacts.slice(0, 2));
+    // console.log("Contacts préparés pour l'import:", contacts.slice(0, 2));
 
     const result = await Contact.insertMany(contacts);
     console.log(

@@ -9,12 +9,12 @@ import Link from "next/link";
 interface SolutionLayoutProps {
   title: string;
   description: string;
-  // mainImage: string;
+  mainImage: string;
   features: string[];
   benefits: {
     title: string;
     description: string;
-    icon: React.ReactNode; 
+    icon: React.ReactNode;
   }[];
   useCases: {
     title: string;
@@ -44,7 +44,7 @@ const staggerContainer = {
 export default function SolutionLayout({
   title,
   description,
-  // mainImage,
+  mainImage,
   features,
   benefits,
   useCases,
@@ -112,8 +112,12 @@ export default function SolutionLayout({
                   variant="outline"
                   size="lg"
                   className="border-2 border-[#67B142] text-[#67B142] hover:bg-[#67B142]/5 shadow-lg hover:shadow-xl transition-all duration-300 text-lg p-4 h-auto rounded-xl"
+                  asChild
                 >
-                  Voir la démo
+                  <Link href="https://youtube.com" target="_blank" rel="noopener noreferrer">
+                    Voir la démo
+                    <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </Link>
                 </Button>
               </motion.div>
             </motion.div>
@@ -130,7 +134,7 @@ export default function SolutionLayout({
             <div className="rounded-2xl overflow-hidden shadow-2xl bg-white p-2 transform -rotate-1 hover:rotate-0 transition-transform duration-500">
               <div className="relative aspect-[16/9] rounded-xl overflow-hidden">
                 <Image
-                  src="/images/features/campaign-preview.png"
+                  src={mainImage}
                   alt={title}
                   fill
                   className="object-cover hover:scale-105 transition-transform duration-500"

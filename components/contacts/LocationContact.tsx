@@ -19,15 +19,6 @@ import { ScrollArea } from "../ui/scroll-area";
 import Link from "next/link";
 import { Skeleton } from "../ui/skeleton";
 
-interface Contact {
-  _id: string;
-  prenom: string;
-  nom: string;
-  telephone: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export function LocationContact({
   handleAddContactMyOwn,
 }: {
@@ -38,7 +29,7 @@ export function LocationContact({
   const [isActiveContact, setIsActiveContact] = useState<string>("");
   const [isOpenDialog, setIsOpenDialog] = useState<boolean>(false);
 
-  console.log(isActiveContact);
+  // console.log(isActiveContact);
   // console.log(userLocations);
 
   const fetchDatabases = async () => {
@@ -47,16 +38,8 @@ export function LocationContact({
       const response = await fetch("/api/phone-database");
       const data = await response.json();
       // console.log(data);
-      if (data.success) {
+      if (data) {
         setUserLocations(data.userLocations);
-      } else {
-        toast.error("Quelque chose s'est mal passe", {
-          style: {
-            backgroundColor: "#ef4444",
-            color: "#fff",
-          },
-          position: "top-right",
-        });
       }
     } catch (err) {
       console.log("Erreur lors du chargement des bases de données:", err);
@@ -177,13 +160,13 @@ export function LocationContact({
             </ScrollArea>
           </motion.div>
         ) : (
-          <div className="flex flex-col items-center gap-2">
+          <div className="flex flex-col items-center gap-6">
             <p className="text-base font-semibold">
               Aucune base de donnees loues trouves
             </p>
             <Link
               href="/dashboard/location-bdd"
-              className="bg-[#67B142] text-white rounded-[6px] text-base px-4 py-2"
+              className="bg-[#67B142] text-white rounded-[6px] text-sm px-4 py-2 mb-4"
             >
               Louer une nouvelle
             </Link>
@@ -200,6 +183,7 @@ export function LocationContact({
           </Button>
           <Button
             type="submit"
+            disabled={!userLocations.length}
             className="bg-[#67B142] text-white rounded-[6px]"
             onClick={handleConfirmed}
           >

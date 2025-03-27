@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, redirect } from "next/navigation";
@@ -47,6 +47,22 @@ export default function DashboardLayout({
   const t = useScopedI18n("navigation");
   const tCommon = useScopedI18n("common");
 
+  useEffect(() => {
+    const handleResize = () => {
+      const w = window.innerWidth;
+
+      if (w <= 640) {
+        setIsSidebarOpen(false);
+      } else {
+        setIsSidebarOpen(true);
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
   const sidebarItems = [
     {
       title: t("overview"),
@@ -59,7 +75,7 @@ export default function DashboardLayout({
       href: `/${locale}/dashboard/campaigns`,
       subItems: [
         {
-          title:  t("newCampaign"),
+          title: t("newCampaign"),
           href: `/${locale}/dashboard/campaigns/new`,
           icon: <Megaphone className="w-6 h-6" />,
         },
@@ -104,7 +120,7 @@ export default function DashboardLayout({
     {
       title: t("tutorials"),
       icon: <PlayCircle className="w-5 h-5" />,
-      href: `/${locale}/dashboard/tutorials`,
+      href: "https://youtube.com",
     },
     {
       title: t("invoices"),
@@ -203,6 +219,10 @@ export default function DashboardLayout({
                 >
                   <Link
                     href={item.href}
+                    target={item.href.startsWith("https") ? "_blank" : ""}
+                    rel={
+                      item.href.startsWith("https") ? "noopener noreferrer" : ""
+                    }
                     className={cn(
                       "flex items-center gap-3 px-3 py-2.5 rounded transition-all duration-200",
                       pathname === item.href
@@ -229,10 +249,10 @@ export default function DashboardLayout({
                   {item.subItems && isSidebarOpen && (
                     <motion.ul
                       initial={{ opacity: 0, height: 0 }}
-                      animate={{ 
-                        opacity: 1, 
+                      animate={{
+                        opacity: 1,
                         height: "auto",
-                        transition: { duration: 0.3 }
+                        transition: { duration: 0.3 },
                       }}
                       className="ml-6 mt-2 space-y-1"
                     >
@@ -325,7 +345,7 @@ export default function DashboardLayout({
           </div> */}
           <DashTopBar />
         </header>
-        <main className="p-8">{children}</main>
+        <main className="p-4 sm:p-8">{children}</main>
       </motion.div>
     </div>
   );

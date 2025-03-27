@@ -9,7 +9,7 @@ export default function SondagesSms() {
       title="SONDAGES SMS"
       description="Créez et gérez facilement des sondages par SMS pour collecter des retours clients de manière simple et efficace."
       icon={<BarChart3 className="h-12 w-12 text-[#67B142]" />}
-      mainImage="/images/sms-pro-dashboard.png"
+      mainImage="/images/sms-sondage.webp"
       features={[
         "Création simple de sondages",
         "Questions personnalisables",

@@ -144,19 +144,11 @@ export function NavigationMe() {
           </NavigationMenuContent>
         </NavigationMenuItem>
         <NavigationMenuItem>
-          <Link href="/fonctionnalites" legacyBehavior passHref>
+          <Link href="/pricing" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              {tScope("func")}
+              {tScope("tar")}
             </NavigationMenuLink>
           </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem>
-          <button
-            onClick={() => scrollToSection("pricing")}
-            className={navigationMenuTriggerStyle()}
-          >
-            {tScope("tar")}
-          </button>
         </NavigationMenuItem>
         <NavigationMenuItem>
           <Link href="/metiers" legacyBehavior passHref>

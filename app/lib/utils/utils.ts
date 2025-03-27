@@ -83,6 +83,14 @@ export interface UserLocation {
   expiresAt: string;
 }
 
+export interface WavePayment {
+  userId: string;
+  smsQuantity: string;
+  totalPrice: string;
+  paymentMethod: string;
+  phoneNumber: string;
+}
+
 // Language
 
 export const defaultLocale = "fr";

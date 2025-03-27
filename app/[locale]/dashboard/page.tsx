@@ -169,7 +169,7 @@ export default function Dashboard() {
     if (user?.id) {
     fetchDashboardData();
     }
-  }, [user?.id]);
+  }, [user?.id, addSolde]);
 
   // Generate sample timeline data
   const timelineData = useMemo(() => {

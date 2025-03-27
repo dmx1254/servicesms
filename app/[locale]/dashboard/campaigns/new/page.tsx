@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useEffect, ChangeEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,7 +40,7 @@ import {
   Trash,
 } from "lucide-react";
 import { motion } from "framer-motion";
-import { format, addDays } from "date-fns";
+import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import {
@@ -503,7 +503,9 @@ export default function NewCampaign() {
   const [success, setSuccess] = useState<string>("");
   const [error, setError] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [signature, setSignature] = useState<string>("");
+  const [signature, setSignature] = useState<string>(
+    session?.user?.companyName || ""
+  );
   const [messageStatuses, setMessageStatuses] = useState<MessageStatus[]>([]);
   const [showStatusModal, setShowStatusModal] = useState(false);
   const [uploadState, setUploadState] = useState<FileUploadState>({
@@ -678,6 +680,16 @@ export default function NewCampaign() {
     const template = TEMPLATES.find((t) => t.id === templateId);
     if (template) {
       const messageText = template.desc;
+      if (messageText.length > 160) {
+        toast.error("Nombre de caratctères supérieur à 160", {
+          style: {
+            background: "#ef4444",
+            color: "#fff",
+          },
+          position: "top-right",
+        });
+        return;
+      }
 
       // console.log(messageText);
       setMessage(messageText);
@@ -892,7 +904,7 @@ export default function NewCampaign() {
     return (
       <div className="p-4 bg-gray-50 rounded-xl text-sm space-y-2">
         <div className="font-medium text-gray-700">
-          Format de fichier requis pour "{template.title}" :
+          Format de fichier requis pour &quot;{template.title}&quot; :
         </div>
         <div className="space-y-1 text-gray-600">
           <p>• Fichier CSV (séparateur: virgule)</p>
@@ -1186,7 +1198,7 @@ export default function NewCampaign() {
           position: "top-right",
         });
       }
-      console.log(errorResp);
+      // console.log(errorResp);
       const successful = successMessages.length;
       const failed = failedMessages.length;
 
@@ -1361,6 +1373,16 @@ export default function NewCampaign() {
     // console.log(timestamp);
     setTimest(timestamp);
   }, [scheduledDate, selectedHour]);
+
+  const handleSetMessage = (e: ChangeEvent<HTMLTextAreaElement>) => {
+    const newMessage = e.target.value;
+
+    if (newMessage?.length > 160) {
+      return; // Empêche la mise à jour si le message dépasse 160 caractères
+    }
+
+    setMessage(newMessage);
+  };
 
   // console.log(file);
 
@@ -1626,7 +1648,7 @@ export default function NewCampaign() {
             <div className="relative group">
               <Textarea
                 value={message}
-                onChange={(e) => setMessage(e.target.value)}
+                onChange={handleSetMessage}
                 className="h-48 font-mono text-base border-2 focus:border-[#67B142] transition-all duration-300 rounded-2xl shadow-sm hover:shadow-md"
                 placeholder="Tapez votre message..."
               />
@@ -2330,7 +2352,6 @@ export default function NewCampaign() {
                     <SelectItem value={session?.user.companyName || ""}>
                       {session?.user.companyName || ""}
                     </SelectItem>
-                    <SelectItem value="SY-PRESSING">SY-PRESSING</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

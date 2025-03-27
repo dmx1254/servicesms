@@ -36,7 +36,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Erreur lors de la conversion" });
     }
 
-    console.log(records);
+    // console.log(records);
 
     // await PhoneDatabase.create({
     //   name: "Artisans",

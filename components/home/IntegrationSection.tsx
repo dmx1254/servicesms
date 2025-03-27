@@ -26,7 +26,7 @@ export default function IntegrationSection() {
           {/* Left side - API Preview */}
           <div className="flex-1 relative h-[500px] w-full">
             <Image
-              src="/images/features/api-preview.png"
+              src="/images/features/integration-api.webp"
               alt="API Integration"
               fill
               className="object-contain"

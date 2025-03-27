@@ -49,7 +49,6 @@ export default function Header() {
 
   const navItems: NavItem[] = [
     { href: "#", label: "Solutions", solutions: true },
-    { href: "/fonctionnalites", label: tScope("func") },
     { href: "/pricing", label: tScope("tar") },
     { href: "/metiers", label: tScope("met") },
     { href: "/#api", label: tScope("api") },

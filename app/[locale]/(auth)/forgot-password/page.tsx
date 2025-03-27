@@ -17,11 +17,11 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-// import { useScopedI18n } from "@/locales/client";
+import { useScopedI18n } from "@/locales/client";
 
 export default function ForgotPasswordPage() {
   const router = useRouter();
-  // const t = useScopedI18n("auth");
+  const t = useScopedI18n("forgotpassword");
   const [email, setEmail] = useState("");
   const [verificationCode, setVerificationCode] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -44,11 +44,15 @@ export default function ForgotPasswordPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Une erreur est survenue");
+        toast.error(t("error"), {
+          style: {
+            color: "#ef4444",
+          },
+          position: "top-right",
+        });
       }
 
-      toast.success("Code de vérification envoyé avec succès", {
+      toast.success(t("sendsuccesscode"), {
         style: {
           color: "#67B142",
         },
@@ -56,15 +60,13 @@ export default function ForgotPasswordPage() {
       });
       setStep(2);
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue",
-        {
-          style: {
-            color: "#ef4444",
-          },
-          position: "top-right",
-        }
-      );
+      toast.error(t("error"), {
+        style: {
+          color: "#ef4444",
+        },
+        position: "top-right",
+      });
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -73,7 +75,7 @@ export default function ForgotPasswordPage() {
   const handleResetPassword = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newPassword !== confirmPassword) {
-      toast.error("Les mots de passe ne correspondent pas", {
+      toast.error(t("nomatch"), {
         style: {
           color: "#ef4444",
         },
@@ -98,11 +100,15 @@ export default function ForgotPasswordPage() {
       });
 
       if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.message || "Une erreur est survenue");
+        toast.error(t("error"), {
+          style: {
+            color: "#ef4444",
+          },
+          position: "top-right",
+        });
       }
 
-      toast.success("Mot de passe réinitialisé avec succès", {
+      toast.success(t("successreset"), {
         style: {
           color: "#67B142",
         },
@@ -110,15 +116,13 @@ export default function ForgotPasswordPage() {
       });
       router.push("/signin");
     } catch (error) {
-      toast.error(
-        error instanceof Error ? error.message : "Une erreur est survenue",
-        {
-          style: {
-            color: "#ef4444",
-          },
-          position: "top-right",
-        }
-      );
+      toast.error(t("error"), {
+        style: {
+          color: "#ef4444",
+        },
+        position: "top-right",
+      });
+      console.log(error);
     } finally {
       setIsLoading(false);
     }
@@ -138,15 +142,11 @@ export default function ForgotPasswordPage() {
               <ArrowLeft className="h-4 w-4" />
             </Button>
             <CardTitle className="text-2xl font-bold">
-              {step === 1
-                ? "Mot de passe oublié"
-                : "Réinitialisation du mot de passe"}
+              {step === 1 ? t("forgot") : t("resetpass")}
             </CardTitle>
           </div>
           <CardDescription>
-            {step === 1
-              ? "Entrez votre adresse e-mail pour recevoir un code de vérification"
-              : "Entrez le code reçu par e-mail et votre nouveau mot de passe"}
+            {step === 1 ? t("enteremail") : t("entercode")}
           </CardDescription>
         </CardHeader>
         <CardContent>
@@ -158,12 +158,12 @@ export default function ForgotPasswordPage() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label htmlFor="email">Adresse e-mail</Label>
+                <Label htmlFor="email">{t("mailadresse")}</Label>
                 <div className="relative">
                   <Input
                     id="email"
                     type="email"
-                    placeholder="exemple@email.com"
+                    placeholder={t("mailadresse")}
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     className="pl-10"
@@ -181,7 +181,7 @@ export default function ForgotPasswordPage() {
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Envoyer le code"
+                  t("send")
                 )}
               </Button>
             </motion.form>
@@ -193,18 +193,18 @@ export default function ForgotPasswordPage() {
               className="space-y-4"
             >
               <div className="space-y-2">
-                <Label htmlFor="code">Code de vérification</Label>
+                <Label htmlFor="code">{t("verificationCode")}</Label>
                 <Input
                   id="code"
                   type="text"
-                  placeholder="Entrez le code reçu"
+                  placeholder={t("enterVerificationCode")}
                   value={verificationCode}
                   onChange={(e) => setVerificationCode(e.target.value)}
                   required
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="newPassword">Nouveau mot de passe</Label>
+                <Label htmlFor="newPassword">{t("newpass")}</Label>
                 <div className="relative">
                   <Input
                     id="newPassword"
@@ -232,9 +232,7 @@ export default function ForgotPasswordPage() {
                 </div>
               </div>
               <div className="space-y-2">
-                <Label htmlFor="confirmPassword">
-                  Confirmer le mot de passe
-                </Label>
+                <Label htmlFor="confirmPassword">{t("confirmnewpass")}</Label>
                 <div className="relative">
                   <Input
                     id="confirmPassword"
@@ -256,7 +254,7 @@ export default function ForgotPasswordPage() {
                 {isLoading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : (
-                  "Réinitialiser le mot de passe"
+                  t("resetpassword")
                 )}
               </Button>
             </motion.form>
@@ -266,7 +264,7 @@ export default function ForgotPasswordPage() {
               href="/signin"
               className="text-[#67B142] hover:underline hover:text-[#67B142]/90"
             >
-              Retour à la connexion
+              {t("backtocon")}
             </Link>
           </div>
         </CardContent>
