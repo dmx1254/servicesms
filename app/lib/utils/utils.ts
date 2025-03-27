@@ -46,6 +46,16 @@ export const formatDate = (dateString: string) => {
     day: "numeric",
   });
 };
+export const formatDateAndHours = (dateString: string) => {
+  const date = new Date(dateString);
+  return date.toLocaleDateString("fr-FR", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+  });
+};
 
 export const checkAmountOfSms = async (contact: string): Promise<number> => {
   if (contact.startsWith("+221")) {
